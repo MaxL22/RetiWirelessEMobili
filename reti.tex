@@ -4,8 +4,10 @@
 % Packages for mathematics and formatting
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amssymb, amsthm}
-\usepackage{geometry}
-\geometry{a4paper, margin=1in}
+\usepackage{graphicx}
+\usepackage[autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+\usepackage[parfill]{parskip} 
 
 % Title, Author, and Date (optional)
 \title{Reti Wireless E Mobili}
@@ -20,5 +22,9 @@
 	% Table of Contents
 	\tableofcontents
 	\newpage
+	
+	\include{chapters/PTT}
+	
+	
 
 \end{document}
