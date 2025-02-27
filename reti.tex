@@ -1,7 +1,6 @@
 % !TeX spellcheck = it_IT
 \documentclass[11pt]{article}
 
-% Packages for mathematics and formatting
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{graphicx}
@@ -9,22 +8,21 @@
 \MakeOuterQuote{"}
 \usepackage[parfill]{parskip} 
 
-% Title, Author, and Date (optional)
+\usepackage[hidelinks]{hyperref}
+
 \title{Reti Wireless E Mobili}
 \author{Massimo Perego}
 \date{}
 
 \begin{document}
 	
-	% Title page (optional)
 	\maketitle
 	
-	% Table of Contents
 	\tableofcontents
 	\newpage
 	
 	\include{chapters/PTT}
 	
-	
+	\include{chapters/wireless}
 
 \end{document}

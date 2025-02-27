@@ -39,7 +39,7 @@ Per \textbf{segnale}
 	\item \textbf{digitale:} un livello di segnale viene mantenuto costante per un determinato intervallo, con un cambio di livello rapido (quasi istantaneo)
 \end{itemize}
 
-Vogliamo passare da una forma d'onda all'altra (trasmettitore e ricevitore fanno questo). \\
+Vogliamo passare da una forma d'onda all'altra (trasmettitore e ricevitore fanno questo). 
 
 \newpage
 
@@ -157,7 +157,11 @@ Come possiamo trasmettere la \textbf{stessa quantità di informazioni senza usar
 
 \paragraph{Considerazioni:} Vogliamo trasmettere una banda infinita con banda finita, ma una banda minore porta a distorsione maggiore. Una soluzione potrebbe essere scegliere la banda finita più ampia; sarebbe fattibile ma ci sono costi economici (i.e., la banda non è gratis) e il dispositivo deve essere in grado di gestirla. Inoltre può creare rumore aggiuntivo. \\
 
-\paragraph{Nyquist Bandwidth:} Dato un canale noise-free (ideale) la bandwidth limita il data-rate. Il \textbf{limite della quantità di informazioni} (misurata in bit/secondo e multipli) è limitato da due volte la banda
+\newpage
+
+\subsubsection{Teorema di Nyquist sulla banda}
+
+Dato un canale noise-free (ideale) la bandwidth limita il data-rate. Il \textbf{limite della quantità di informazioni} (misurata in bit/secondo e multipli) è limitato da due volte la banda
 $$ C = 2B $$
 per \textbf{segnali binari} (2 livelli di voltaggio). Per \textbf{segnali multilivello}, codificare i dati su più livelli di segnale
 $$ C = 2B \log_2 M $$
@@ -174,3 +178,82 @@ Esempio di effetto del rumore sul segnale trasmesso:
 Considerando il profilo temporaneo del rumore, il ricevitore riceve un segnale diverso, con modifiche su cui non abbiamo controllo, indipendenti da ricevitore e trasmettitore.\\
 
 % End L1
+
+\paragraph{Tipi di rumore:}
+\begin{itemize}
+	\item Thermal noise: rumore di base dovuto all'agitazione delle molecole, un rumore bianco costante su tutta la banda
+	\item Intermodulation noise: determinato dal fatto che ci sono dei problemi tra le diverse modulazioni, ci si "accavalla" nel trasmettere le informazioni
+	\item Cross talk: cavi vicini che alterano il segnale l'uno dell'altro, tramite radiazioni elettromagnetico
+	\item Impulse noise: impulso elettromagnetico intenso di durata limitata che attraverso il mezzo e distrugge temporaneamente il segnale
+\end{itemize}
+
+\newpage
+
+\subsubsection{Decibel}
+Il decibel è un'\textbf{unità di misura del rapporto di potenze}, in \textbf{scala logaritmica}
+$$ \left(\frac{P_1}{P_2}\right)_{dB} = 10 \cdot \log_{10} \left(\frac{P_1}{P_2}\right) $$ 
+$\pm 3$ corrispondono al doppio/metà.\\
+
+\paragraph{Decibel-Milliwatt:} Un decibel ma con la \textbf{potenza al denominatore fissata} ad $1mW$
+$$ P_{dBm} = \frac{P}{1mW} $$
+
+Generalmente una Wireless-LAN (WiFi 802.11) usa $100mW$, quindi $20dBm$, mentre, una trasmissione cellulare usa $500mW$, quindi $27dBm$ (ricorda di mettere dopo il $10 \log_{10}$). In generale, una lettera dopo $dB$ indica una potenza fissata al denominatore.\\
+
+\subsubsection{Rapporto segnale rumore SNR}
+Dobbiamo essere un grado di \textbf{quantificare il rumore} su un canale, quindi l'impatto sul rumore della trasmissione.
+$$  (SNR)_{dB} = 10 \log_{10} \frac{\text{signal power}}{\text{noise power}} $$
+Misurato in decibel (rapporto tra due potenze), tanto più il rapporto è alto, tanto più il segnale si distingue dal rumore.\\
+
+\newpage
+
+\subsubsection{Shannon Capacity Formula}
+Nyquist descrive la capacità del canale nel caso di assenza di rumore, Shannon dice che la \textbf{capacità dipende} non solo dalla capacità di codificare livelli ma \textbf{anche dal SNR}
+$$ C = B \log_2 (1 + SNR) $$
+
+Quindi la capacità è direttamente proporzionale al SNR. Questo valore è puramente teorico e \textbf{considera solo il thermal noise}, ma fornisce una \textbf{massima teorica per trasmettere informazioni senza errori} su un canale. La teoria della trasmissione di Shannon ha come assioma una trasmissione senza errori.\\
+
+In una determinata condizione di rumore (SNR) possiamo aumentare il data rate in due modi:
+\begin{enumerate}
+	\item Aumentando la bandwidth ($B$), ma il rumore termico aumenta con la larghezza della banda
+	\item Aumentando la potenza del segnale trasmesso (quindi aumentando il valore del SNR), ma un aumento della potenza porta ad aumentare intermodulation e crosstalk noise (aumenta il campo elettromagnetico)
+\end{enumerate}
+Posso aumentare SNR o $B$ ed in entrambi i casi l'aumento viene "bilanciato" da un aumento del rumore.\\
+
+\newpage
+
+%Esempi s37,38 %Aggiungi, sono tipo esame
+\paragraph{Esempio:} Supponiamo di avere a disposizione uno spettro tra $3 MHz$ e $4 MHz$ e $SNR_{dB}=24dB$:
+\begin{align*}
+	B & = 4Mhz - 3Mhz = 1 Mhz \\
+	SNR_{dB} & = 24dB = 10 \log_{10} (SNR) \\
+	\implies SNR & = 251
+\end{align*}
+Il valore di $SNR$ significa che il segnale è circa 251 volte superiore al rumore. Ora possiamo calcolare la capacità secondo Shannon:
+$$ C = 10^6 \cdot \log_2 (1 + 251) \approx 10^6 \cdot 8 = 8 Mbps $$
+E da questa possiamo trovare quanti livelli di segnale servono per ottenere $8Mbps$, tramite la formula della capacità secondo Nyquist:
+$$\begin{array}{c c r c l}
+	C = 2B \log_2 (M) & \implies & 8 \cdot 10^6 &=& 2 \cdot 10^6 \cdot \log_2(M) \\
+	& \implies & 4 &=& \log_2 (M)  \\
+	& \implies & M &=& 16 \\
+\end{array}$$
+Di più di 16 sarebbe inutile perché trasmettendo un numero maggiore di livelli non possiamo superare la capacità teorica detta da Shannon. La capacità dipende dalla condizione del canale e dal numero di livelli.\\
+
+\newpage
+
+\subsection{Multiplexing}
+L'idea è quella di un collegamento che può trasportare più canali. Solitamente la capacità di un mezzo è superiore della capacità richiesta da una singola trasmissione quindi cerchiamo un modo di trasportare più segnali sullo stesso link.
+
+\subsubsection{Frequency Division Multiplexing FDM}
+Se ho una banda "larga", posso dividerla in "slot" per ottenere sotto-bande con comunicazioni diverse, sfruttando il fatto che il segnale da trasmettere richiede una banda minore di quella disponibile. Creiamo $n$ canali paralleli all'interno della banda.\\
+
+\begin{center}
+	\includegraphics[width=0.4\linewidth]{img/PTT/fdm1}
+\end{center}
+
+\subsubsection{Time division Multiplexing TDM}
+Se la banda è "piccola", ma il data rate è molto superiore a quello richiesto da una singola trasmissione, crea $n$ slot di tempo ciclici.\\
+\begin{center}
+	\includegraphics[width=0.4\linewidth]{img/PTT/tdm1}
+\end{center}
+
+\newpage
