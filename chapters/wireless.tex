@@ -55,9 +55,9 @@ Moduliamo la portante (modifichiamo l'ampiezza) in base ai bit da codificare. Us
 
 \paragraph{Propagazione onde radio:} Ci sono più possibili tipi di propagazione delle onde radio, in base alla frequenza utilizzata
 \begin{itemize}
-	\item Ground Wave Propagatio (sotto i $2MHz$): il segnale segue la curvatura della terra
+	\item Ground Wave Propagation (sotto i $2MHz$): il segnale segue la curvatura della terra
 	\item Sky Wave Propagation (da $2$ a $30MHz$): il segnale rimbalza nella ionosfera
-	\item \textbf{Line of sight LOS} (sopra $30MHz$): Deve esserci una linea diretta (anche non a vista in realtà, ma diretta) tra trasmettitore e ricevitore
+	\item \textbf{Line of sight LoS} (sopra $30MHz$): Deve esserci una linea diretta (anche non a vista in realtà, ma diretta) tra trasmettitore e ricevitore
 \end{itemize}
 
 \paragraph{Tipi di antenne:}
@@ -71,9 +71,9 @@ Moduliamo la portante (modifichiamo l'ampiezza) in base ai bit da codificare. Us
 
 \newpage
 
-\subsubsection{Problemi con Trasmissione radio Line of Sight (LOS)}
+\subsubsection{Problemi con Trasmissione radio Line of Sight (LoS)}
 
-Ci sono problemi legati alla trasmissione LOS:
+Ci sono problemi legati alla trasmissione LoS:
 \begin{itemize}
 	\item Free space loss \& path loss: attenuazione del segnale dovuta alla distanza e all'ambiente in cui il segnale si propaga; cosa perdo da antenna trasmettitrice (TX) a ricevitrice (RX)
 	\item Rumore: disturbo che può distorcere il segnale
@@ -88,3 +88,168 @@ Misurata in $dB$, rapporto tra potenza del segnale trasmesso (fisso) rispetto al
 Direttamente proporzionale (al quadrato della) alla frequenza, direttamente proporzionale ad una potenza della distanza, l'esponente $n$ dipende dall'ambiente (più l'ambiente è ostruito più la distanza sarà influente).\\
 
 %End L2
+
+\newpage
+
+%Start from s54
+\paragraph{Free space loss ($n=2$):} A parità di distanza, maggiore è la frequenza maggiore è il path loss. La potenza di trasmissione massima è regolamentata (standard). A parità di potenza, maggiore è la frequenza minore è il raggio di copertura. Con "free space loss" si intende la perdita ideale in caso di spazio completamente libero, quindi con $d^n = d^2$.
+\begin{center}
+	\includegraphics[width=0.75\linewidth]{img/wireless/freespaceloss}
+\end{center}
+
+Con $300GHz$ la perdita ad 1km è oltre i $140db$, mentre con $30MHz$ è poco sopra i $60dB$. La distanza di trasmissione è limitata dalle frequenze utilizzate da una certa tecnologia.\\
+
+\newpage
+
+\paragraph{Antenna gain:} La diffusione di un'antenna ideale è isotropica (in tutte le direzioni), ma questo può essere inefficiente, capendo la posizione dei ricevitori si può migliorare la potenza ricevuta. L'idea di un'antenna direzionale è convogliare l'energia verso un determinato punto, un "beam" verso il ricevitore. Il segnale si propaga in una ellisse verso la direzione voluta dall'antenna, al contrario del cerchio creato da un'antenna isotropica.\\
+
+Il \textbf{gain} di un'antenna viene definito come il rapporto tra l'intensità della radiazione elettromagnetica in una data direzione e l'intensità che si avrebbe se si usasse un'antenna isotropica, misurato in $dBi$. La direzionalità viene misurata in $dBi$, dove $i$ sta per "isotropic", ed è il rapporto tra la potenza che si avrebbe in quel punto con una antenna isotropica al denominatore e l'antenna attuale al numeratore. Concentrando verso il ricevitore "perdo" verso le altre direzioni. \\
+
+%TODO Mancano le formule?
+Questo ha un \textbf{effetto sul path loss}; nel caso ideale avremmo allineamento perfetto tra TX e RX e di conseguenza un gain che riduce la perdita di potenza nella trasmissione. \\
+
+Alla perdita in free space, si sottraggono valori dipendenti dal gain di trasmittente e ricevente, abbassando il rapporto e riducendo la perdita. Chiamando $G_{tx}$ e $G_{rx}$ gain di trasmettitore e ricevitore, rispettivamente: 
+$$ \frac{P_t}{P_r} = \frac{(4 \pi f)^2}{G_{tx} G_{rx} c^2} d^n $$
+Da ricordare che è necessaria un allineamento, se il ricevitore è fuori dal "beam" allora la potenza ricevuta sarà minore di quella di un antenna isotropica, a parità di distanza ($dBi$ negativi, il gain peggiora).\\
+
+%TODO Chiedere e check di tutto
+
+\newpage
+
+\paragraph{Multipath:} Anche se direzionale, il segnale avrà una "fascia" di direzioni in cui viene inviato, quindi può interagire con l'ambiente: 
+\begin{itemize}
+	\item \textbf{riflessione:} il segnale "rimbalza", come su uno specchio, 
+	\item \textbf{scattering:} quando la lunghezza d'onda $\lambda$ è simile a quella dell'oggetto, un raggio colpisce l'elemento e viene separato in tanti altri, sparsi in tutte le direzioni 
+	\item \textbf{diffrazione:} se la lunghezza d'onda è $\lambda \ll$ della dimensione di un oggetto e lo colpisce sui bordi, diffondendo il segnale in più direzioni dall'altro lato dell'oggetto
+\end{itemize}
+\begin{center}
+	\includegraphics[width=0.7\linewidth]{img/wireless/multipath1}
+\end{center}
+I percorsi che non sono LoS saranno più lunghi e, di conseguenza, più lenti.  \\
+
+\newpage
+
+\paragraph{Fading:} Quando più segnali vengono ricevuti in tempi diversi ci sono due tipi di interferenze: 
+\begin{itemize}
+	\item \textbf{costruttiva:} "fa bene", aumenta l'ampiezza ed il segnale
+	\item \textbf{distruttiva:} il segnale ricevuto viene modificato in modo imprevedibile (fading/evanescenza)
+\end{itemize}
+\begin{center}
+	\includegraphics[width=0.85\linewidth]{img/wireless/fading}
+\end{center}
+
+Bisogna tenere conto delle proprietà fisiche del mezzo, quindi da come il segnale si modifica durante la propagazione. Il \textbf{Coherence time} permette di avere una stima per sapere ogni quanto campionare la condizione di un canale, un lasso di tempo in cui essere sicuri che il canale non subirà cambiamenti significativi; scala temporale in cui le caratteristiche del segnale sono "costanti"
+$$ T_c = \frac{1}{f_D}$$
+
+Dove $f_D$ è la \textbf{frequenza di Doppler}: dipende dalla velocità di movimento tra trasmettitore e ricevitore e dalla frequenza (e velocità della luce); più alta è la frequenza o più velocemente ci muoviamo più il campionamento dovrà essere fitto
+$$ f_D = \frac{v}{c} f_c$$
+
+Una tecnologia pensata per determinati spettri ed una determinata velocità relativa possiamo determinare una stima di $T_c$ e costruire apparati che funzionano di conseguenza.\\
+
+\newpage
+
+Esempio:
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wireless/examplemultipath}
+\end{center}
+I primi 4 grafici sono:
+\begin{itemize}
+	\item segnale trasmesso
+	\item segnale ricevuto LoS, in $pW$, con effetto Doppler e noise
+	\item altri 2 segnali NLoS (Non Line of Sight), percorrono più spazio, vengono ricevute dopo nel tempo e con una potenza ridotta, oltre che subire effetto Doppler e noise
+\end{itemize}
+L'ultima è ciò che viene effettivamente ricevuto, ovvero la combinazione di tutte le onde ricevute. E questo solo con il multipath, bisogna aggiungere anche effetto doppler e noise. \\
+
+\newpage
+
+\paragraph{Inter-Symbol Interference:} La lunghezza dei vari simboli deve tenere conto degli effetti del multipath. 
+\begin{center}
+	\includegraphics[width=0.8\linewidth]{img/wireless/ISI1}
+\end{center}
+Dopo il primo impulso LoS, vengono ricevuti altri simboli per effetto del multipath e ci possono essere altri segnali che interferiscono con l'impulso LoS successivo. Si sovrappongono segnali LoS e multipath di quello precedente, causando interferenza distruttiva, interferenza inter-simbolo ISI. La distanza tra un segnale e l'altro è troppo breve.\\
+
+Maggiore è la distanza tra TX e RX, più alta è la probabilità di questi fenomeni. Trasmettendo meno simboli ho un data rate minore, ma incrementandoli aumenta la probabilità di avere ISI. \\
+
+\newpage
+
+\subsection{Codifica e Trasmissione Dati}
+La struttura di una trasmissione radio è
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wireless/struttrasmissione}
+\end{center}
+
+Le fasi sono: 
+\begin{itemize}
+	\item Forward Error Correction FEC
+	\item Modulazione e encoding
+	\item Si amplifica la potenza in modo da renderla sufficiente (secondo il path loss previsto), deve essere in grado di raggiungere il RX
+	\item il segnale "brutto" ricevuto va demodulato e decodificato
+	\item FEC sul decoder
+\end{itemize}
+
+\subsubsection{Modulazione e Codifica}
+Per la codifica possiamo agire sui 3 parametri di una sinusoidale:
+\begin{itemize}
+	\item \textbf{Amplitude Shift Keying ASK:} diversi livelli di ampiezza per diversi bit
+	\item \textbf{Frequency Shift Keying FSK:} diverse frequenze per diversi bit
+	\item \textbf{Phase Shift Keying PSK:} diverse fasi per diversi bit
+\end{itemize}
+Ci possono anche essere combinazioni. L'obiettivo della parte di encoding e modulation è produrre una forma d'onda con un determinato significato.\\
+
+\newpage
+
+\paragraph{Differential Phsae Shift Keying (DPSK):} Risulta più semplice accorgersi della differenza rispetto che misurare un certo livello: la codifica dipende dallo stato precedente: 
+\begin{itemize}
+	\item $0 \rightarrow$ nessun cambio di fase
+	\item $1 \rightarrow$ applico uno shift
+\end{itemize}
+
+Richiede un allineamento meno preciso tra TX e RX, identificare le differenze è più semplice.  Codifica e decodifica non sono più fisse\\
+
+
+%TODO From here
+Variazioni di queste codifiche per aumentare i bit per simbolo: 
+* MFSK: diverse frequenze
+* QPSK:
+* X-QAM:
+%complete s77
+
+Quadrature Phase-Shift Keying QPSK: Viene utilizzata la fase per determinare i bit. \\
+Abbiamo due possibili rappresentazioni: %s78 complete
+* cases
+* img
+In entrambe si può vedere che ci sono 4 "posizioni", ognuna delle quali codifica 2 bit. Si chiama "quadra" per la variazione di $90^\circ$ tra uno e l'altro. Qua abbiamo 2 bit per symbol.\\
+
+Qaudrature Amplitude Modulation QAM: Oltre alla fase abbiamo anche una modifica dell'ampiezza. Utilizziamo due parametri per avere più codifiche differenti, portando ad una costellazione più densa
+%img s79 
+Schema QAM:
+%img s80
+Si spezzano i bit, si mappa prima in fase e poi in ampiezza, poi boh, cazzo ne so.
+
+Esempi maybe, idk anymore
+
+Wi-Fi 5 usa 256-QAM mentre Wi-Fi 6 usa 1024-QAM. La potenza rimane costante, ci muoviamo all'interno dello stesso spazio, quello che cambia è quanto "densi" sono i simboli all'interno dello spazio.\\
+
+%s57, deviazione
+Bit Error Rate Curve: rappresenta la probabilità di alterare un bit, dato il rapporto tra energia che c'è per un singolo bit ed il rumore. %Check, wft; completa
+Qua'è la probabilità di sbagliare un bit, dato un certo rapporto tra densità di energia del segnale per bit e rumore. Better SNR.\\
+
+%s84 again
+Il RX riceve una "nuvola" di punti e cerca il simbolo più vicino ma se l'alterazione subita è significativa poterbbe essere un'interpretazione sbagliata quindi un errore.\\
+Man mano che il segnale migliora rispetto al rumore, la probabilità di avere un errore diminuisce.\\
+Tanto più densa è la costellazione tanto è più probabile sbagliare simbolo:
+%img s84
+Si può vedere come QPSK sbagli molto meno rispetto a 1024-QAM.\\
+
+Adaptive Modulation and Coding AMC: Misuriamo la qualità del canale e cerchiamo di capire quale sia la codifica più efficiente, non vogliamo troppi errori. Se il SNR è 10 è inutile trasmettere con 1024-QAM in quanto quasi tutti i simboli saranno sbagliati, è meglio inviare con un data rate minore ma meno errori. \\
+La codifica viene modificata in base alla qualità del canale, ogni tot di tempo misuro la qualità del canale ed adatto il data rate di conseguenza.\\
+
+Forward Error Correction: Oltre alla scelta della codifica scegliamo le tecniche di correzione dell'errore. 
+%Check s85, tipo, forse 
+Dato che nel wireless la probabilità di errore è elevata, aggiungiamo ridondanza, ogni sequenza di bit diventa una codeword, abbiamo $k$ bit trasmessi per $n$ bit da inviare (sempre $k>n$). La tabella delle codeword deve essere resiliente a possibili errori.\\
+Rimangono valide le tecniche di error detection, in cui a livello di RX riusciamo a capire se c'è stato un errore tramite dei bit di controllo aggiunti ai dati (CNC).\\
+
+Adaptive Modulation and Coding: 
+%complete s86, spiega qualcosa
+A partire d auna tabella scegliamo quale codifica utilizzare, se ho un SNR di questo tipo, che modulazione e coding rate (rapporto bit totali e di informazione effettiva) uso? 
+%img s87
