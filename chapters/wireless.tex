@@ -57,7 +57,7 @@ Moduliamo la portante (modifichiamo l'ampiezza) in base ai bit da codificare. Us
 \begin{itemize}
 	\item Ground Wave Propagation (sotto i $2MHz$): il segnale segue la curvatura della terra
 	\item Sky Wave Propagation (da $2$ a $30MHz$): il segnale rimbalza nella ionosfera
-	\item \textbf{Line of sight LoS} (sopra $30MHz$): Deve esserci una linea diretta (anche non a vista in realtà, ma diretta) tra trasmettitore e ricevitore
+	\item \textbf{Line of Sight LoS} (sopra $30MHz$): Deve esserci una linea diretta (anche non a vista in realtà, ma diretta) tra trasmettitore e ricevitore
 \end{itemize}
 
 \paragraph{Tipi di antenne:}
@@ -198,58 +198,87 @@ Ci possono anche essere combinazioni. L'obiettivo della parte di encoding e modu
 
 \newpage
 
-\paragraph{Differential Phsae Shift Keying (DPSK):} Risulta più semplice accorgersi della differenza rispetto che misurare un certo livello: la codifica dipende dallo stato precedente: 
+\paragraph{Differential Phase-Shift Keying (DPSK):} Risulta più semplice accorgersi della differenza rispetto che misurare un certo livello: la codifica dipende dallo stato precedente: 
 \begin{itemize}
 	\item $0 \rightarrow$ nessun cambio di fase
 	\item $1 \rightarrow$ applico uno shift
 \end{itemize}
 
-Richiede un allineamento meno preciso tra TX e RX, identificare le differenze è più semplice.  Codifica e decodifica non sono più fisse\\
+Richiede un allineamento meno preciso tra TX e RX, identificare le differenze è più semplice.  Codifica e decodifica non sono più fisse ma dipendono dalla variazione tra un bit ed il successivo (o mancanza di essa).\\
 
+%Variazioni di queste codifiche per aumentare i bit per simbolo: 
+%* MFSK: diverse frequenze
+%* QPSK:
+%* X-QAM:
+%%complete s77
 
-%TODO From here
-Variazioni di queste codifiche per aumentare i bit per simbolo: 
-* MFSK: diverse frequenze
-* QPSK:
-* X-QAM:
-%complete s77
+\paragraph{Quadrature Phase-Shift Keying QPSK:} Viene utilizzata la fase per determinare i bit. Ci sono 4 fasi differenti ($90^\circ$ tra una e l'altra), quindi 2 bit per simbolo
+$$ s(t) = \begin{cases}
+	A \cos \left(2 \pi f_c t + \frac{\pi}{4}\right) & 11 \\
+	A \cos \left(2 \pi f_c t + \frac{3 \pi}{4}\right) & 01 \\
+	A \cos \left(2 \pi f_c t - \frac{3 \pi}{4}\right) & 00 \\
+	A \cos \left(2 \pi f_c t - \frac{\pi}{4}\right) & 10 \\
+\end{cases} $$
+Si usa la codifica Gray, punti adiacenti differiscono di un solo bit. Diagramma della costellazione:
+\begin{center}
+	\includegraphics[width=0.45\linewidth]{img/wireless/costellazione1}
+\end{center}
+Si può vedere che ci sono 4 "posizioni", ognuna delle quali codifica 2 bit. Si chiama "quadra" per la variazione di $90^\circ$ tra uno e l'altro. Qua abbiamo 2 bit per symbol.\\
 
-Quadrature Phase-Shift Keying QPSK: Viene utilizzata la fase per determinare i bit. \\
-Abbiamo due possibili rappresentazioni: %s78 complete
-* cases
-* img
-In entrambe si può vedere che ci sono 4 "posizioni", ognuna delle quali codifica 2 bit. Si chiama "quadra" per la variazione di $90^\circ$ tra uno e l'altro. Qua abbiamo 2 bit per symbol.\\
+\newpage
 
-Qaudrature Amplitude Modulation QAM: Oltre alla fase abbiamo anche una modifica dell'ampiezza. Utilizziamo due parametri per avere più codifiche differenti, portando ad una costellazione più densa
-%img s79 
+\paragraph{Quadrature Amplitude Modulation QAM:} Oltre alla fase abbiamo anche una modifica dell'ampiezza. Utilizziamo due parametri per avere più codifiche differenti, portando ad una costellazione più densa. Combina variazioni di ampiezza e fase. 
+\begin{center}
+	\includegraphics[width=0.6\linewidth]{img/wireless/costellazione2}
+\end{center}
 Schema QAM:
-%img s80
-Si spezzano i bit, si mappa prima in fase e poi in ampiezza, poi boh, cazzo ne so.
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wireless/schemaQAM}
+\end{center}
+Si spezzano i bit, si mappa prima in fase e poi in ampiezza, si modula sulla portante e le sinusoidi risultanti si uniscono per avere il segnale modulato da trasmettere.\\
 
-Esempi maybe, idk anymore
+%TODO: esempi slide 81,82, controllare, capire?
+%Esempi maybe, idk anymore
+% Esempi slides
 
 Wi-Fi 5 usa 256-QAM mentre Wi-Fi 6 usa 1024-QAM. La potenza rimane costante, ci muoviamo all'interno dello stesso spazio, quello che cambia è quanto "densi" sono i simboli all'interno dello spazio.\\
 
-%s57, deviazione
-Bit Error Rate Curve: rappresenta la probabilità di alterare un bit, dato il rapporto tra energia che c'è per un singolo bit ed il rumore. %Check, wft; completa
-Qua'è la probabilità di sbagliare un bit, dato un certo rapporto tra densità di energia del segnale per bit e rumore. Better SNR.\\
+\newpage
 
-%s84 again
-Il RX riceve una "nuvola" di punti e cerca il simbolo più vicino ma se l'alterazione subita è significativa poterbbe essere un'interpretazione sbagliata quindi un errore.\\
-Man mano che il segnale migliora rispetto al rumore, la probabilità di avere un errore diminuisce.\\
-Tanto più densa è la costellazione tanto è più probabile sbagliare simbolo:
-%img s84
-Si può vedere come QPSK sbagli molto meno rispetto a 1024-QAM.\\
+\subsubsection{Bit Error Rate Curve}
+Rappresenta la \textbf{probabilità che un bit venga alterato}, in funzione del rapporto tra la densità di energia del segnale per bit ed il livello di rumore
+$$ BER = func = \left( \frac{E_b}{N_0} \right)$$
+Qual'è la probabilità di sbagliare un bit, dato un certo rapporto tra densità di energia del segnale per bit e rumore. Simile a SNR come idea.\\
+Dei valori ricevuti da un trasmettitore potrebbero essere:
+\begin{center}
+	\includegraphics[width=0.35\linewidth]{img/wireless/esval}
+\end{center}
 
-Adaptive Modulation and Coding AMC: Misuriamo la qualità del canale e cerchiamo di capire quale sia la codifica più efficiente, non vogliamo troppi errori. Se il SNR è 10 è inutile trasmettere con 1024-QAM in quanto quasi tutti i simboli saranno sbagliati, è meglio inviare con un data rate minore ma meno errori. \\
-La codifica viene modificata in base alla qualità del canale, ogni tot di tempo misuro la qualità del canale ed adatto il data rate di conseguenza.\\
+Il RX riceve una "nuvola" di punti e cerca il simbolo più vicino ma se l'alterazione subita è significativa potrebbe essere un'interpretazione sbagliata quindi un errore. Man mano che il segnale migliora rispetto al rumore, la probabilità di avere un errore diminuisce. Tanto più densa è la costellazione tanto è più probabile sbagliare simbolo:
+\begin{center}
+	\includegraphics[width=0.5\linewidth]{img/wireless/maryqam}
+\end{center}
+Si può vedere come QPSK sbagli molto meno rispetto a 1024-QAM.
 
-Forward Error Correction: Oltre alla scelta della codifica scegliamo le tecniche di correzione dell'errore. 
-%Check s85, tipo, forse 
-Dato che nel wireless la probabilità di errore è elevata, aggiungiamo ridondanza, ogni sequenza di bit diventa una codeword, abbiamo $k$ bit trasmessi per $n$ bit da inviare (sempre $k>n$). La tabella delle codeword deve essere resiliente a possibili errori.\\
-Rimangono valide le tecniche di error detection, in cui a livello di RX riusciamo a capire se c'è stato un errore tramite dei bit di controllo aggiunti ai dati (CNC).\\
+\newpage
 
-Adaptive Modulation and Coding: 
-%complete s86, spiega qualcosa
-A partire d auna tabella scegliamo quale codifica utilizzare, se ho un SNR di questo tipo, che modulazione e coding rate (rapporto bit totali e di informazione effettiva) uso? 
-%img s87
+\paragraph{Adaptive Modulation and Coding AMC:} Misuriamo la qualità del canale e cerchiamo di capire quale sia la codifica più efficiente, troppi errori renderebbero la comunicazione effettivamente inutile. Se il SNR è 10 è inutile trasmettere con 1024-QAM in quanto quasi tutti i simboli saranno sbagliati (immagine precedente), è meglio inviare con un data rate minore che permette meno errori. \\
+
+La \textbf{codifica viene modificata in base alla qualità del canale}, ogni tot di tempo misuro la qualità del canale ed adatto il data rate di conseguenza.\\
+
+\subsubsection{Forward Error Correction}
+Servono delle tecniche di correzione dell'errore. Dato che nel wireless la probabilità di errore è elevata, viene aggiunta una ridondanza ai dati inviati: ogni sequenza di bit diventa una codeword, abbiamo $k$ bit trasmessi per $n$ bit da inviare (sempre $k>n$). In questo modo, con una tabella di codeword adatta, è possibile rendere la trasmissione resiliente agli errori.
+\begin{center}
+	\includegraphics[width=0.7\linewidth]{img/wireless/FEC1}
+\end{center}
+Ogni $n$ bit da trasmettere diventano $k$, secondo una tabella prefissata, così anche se qualcuno arriva sbagliato si può ricostruire il valore originale (esempio: $00 \rightarrow 00000$, $10 \rightarrow 11001$).\\
+Rimangono valide le tecniche di error detection, in cui a livello di RX riusciamo a capire se c'è stato un errore tramite dei bit di controllo aggiunti ai dati (e.g., CNC).\\
+
+\paragraph{AMC:} A seconda delle condizioni del canale wireless il trasmittente sceglie lo schema di modulazione e codifica opportuno. Bisogna scegliere: codifica, coding rate (redundancy). Usato in nelle reti mobili 4G, 5G e WiFi (802.11n+).\\
+
+Generalmente, queste informazioni vengono scelte a partire da una tabella: se ho un SNR di questo tipo, che modulazione e coding rate (rapporto bit totali e di informazione effettiva) posso usare?  
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wireless/mcruppolo}
+\end{center}
+
+%End L3
