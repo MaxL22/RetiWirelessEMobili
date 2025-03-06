@@ -105,14 +105,12 @@ Con $300GHz$ la perdita ad 1km è oltre i $140db$, mentre con $30MHz$ è poco so
 
 Il \textbf{gain} di un'antenna viene definito come il rapporto tra l'intensità della radiazione elettromagnetica in una data direzione e l'intensità che si avrebbe se si usasse un'antenna isotropica, misurato in $dBi$. La direzionalità viene misurata in $dBi$, dove $i$ sta per "isotropic", ed è il rapporto tra la potenza che si avrebbe in quel punto con una antenna isotropica al denominatore e l'antenna attuale al numeratore. Concentrando verso il ricevitore "perdo" verso le altre direzioni. \\
 
-%TODO Mancano le formule?
+%Le formule sono sempre quelle dei dB
 Questo ha un \textbf{effetto sul path loss}; nel caso ideale avremmo allineamento perfetto tra TX e RX e di conseguenza un gain che riduce la perdita di potenza nella trasmissione. \\
 
 Alla perdita in free space, si sottraggono valori dipendenti dal gain di trasmittente e ricevente, abbassando il rapporto e riducendo la perdita. Chiamando $G_{tx}$ e $G_{rx}$ gain di trasmettitore e ricevitore, rispettivamente: 
 $$ \frac{P_t}{P_r} = \frac{(4 \pi f)^2}{G_{tx} G_{rx} c^2} d^n $$
 Da ricordare che è necessaria un allineamento, se il ricevitore è fuori dal "beam" allora la potenza ricevuta sarà minore di quella di un antenna isotropica, a parità di distanza ($dBi$ negativi, il gain peggiora).\\
-
-%TODO Chiedere e check di tutto
 
 \newpage
 
@@ -282,3 +280,138 @@ Generalmente, queste informazioni vengono scelte a partire da una tabella: se ho
 \end{center}
 
 %End L3
+
+%start from s89
+%Tipico esercizio d'esame su AMC
+% Esercizio s89
+
+\newpage
+
+\paragraph{Esempio:} Dati un $SNR$ sul canale, un $BER$ che si vuole garantire ed un symbol rate
+$$ SNR = 8dB, \; BER = 10^{-2}, \; SR = 1000 sym/s$$
+Che modulation and coding scheme posso usare sul mio canale per avere l'error rate desiderato, sapendo che il coding rate per ogni codifica è
+\begin{center}
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			& \multicolumn{3}{c |}{\textbf{Coding rate}} \\
+			\hline
+			\textbf{SNR} & \textbf{BPSK} & \textbf{QPSK} & \textbf{16-QAM} \\
+			\hline
+			$< 6dB$ & 0.6 & 0.4 & 0.2 \\
+			$6-10 dB$ & 0.8 & 0.6 & 0.5 \\
+			$> 10 dB$ & 0.9 & 0.8 & 0.7 \\
+			\hline
+		\end{tabular}
+	\end{table}
+\end{center}
+Ed il BER per ogni codifica è 
+\begin{center}
+		\includegraphics[width=0.45\linewidth]{img/wireless/esber}
+\end{center}
+
+Dall'immagine si può vedere che con $SNR = 8dB$, sia BPSK che QPSK permettono un $BER$ adeguato. Quale dei due però permette il data rate migliore? Possiamo calcolare il data rate come
+$$ sym/s \cdot bit/sym \cdot coding\_rate $$
+Quindi
+\begin{itemize}
+	\item BPSK: con coding rate di $0.8$ ed $1bps$: $1000 \cdot 1 \cdot 0.8 = 800 bit/s$
+	\item QPSK: con coding rate di $0.6$ e $2bps$: $1000 \cdot 2 \cdot 0.6 = 1200 bit/s$
+\end{itemize}
+
+\newpage
+
+\subsubsection{Orthogonal Frequency Division Multiplexing OFDM}
+Vogliamo offrire canali differenti usando una divisione in frequenza diversa da FDM. L'obiettivo è quello di garantire lo stesso data rate che avremmo in una trasmissione in TDM ma usando una divisione in frequenza, senza usare troppa banda. Schema:
+\begin{center}
+	\includegraphics[width=0.45\linewidth]{img/wireless/OFDM1}
+\end{center}
+Lo si implementa tramite uno split da seriale a parallelo ed ogni componente viene inviata ad un modulatore, ognuno dei quali modula rispetto a multipli di una certa frequenza base $f_b$ e alla portante $f_0$; quindi abbiamo una portante $f_0$ e tante sotto-portanti multiple di $f_b$. Stessa codifica e modulazione. Alla fine si trasmette la combinazione di tutte le onde create. \\
+
+Nel caso di FDM classico viene lasciata una guardia per evitare interferenze, si allontanano un po' le frequenze in modo tale che le varie armoniche di una frequenza non possa interagire con le adiacenti.\\
+
+\newpage
+
+\paragraph{Ortogonalità:} Nell'OFDM le \textbf{subcarrier sono ortogonali tra loro} e non interferiscono, i.e., la distanza tra subcarrier è studiata in modo da evitare interferenze. Nel momento di picco di ogni sotto-portante, il contributo delle altre frequenze è nullo.
+\begin{center}
+	\includegraphics[width=0.6\linewidth]{img/wireless/OFDM2}
+\end{center}
+
+La scelta di $f_b$ dipende dalla durata dei simboli $T$:
+$$ f_b = \frac{1}{T}$$
+Tutti i segnali multipli di $f_b$ sono ortogonali tra loro. Si tratta dell'inverso della durata del simbolo.\\
+
+Considerazioni:
+\begin{itemize}
+	\item più robusto riguardo ad interferenze che riguardano solo alcuni subcarrier
+	\item più robusto rispetto ai problemi di multipath perché la distanza tra un simbolo e l'altro è maggiore (ISI ridotta)
+\end{itemize}
+
+N.B.: in generale multiple access $\neq$ multiplexing, far passare più segnali contemporaneamente è diverso da fare comunicare più utenti contemporaneamente.\\
+
+\paragraph{TL;DR: } Si tratta di un FDM in cui le frequenze sono ortogonali tra loro in modo da non avere interferenze. Le interferenze in FDM erano prevenute tramite l'uso di una guardia, ovvero spazio di banda libero, OFDM permette di usare meno banda.\\
+
+\newpage
+
+\subsection{Spread Spectrum}
+Letteralmente "spettro espanso", consiste nel trasmettere il segnale di informazione su uno \textbf{spettro di frequenze più ampio} di quella del segnale. Una banda maggiore del necessario. \\
+
+La struttura, concettualmente, è
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wireless/ss1}
+\end{center}
+Dopo l'encoding, c'è una fase di \textbf{spreading dei dati}, generalmente basato su valori pseudo-casuali (da invertire dopo la ricezione).\\
+
+Motivazioni:
+\begin{itemize}
+	\item rendere il segnale più robusto, "spalmandolo" su una banda più ampia lo rende più resiliente a diversi tipi di rumore e interferenze
+	\item nascondere e cifrare il segnale (nato in ambito militare); solo TX e RX sono a conoscenza del codice di spreading (non una tecnica sufficiente, ma a livello radio questo si può fare)
+	\item molti utenti possono usare indipendentemente la stessa banda contemporaneamente senza interferenza. Usata da CDMA
+\end{itemize}
+
+\newpage
+
+\subsubsection{Frequency Hopping Spread Spectrum FHSS}
+
+In FHSS il codice di spreading determina quale frequenza usare per trasmettere il segnale. Ad ogni intervallo di tempo prestabilito, la frequenza viene cambiata pseudo-casualmente (frequency hopping). usato da Bluetooth (802.15.1), "saltando" ogni $625 \mu s$.\\
+In altre parole: ho una certa ampiezza di banda e cambio in modo pseudo-casuale la frequenza usata ad ogni intervallo di tempo. Ho $n$ frequenze e ne uso una per volta, cambiata ogni tanto.\\
+
+Schema di trasmissione e ricezione:
+\begin{center}
+	\includegraphics[width=\linewidth]{img/wireless/fhss1}
+\end{center}
+La channel table permette di scegliere la frequenza da utilizzare, in base al valore casuale, ed il sintetizzatore utilizzerà quella frequenza. Il tempo di hopping generalmente è predefinito, serve un seed per la sequenza di valori pseudo-casuali usati per determinare la frequenza usata.\\
+
+Il frequency hopping è più resistente a rumore e jamming, in quanto compromettere una frequenza non compromette l'intera trasmissione.\\
+Un altro ricevitore che si sincronizza con il trasmettitore può solo leggere alcuni pezzi dei messaggi perché non conosce la sequenza di hopping. \\
+
+\newpage
+
+\subsubsection{Direct Sequence Spread Spectrum DSSS}
+
+Per una sequenza di $D$ bit, ogni bit della sequenza viene rappresentato da un insieme di bit usando un codice di spread (pseudo-casuale). Ogni bit diventa $n$ bit ottenuti da una sequenza casuale. \\
+I bit della sequenza di spread "durano meno" (durano $1/n$ del tempo dei bit di informazione) e vengono chiamati "chip". Per ogni bit originale abbiamo $n$ chip.\\
+Per mantenere lo stesso data rate abbiamo bisogno di $n$ volte la banda ($n$ fattore di spreading).\\
+
+Generalmente, si usa uno \texttt{xor} (in quanto invertibile) degli $n$ bit casuali con il bit da inviare e si invia il risultato. Esempio: 
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\multicolumn{1}{|c|}{\textbf{Bit informazione}} & \multicolumn{4}{c|}{\textbf{1}} & \multicolumn{4}{c|}{\textbf{0}} \\ 
+		\hline
+		\textbf{Sequenza di chip} & 0 & 1 & 1 & 1 & 0 & 0 & 1 & 0 \\ 
+		\hline
+		\textbf{Trasmesso (XOR)} & 1 & 0 & 0 & 0 & 0 & 0 & 1 & 0\\ 
+		\hline
+	\end{tabular}
+\end{center}
+Usando BPSK diventa: 
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wireless/DSSS1}
+\end{center}
+In verde il {\color{green} segnale originale}, in blu la {\color{blue} sequenza pseudo-casuale}, in rosso ciò che viene {\color{red} effettivamente inviato}.\\
+
+%Schema di trasmissione e ricezione: 
+%img s110
+
+%End L4
