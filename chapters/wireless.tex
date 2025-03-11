@@ -415,3 +415,118 @@ In verde il {\color{green} segnale originale}, in blu la {\color{blue} sequenza 
 %img s110
 
 %End L4
+
+\newpage
+
+\subsubsection{Code Division Multiple Access CDMA}
+Differenza tra multiplexing e multiple access:
+\begin{itemize}
+	\item multiplexing significa avere più canali di comunicazione
+	\item multiple access: come faccio a far comunicare più utenti 
+\end{itemize}
+
+L'idea è utilizzare un canale con una certa banda a disposizione, e tutti i dispositivi possono usare la stessa banda, evitando interferenze.\\
+
+Ogni bit della sequenza da trasmettere viene codificato con un codice largo $k \geq 1$ chip usando un pattern prefissato detto \textbf{codice}. Un chip è una sequenza di 1 e $-1$ (al posto dello $0$). Ogni utente ha un codice diverso e di conseguenza produrrà chip diversi. Tutti "parlano assieme" e posso comunque distinguere le informazioni provenienti da un utente specifico.
+
+\paragraph{Sequenze Walsh:} Creano un insieme di codici ortogonali (sono in numero limitato).
+
+\paragraph{Sequenze PN, Gold, Kasami:} Non ortogonali ma in numero molto maggiore.\\
+
+Non si ha nessuna divisione della banda, ma uno spettro maggiore che quello per un singolo bit. Ognuno comincia a trasmettere con il proprio codice assegnato senza preoccuparsi di interferenze, starà al ricevitore distinguere i vari segnali. Tutte le forme d'onda vengono trasmesse assieme, senza il problema dell'interferenza.\\
+Esempio di trasmissione da parte di 3 utenti:
+\begin{center}
+	\includegraphics[width=0.6\linewidth]{img/wireless/CDMA1}
+\end{center}
+
+Il RX è a conoscenza del codice, numero di chip per bit e la regola (1 viene codificato tramite il codice stesso, 0 tramite l'inverso). Il RX calcola la funzione
+$$ s_u (d) = \sum_{i=1}^{k} d_i \cdot c_i $$ 
+Si tratta di una moltiplicazione tra il valore ricevuto ed il relativo bit all'interno del codice: se il risultato della sommatoria è positivo è stato trasmesso un 1, 0 altrimenti.\\
+
+Esempio: con 3 utenti
+\begin{center}
+	{
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		User A & 1 & -1 & -1 & 1 & -1 & 1 \\ 
+		\hline
+		User B & 1 & 1 & -1 & -1 & 1 & 1 \\ 
+		\hline
+		User C & 1 & 1 & -1 & 1 & 1 & -1 \\ 
+		\hline
+	\end{tabular}}
+\end{center}
+Con un solo segnale, se l'utente A invia un 1:
+\begin{center}
+	{
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+		\hline
+		Transmit (data bit = 1) A & 1 & -1 & -1 & 1 & -1 & 1 & \\ 
+		\hline
+		Receiver codeword A & 1 & -1 & -1 & 1 & -1 & 1 & \\ 
+		\hline
+		Multiplication & 1 & 1 & 1 & 1 & 1 & 1 & =6 \\ 
+		\hline
+	\end{tabular}
+	}
+\end{center}
+Per uno 0, il codice trasmesso sarebbe invertito ed il risultato della sommatoria diventa $-6$. In questo caso l'utente A ha trasmesso ed è stato usato il codice di A per decodificare. Se provassi ad usare il codice di A per decodificare un messaggio di B:
+\begin{center}
+	{
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+		\hline
+		Transmit (data bit = 1) B & 1 & 1 & -1 & -1 & 1 & 1 & \\ 
+		\hline
+		Receiver codeword A & 1 & -1 & -1 & 1 & -1 & 1 & \\ 
+		\hline
+		Multiplication & 1 & -1 & 1 & -1 & -1 & 1 & =0 \\ 
+		\hline
+	\end{tabular}
+	}
+\end{center}
+
+Il risultato è 0, quindi non è stato trasmesso da A ma da un segnale ortogonale rispetto ad A. Non è detto che i segnali debbano essere perfettamente ortogonali, possono anche esserci interferenze: 
+\begin{center}
+	{
+		\renewcommand{\arraystretch}{1.2}
+		\begin{tabular}{|c|c|c|c|c|c|c|c|}
+			\hline
+			Transmit (data bit = 1) C & 1 & 1 & -1 & 1 & 1 & -1 & \\ 
+			\hline
+			Receiver codeword A 	 & 1 & 1 & -1 & -1 & 1 & 1 & \\ 
+			\hline
+			Multiplication 					  & 1 & 1 & 1 & -1 & 1 & -1 & =2 \\ 
+			\hline
+		\end{tabular}
+	}
+\end{center}
+Non sono perfettamente ortogonali quindi risulta in una interferenza, il risultato è però troppo basso per essere interpretato come un valore corretto.\\
+
+Ma l'idea è che tutti trasmettano assieme, quindi i segnali possono combinarsi:
+\begin{center}
+	{
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+		\hline
+		B (data bit = 1) & 1 & 1 & -1 & -1 & 1 & 1 &\\ 
+		\hline
+		C (data bit = 1) & 1 & 1 & -1 & 1 & 1 & -1 &\\ 
+		\hline
+		Combined signal & 2 & 2 & -2 & 0 & 2 & 0 & \\ 
+		\hline
+		Receiver codeword B & 1 & 1 & -1 & -1 & 1 & 1 & \\ 
+		\hline
+		Multiplication & 2 & 2 & 2 & 0 & 2 & 0 & =8 \\ 
+		\hline
+	\end{tabular}
+	}
+\end{center}
+Cercando di estrarre cosa ha mandato B (ovvero usando il codice B) risulta un segnale abbastanza alto da poter essere interpretato come 1.\\
+
+Più è alto il numero di utenti più lo spreading factor deve essere alto (lunghezza del codice), riducendo il data rate del dispositivo. Può essere modulato in funzione del numero di utenti, quando ci sono tanti utenti connessi viene usato uno spreading factor maggiore.\\
+
+\paragraph{Near-Far Problem:} Questo sistema funziona bene se i vari segnali ricevuti hanno più o meno la stessa potenza, ma utenti più lontani avranno una potenza minore (se tutti trasmettono con la stessa potenza).\\
+La soluzione è utilizzare potenze diverse in base alla distanza (sì, consuma più batteria).\\
