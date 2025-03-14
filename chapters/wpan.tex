@@ -125,7 +125,7 @@ Questi sono standard, un dispositivo deve aderire ad uno o più profili (annunci
 \end{center}
 In qualsiasi caso i master lavorano in maniera completamente \textbf{separata}. Un AS attivo in due piconet diverse avrà indirizzamento diverso sulle due reti.
 
-\subsubsection{Specifiche Bluetooth}
+\subsubsection{Bluetooth Radio}
 \paragraph{Specifiche radio Bluetooth 2.1:}
 \begin{center}
 	{
@@ -182,3 +182,127 @@ Per gestire le scatternet si usa FH-CDMA, anche in caso due scatternet comunichi
 \end{center}
 
 %End L5
+
+Esempio a più dispositivi: 
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wpan/picocomm2}
+\end{center}
+
+Nelle frequenze pari master a slave, nelle frequenze dispari viceversa. Più slave vengono coordinati tramite TDMA, ovvero il master decide chi parla in quale slot di tempo. La \textbf{dimensione dei messaggi} può essere di 1, 3 o 5 slot di tempo consecutivi (dispari per mantenere l'alternanza in TDD). Nell'header di ogni pacchetto c'è la dimensione.\\
+
+La frequenza usata dal frequency hopping è data dal numero di timeslot passati, non dal numero di messaggi, quindi al time slot 5 viene usata la quinta frequenza $f_5$, anche se sono stati inviati solo 3 messaggi. Per una singola trasmissione (messaggio) viene mantenuta la stessa frequenza (non cambia a metà). All'interno della piconet tutti i clock devono essere sincronizzati.\\
+
+\paragraph{Scatternet:} Nel caso di una scatternet, ogni piconet che la compone ha tutto diverso: diverse frequenze, diverso clock e di conseguenza completa autonomia. Un AS connesso a più piconet deve essere in grado di gestire le due connessioni indipendentemente.\\
+
+Su 79 canali, cambiati ogni $625 \mu s$, può capitare una sovrapposizione (quindi interferenza), possibili soluzioni sono: 
+\begin{itemize}
+	\item FH su un numero ridotto di canali, e.g., ogni piconet su 20 canali e si spera non ci sia sovrapposizione in quei 20
+	\item Si usa CDMA per evitare interferenze; il master comunica un codice ortogonale ai dispositivi all'interno della piconet (soluzione usata)
+\end{itemize}
+
+\newpage
+
+\subsubsection{Baseband}
+
+\paragraph{Tipologie di servizio:} Offre due possibili canali logici: 
+\begin{itemize}
+	\item \textbf{Synchronous Connection-Oriented Link (SCO)} point-to-point:
+	\begin{itemize}
+		\item canale audio/voce di $64kbps$ bidirezionale
+		\item il master riserva una coppia di slot adiacenti ad intervalli regolari
+		\item previsti fino al massimo di 3 canali SCO attivi contemporaneamente
+		\item traffico real time
+	\end{itemize}
+	Garantiscono un bit rate fisso, un canale riservato, usato per casistiche sensibili al delay (real time).
+	
+	\item \textbf{Asynchronous Connectionless Link (ACL)} point-to-multipoint:
+	\begin{itemize}
+		\item canali ACL occupano gli slot rimanenti
+		\item traffico dati con ciascuno degli slave
+		\item un solo ACL contemporaneo fra master e uno slave
+		\item traffico best effort (nessuna garanzia di delay)
+	\end{itemize}
+	Bit rate non costante, permette una qualità maggiore ma senza nessuna garanzia.
+\end{itemize}
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wpan/scoacl}
+\end{center}
+
+\paragraph{Formato pacchetti:} 
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wpan/basebandpacket}
+\end{center}
+Access code: utilizzato per sincronizzazione e identificazione. Può essere di 3 tipi:
+\begin{itemize}
+	\item Channel Access Code (CAC): identifica la piconet (derivato dai 48 bit dell'indirizzo hardware del master)
+	\item Device Address Code (DAC): derivato dall'indirizzo hardware dello slave ed è usato dal master per chiamare il dispositivo (paging)
+	\item Inquiry Address Code (IAC): usato per trovare l'indirizzo di un dispositivo vicino (durante la fase di inquiry)
+\end{itemize}
+
+Packet Header: ha diversi campi: 
+\begin{center}
+	    \begin{tabular}{|l|p{10cm}|}
+		\hline
+		\textbf{Campo Header} & \\ \hline
+		AMA & Indirizzo del membro attivo della piconet \\ \hline
+		Type & Identifica la tipologia del pacchetto e il formato del pacchetto SCO/ACL, numero di slot ecc... \\ \hline
+		Flow & Per gli ACL: stop (1), resume (0) \\ \hline
+		ARQN & 1 ACK, 0 NACK \\ \hline
+		SEQN & Sequence number modulo 2 \\ \hline
+		HEC & Controllo errori del campo header (1/3 FEC) \\ \hline
+	\end{tabular}
+\end{center}
+ARQN e SEQN sono 2 bit necessari e sufficienti per il controllo degli errori (bastano grazie alla rigida struttura di comunicazione delineala al livello precedente).\\
+
+%TODO Wtf, idk
+Payload: contenuto effettivo del pacchetto può essere: 
+\begin{itemize}
+	\item SCO: 30 byte,  (FEC 0, 2/3, 1/3), che porta a massimo $64kbps$, dato che $(30 \cdot 8) \cdot (1600/6)$, ovvero $30 \cdot 8$ bit, 
+	\item ACL: variabile da 0 a 343 byte
+\end{itemize}
+
+\paragraph{Controllo degli errori: }
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wpan/errorcorr1}
+\end{center}
+
+All'interno del quadrato blu si vede il SEQN, mentre ACK/NACK sono indicati al di fuori.\\
+
+Sequenza tipica:
+\begin{itemize}
+	\item Il master invia un pacchetto con un SEQN $s$
+	\item lo slave risponde con un ACK ed un SEQN $s$ (lo stesso)
+\end{itemize}
+
+Possibili problemi: 
+\begin{itemize}
+	\item Lo slave non riceve il pacchetto: invierà un NACK per indicare la mancata ricezione, nello slot successivo deve parlare lo stesso dato che "è il suo turno", sa che ci sarà un SEQN pari a $\neg s$ ma non ha ricevuto nulla e lo indica con il NACK. "Non ho ricevuto e mi aspettavo questo"
+	\item Se il master non riceve risposta dallo slave (ACK perso), il pacchetto viene re-inviato, con la possibilità di inviare un duplicato, ma meglio che perdere pacchetti
+	\item Lo slave riceve un duplicato e se ne accorge in quanto il SEQN è uguale a quello precedente (il master non ha ricevuto l'ACK, non è cambiato il SEQN, quindi è una ritrasmissione del pacchetto precedente)
+\end{itemize}
+La rigidità dell'alternanza tra master e slave permette di rendere minimale lo spazio necessario per effettuare il controllo degli errori.\\
+
+\newpage
+
+\subsubsection{Link Manager Protocol}
+\paragraph{Transizioni di stato:}
+\begin{center}
+	\includegraphics[width=0.55\linewidth]{img/wpan/lmpst}
+\end{center}
+
+\paragraph{Standby Mode:} A dispositivo "appena acceso" entra in standby mode, non membro di alcuna piconet, minimo consumo.\\
+
+\paragraph{Enquiry mode:} Periodicamente il master invia 32 messaggi consecutivi usando 32 canali (wake-up channels, la sequenza  è standard). I messaggi contengono un \textbf{IAC packet}. Gli slave periodicamente ascoltano i 32 canali per vedere se qualcuno ha mandato un IAC packet. Tutto questo in modo non coordinato.\\
+
+Ogni dispositivo ascolta per $11,25 ms$, all'inizio di ogni intervallo di $1,28$ o $2,56 s$. Una volta "beccata" una trasmissione del master si aspetta un numero random di slot di tempo (random backoff) prima di trasmettere la risposta (per evitare che più slave che hanno ascoltato quella trasmissione rispondano nello stesso momento). Possiamo farlo dato che adesso l'unica cosa che sappiamo è il clock del master, ricevere un qualsiasi segnale del master permette di sincronizzarsi con la piconet. La risposta contiene il Blouetooth Device Address dello slave e la classe, per indicare il tipo di dispositivo.\\
+
+\newpage
+
+Per finalizzare la connessione mancano le frequenze di hopping: si usano 16 delle 32 frequenze standard, per mandare: Device Access Code DAC, la sequenza di FH e l'Active Member Address AMA dello slave.\\
+
+Lo slave risponde con DAC e ACK, poi può cominciare la comunicazione.
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wpan/inquiry1}
+\end{center}
+
+%End L6
