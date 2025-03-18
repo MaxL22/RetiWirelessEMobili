@@ -292,11 +292,11 @@ La rigidità dell'alternanza tra master e slave permette di rendere minimale lo 
 
 \paragraph{Standby Mode:} A dispositivo "appena acceso" entra in standby mode, non membro di alcuna piconet, minimo consumo.\\
 
-\paragraph{Enquiry mode:} Periodicamente il master invia 32 messaggi consecutivi usando 32 canali (wake-up channels, la sequenza  è standard). I messaggi contengono un \textbf{IAC packet}. Gli slave periodicamente ascoltano i 32 canali per vedere se qualcuno ha mandato un IAC packet. Tutto questo in modo non coordinato.\\
+\paragraph{Inquiry mode:} Periodicamente il master invia 32 messaggi consecutivi usando 32 canali (wake-up channels, la sequenza  è standard). I messaggi contengono un \textbf{IAC packet}. Gli slave periodicamente ascoltano i 32 canali per vedere se qualcuno ha mandato un IAC packet. Tutto questo in modo non coordinato.\\
 
 Ogni dispositivo ascolta per $11,25 ms$, all'inizio di ogni intervallo di $1,28$ o $2,56 s$. Una volta "beccata" una trasmissione del master si aspetta un numero random di slot di tempo (random backoff) prima di trasmettere la risposta (per evitare che più slave che hanno ascoltato quella trasmissione rispondano nello stesso momento). Possiamo farlo dato che adesso l'unica cosa che sappiamo è il clock del master, ricevere un qualsiasi segnale del master permette di sincronizzarsi con la piconet. La risposta contiene il Blouetooth Device Address dello slave e la classe, per indicare il tipo di dispositivo.\\
 
-\newpage
+Lo slave ascolta su una delle 32 frequenze di wake-up, mentre il master invia sempre su tutte e 32. In questo modo, ascoltando per un certo periodo di tempo, se, anche solo \textit{vagamente} allineato, lo slave vedrà la comunicazione del master (insomma, prima o poi la becca). Poi c'è un random backoff di un certo numero di slot ti tempo prima di rispondere al master per richiedere il FH, DAC e AMA, inviato su 16 dei 32 canali di wake up (simile a prima).\\
 
 Per finalizzare la connessione mancano le frequenze di hopping: si usano 16 delle 32 frequenze standard, per mandare: Device Access Code DAC, la sequenza di FH e l'Active Member Address AMA dello slave.\\
 
@@ -306,3 +306,198 @@ Lo slave risponde con DAC e ACK, poi può cominciare la comunicazione.
 \end{center}
 
 %End L6
+
+\paragraph{Fase di paging:} Dopo la fase di inquiry, il master invia messaggi di paging per richiamare il dispositivo target, fornire tutti i dati di sincronizzazione necessari e stabilire definitivamente la connessione.\\
+
+\newpage
+
+\paragraph{Altri stati:} Un dispositivo "attivo" può essere:
+\begin{itemize}
+	\item \textbf{Connected}: connessi ma non stiamo trasmettendo, sta solo ascoltando il master.
+	\item \textbf{Transmit}: quando deve trasmettere va in transmit mode.
+\end{itemize}
+Entrambe queste modalità fanno uso del AMA. \\
+
+Entrambe queste modalità consumano batteria (transmit un po' di più, ma comunque consumano), di conseguenza ci sono 3 \textbf{stati di power saving} (in ordine discendente di consumo): 
+\begin{itemize}
+\item \textbf{Sniff Mode}: non ascolta tutti gli slot (mantiene AMA)
+\item \textbf{Hold Mode}: ascolta solo canali SCO (mantiene AMA)
+\item \textbf{Park Mode}: rimane membro della piconet ma rilascia l'AMA e gli viene assegnato un PMA. Periodicamente ascolta i messaggi che il master invia in broadcast a tutti i membri parked. Rimane sincronizzato con clock e FH del master. Può tenere spenta la radio mentre non ascolta, per risparmiare batteria (ma ogni tanto va accesa per risincronizzare il clock, bisogna mantenere quello del master)
+\end{itemize}
+
+\newpage
+
+\subsubsection{Logical Link Control and Adaptation Protocol L2CAP}
+Sempre presente in tutti i dispositivi Bluetooth, ma è il primo livello software (richiede combinazione di pacchetti a livello fisico). Non viene usato per l'audio (maggior parte dei canali SCO).\\
+
+Supporta solo canali ACL. Offre 3 tipi di \textbf{canali logici}:
+\begin{itemize}
+	\item \textbf{Connectionless}: unidirezionale, ad esempio tra broadcast e slave, per quando non c'è la necessità di instaurare una connessione
+	\item \textbf{Connection-oriented}: bidirezionale e supporto QoS (richiedere una certa qualità del canale)
+	\item \textbf{Signaling}: bidirezionale usato per messaggi di controllo master/slave, controllo di un livello superiore
+\end{itemize}
+
+\paragraph{Formato dei pacchetti:}
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wpan/l2cappacket}
+\end{center}
+La dimensione è segnata in byte, i pacchetti sono molto più grandi di quelli a livello baseband, la \textbf{segmentazione ed assemblamento} dei frame inviati a livello baseband viene \textbf{effettuata da L2CAP} (stile ethernet e trasporto, il messaggio sopra viene ricostruito, anche se sotto è diviso in più messaggi).\\
+
+\newpage
+
+I valori del Channel Identifier possibili sono: 
+\begin{itemize}
+	\item CID $= 2$: non c'è nessuna connessione, pacchetto per connectionless
+	\item ID $\geq 64$: pacchetto connection-oriented, il numero indica la connessione
+	\item CID $=1$: usato per i pacchetti di signaling/controllo
+\end{itemize}
+
+Al posto di avere dati relativi all'applicazione, il payload di un pacchetto di controllo contiene
+\begin{itemize}
+	\item Code: codice per il tipo di comando 
+	\item Id: per l'identificatore del comando
+\end{itemize}
+Poi lunghezza e dati.\\
+
+\subsubsection{Service Discovery Protocol SDP}
+
+Protocollo \textbf{client-server} in cui un server contiene le informazioni ed il client ha due possibili azioni:
+\begin{itemize}
+	\item ricerca di un servizio
+	\item browse dei servizi (lista dei servizi disponibili su un dispositivo)
+\end{itemize}
+Generalmente, master chiede (client), slave rispondono alle richieste (server).\\
+
+\newpage
+
+\subsection{Bluetooth Low Energy BLE}
+
+Ha come \textbf{obiettivi}:
+\begin{itemize}
+	\item ridurre il consumo energetico dei dispositivi
+	\item entrare nel mondo degli smart sensor (di solito difficilmente ricaricabili, quindi da fare il meno possibile)
+	\item semplificare il sistema di comunicazione (l'inquiry è complicato)
+	\item compatibile con più dispositivi Bluetooth
+\end{itemize} 
+
+Introduce \textbf{nuove funzionalità}: prima l'unica struttura possibile era master-slave, ma non bastava più per gli usi possibili del Bluetooth. Si aggiungono \textbf{altre strutture} di comunicazione:
+\begin{itemize}
+	\item \textbf{Broadcast}: più flessibile, chi è in range ascolta un broadcaster
+	\item \textbf{Mesh}: struttura meno rigida, ogni dispositivo connesso a molteplici altri
+\end{itemize}
+
+Poi si aggiungono funzionalità di \textbf{positioning}: 
+\begin{itemize}
+	\item rilevare la \textbf{presenza} di un dispositivo
+	\item rilevare la \textbf{distanza}
+	\item rilevare la \textbf{direzione} dal dispositivo
+\end{itemize}
+
+Si tiene la stessa banda ISM, ma i canali sono 40 al posto che 79, rendendoli più resistenti ad interferenza (anche se abbassando il data rate). \\
+
+\newpage
+
+\subsubsection{Architettura}
+\begin{center}
+	\includegraphics[width=0.8\linewidth]{img/wpan/blearch}
+\end{center}
+
+I livelli fisici cambiano in quanto è cambiata la trasmissione radio. Eccetto i primi 2, il resto è "equivalente" all'architettura del 2.1, con qualche modifica ovviamente.
+%Spiega i protocolli?
+
+\subsubsection{Classi di potenza}
+\begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\textbf{Power Class} & \textbf{Max Output Power ($P_{\text{max}}$)} & \textbf{Min Output Power$^1$} \\
+		\hline
+		1   & 100 mW (+20 dBm)  & 10 mW (+10 dBm)  \\
+		1.5 & 10 mW (+10 dBm)   & 0.01 mW (-20 dBm) \\
+		2   & 2.5 mW (+4 dBm)   & 0.01 mW (-20 dBm) \\
+		3   & 1 mW (0 dBm)      & 0.01 mW (-20 dBm) \\
+		\hline
+	\end{tabular}
+\end{center}
+La perdita di potenza (il minimo è minore) sono parzialmente "controbilanciate" dallo spettro più ampio che permette una migliore ricezione.
+
+%\newpage
+
+\subsubsection{BLE Radio (PHY)}
+
+Non cambia lo spettro, sempre $2.4GHz$ ISM, ma viene diviso in 40 canali, dei quali 37 usati per data packets, mentre gli ultimi sono usati come \textit{advertising}.\\
+
+La sequenza di FH è determinata dalla formula
+\begin{center}
+	\texttt{channel = (curr\_channel + hop) mod 37}
+\end{center}
+il valore di "hop" è il "segreto" su cui fare viene fatto hopping. \\ 
+
+Con la Gaussian Frequency Shift Keying (GFSK) con rate di modulazione si raggiunge $1Mbps$.\\
+
+\subsubsection{BLE State Machine}
+\begin{center}
+	\includegraphics[width=0.6\linewidth]{img/wpan/blestate}
+\end{center}
+Tutti partono dallo standby.\\
+
+\paragraph{Advertising:} usa i canali di advertising per farsi conoscere, non è più il master che cerca per creare la piconet, ma è lo slave che si annuncia. \\
+
+\paragraph{Initiating:} Lo stato in cui vengono ascoltati i messaggi di advertising.\\
+
+\paragraph{Isochronous Broadcasting:} broadcasting periodico (isocrono) per emettere delle informazioni.\\
+
+\paragraph{Scanning:} Il dispositivo si mette in ascolto.\\
+
+\newpage
+
+\subsubsection{Advertising}
+\begin{center}
+	\includegraphics[width=0.85\linewidth]{img/wpan/bleadvert}
+\end{center}
+
+Ogni certa quantità di tempo viene inviato un \textbf{advertising event}, su uno o più dei canali di advertising. Il tempo tra un advertising event e l'altro è determinato da:
+\begin{center}
+	\texttt{T\_advEvent = advInterval + advDelay}
+\end{center}
+Dove
+\begin{itemize}
+	\item \texttt{advInterval} è un intero multiplo di $625 \mu s$ nel range $20 ms$ - $10,24s$ ed è determinato in base all'uso del dispositivo (per esempio, un sensore della temperatura non ha bisogno di inviare dati spesso quanto un accelerometro); il rate di invio determina il consumo della batteria
+	\item \texttt{advDelay} è un valore psudo-random nel range $0$-$20ms$ (per evitare sovrapposizioni, sempre multiplo di $625 \mu s$)
+\end{itemize}
+
+\subsubsection{Generic Attribute Profile GATT}
+Viene gestito dal modulo GATT all'interno dell'architettura, permette uno scambio di dati strutturato tra server, che offrono servizi tramite profili (e.g., fascia che misura la frequenza cardiaca avrà un Heart rate profile) e client che richiedono (e.g., smartphone che chiede la frequenza cardiaca). Ogni profilo ha i suoi dati e caratteristiche associate. Il ruolo di server o client non è fisso, può cambiare dinamicamente in base alla necessità.\\
+
+\newpage
+
+\subsubsection{General Access Protocol GAP}
+Un'applicazione, in base al suo scopo, può decidere uno dei "ruoli fondamentali" definiti dal GAP:
+\begin{itemize}
+	\item \textbf{Broadcaster}: spedisce pacchetti di advertising. Trasmissione di dati connectionless come eventi di advertising
+	\item \textbf{Observer}: riceve advertising packet. Ricezione di pacchetti connectionless
+	\item \textbf{Peripheral}: un peripheral device opera in slave (advertiser) mode a livello di Link Layer
+	\item \textbf{Central}: un device opera in master (initiator) mode a livello di Link Layer
+\end{itemize}
+
+\paragraph{Creazione di una Connessione Unicast (peer to peer):} Host A sarà il master, B lo slave.
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/wpan/bleunicast}
+\end{center}
+In questo caso è il \textbf{master che ascolta} ed il dispositivo slave è un advertiser, vuole essere trovato dal master mandando advertising packets undirected (diretti a "nessuno"), vogliono solo dire ad un initiator che c'è \textit{qualcuno} che vuole collegarsi. Vengono inviati sui 3 canali di advertising, di conseguenza il master ascolterà sugli stessi canali.\\
+
+Una volta che il master "sente" il messaggio, invierà una connection request nello slot di tempo successivo (si mantiene sempre il TDD, sappiamo che nello slot di tempo successivo all'invio il dispositivo starà aspettando). Nella connection request ci sono anche le informazioni per il FH. Dopo la richiesta di connessione si passa a master e slave per la trasmissione.\\
+
+\paragraph{Connessione Broadcast:} Si può anche avere una connessione "broadcast", non peer to peer, in cui abbiamo un broadcaster, che non ha interesse ad avere un master, vuole solo inviare dati.
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/wpan/blebroadcast}
+\end{center}
+Gli observer (quelli che ascoltano) saranno tutti i dispositivi all'interno del range di comunicazione.\\
+
+%imgs s61, 62?
+\paragraph{Passive scanning:} Lo scanner ascolta passivamente e periodicamente sui canali di advertising (solo passivo). \\
+
+\paragraph{Active scanning:} Sempre e solo usando i canali di advertising, lo scanner ascolta sul canale per poi richiedere dei dati tramite scan request (e di conseguenza otterrà la response). Quest'ultima parte è unicast con il dispositivo di broadcast.\\
+
+%Fine slide 2
+
+%End L7
