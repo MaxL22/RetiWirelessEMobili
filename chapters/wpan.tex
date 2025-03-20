@@ -501,3 +501,267 @@ Gli observer (quelli che ascoltano) saranno tutti i dispositivi all'interno del 
 %Fine slide 2
 
 %End L7
+
+%Slide 3
+\subsection{ZigBee}
+Sempre sotto 802.15, gli standard sono IEEE quindi siamo a livello fisico e data link.\\
+
+I requisiti richiesti a ZigBee sono: 
+\begin{itemize}
+	\item Affidabilità
+	\item Basso costo
+	\item Lunga durata della batteria (molto più che Bluetooth)
+	\item Bassa complessità
+	\item Utilizzo delle bande ISM ($2.4GHz$ Worldwide \& $915 MHz$/ $868MHz$ in base alla zona)
+	\item Scalabilità (possibile un alto numero di nodi), con diversi possibili strutture
+	\item Interoperabilità tra vendors
+	\item Sicurezza
+\end{itemize}
+
+Gli utilizzi sono principalmente in ambiti di domotica, IoT, monitoring, ma possono essere i può svariati, qualunque ambito richieda comunicazione di "pochi" dati tra più dispositivi con un basso consumo di energia.\\
+
+Topologie di rete
+Sono possibili più tipologie di rete: stella, albero, mesh.
+\begin{center}
+	\includegraphics[width=0.5\linewidth]{img/wpan/ztopology}
+\end{center}
+
+Si introducono topologie multi-hop, quindi serve avere del routing.\\
+
+\newpage
+
+Ci sono due macro classi di nodi: 
+\begin{itemize}
+	\item \textbf{Full Function Device FFD}
+	\item \textbf{Reduced Function Device RFD}
+\end{itemize}
+Il nome è abbastanza autoesplicativo, tra i FFD c'è un solo coordinatore (ZigBee Coordinator) ed uno o più Router, i quali possono fare instradamento. Gli end device sono (solitamente) RFD, non possono fare routing, possono solo comunicare e ricevere dati verso il coordinatore/loro router di competenza (questi sono sensori, raccolgono dati/piccole azioni).\\
+
+Quindi i dispositivi possono fare da:
+\begin{itemize}
+	\item \textbf{Coordinator} (PAN coordinator) FFD: unico all'interno della rete, la crea e ne mantiene le informazioni (es. chiavi di sicurezza)
+	\item \textbf{Router} FFD: nodi che hanno la capacità di inoltrare dati tra i dispositivi ZigBee
+	\item \textbf{End device} RFD: da punto di vista di rete possiedono solo la funzionalità di parlare ad un router/coordinatore; ridotta complessità ed elevato risparmio energetico
+\end{itemize}
+
+\paragraph{Tipologie di invio dati:} Ci sono diverse possibili tipologie di dati, in base al caso d'uso: 
+\begin{itemize}
+	\item \textbf{Dati periodici}: invio dopo un intervallo di trasmissione fissato (es: sensori per misurare qualcosa)
+	\item \textbf{Dati intermittenti (asincroni)}: i dati vengono comunicati in base ad un evento (es: qualsiasi tipo di attuatore come un interruttore)
+	\item \textbf{Dati ripetitivi e a bassa latenza}: allocazione di time slot (es: mouse)
+\end{itemize}
+
+\newpage
+
+\paragraph{Architettura:} L'architettura di ZigBee si presenta come:
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/wpan/zarch}
+\end{center}
+
+\subsubsection{Livello Fisico 802.15.4 (PHY)}
+Lo standard 802.15.4 specifica la tipologia di modulazione e spread spectrum per le 3 bande
+\begin{center}
+	\renewcommand{\arraystretch}{1.5}
+	\resizebox{\textwidth}{!}{  % Resize table to fit page width
+		\begin{tabular}{|>{\centering\arraybackslash}p{2.5cm}|>{\centering\arraybackslash}p{1.8cm}|
+				>{\centering\arraybackslash}p{2.5cm}|>{\centering\arraybackslash}p{2.5cm}|
+				>{\centering\arraybackslash}p{2.5cm}|>{\centering\arraybackslash}p{2.5cm}|
+				>{\centering\arraybackslash}p{1.8cm}|}
+			\hline
+			\textbf{Banda} & \textbf{\# Canali} & \multicolumn{3}{c|}{\textbf{Spread Spectrum}} & \multicolumn{2}{c|}{\textbf{Data rate}} \\ 
+			\hline
+			& & \textbf{Tipo} & \textbf{Chip Rate (chip/s)} & \textbf{Modulazione (dei chip)} & \textbf{Symbol rate} & \textbf{Bit rate} \\ 
+			\hline
+			868-868.6 MHz & 1 & DSSS \newline 1bit → 15 chip (max) & 300.000 & BPSK \newline 1 chip & 20 ksym/s & 20 kb/s \\ 
+			\hline
+			902-928 MHz & 10 & DSSS & 600.000 & BPSK \newline 1 chip & 40 ksym/s & 40 kb/s \\ 
+			\hline
+			2400-2483.5 MHz & 16 & DSSS \newline 4 → 32 chip \newline (16 sequenze di 32 chip quasi ortogonali) & 2.000.000 & O-QPSK \newline 2 chip & 62.5 ksym/s \newline (1 simbolo di 32 chip → 4 bit) & 250 kb/s \\ 
+			\hline
+		\end{tabular}
+	}
+\end{center}
+
+Si usa multiplexing su canali all'interno della banda, spread spectrum DSSS per la comunicazione. Si può notare che i data rate sono molto limitati, ma i dati generalmente trasferiti da sensori/casi d'uso di ZigBee sono anch'essi abbastanza ridotti.\\
+
+\subsubsection{Livello Data Link 802.15.4 (MAC)}
+
+Questo livello si occupa di:
+\begin{itemize}
+	\item Gestire l'invio dei beacon (se il dispositivo è PAN Coordinator)
+	\item Sincronizzazione con i beacon del coordinatore (router \& end device)
+	\item Associazione/dissociazione alla Pan ascoltando i beacon
+	\item Accesso al canale tramite CSMA/CA
+	\item MAC Address (16 o 64 bit)
+	\item Gestione del duty cicle del dispositibo
+\end{itemize}
+
+Si possono avere due tipi di trasmissioni: 
+\begin{itemize}
+	\item diretta: dispositivo $\leftrightarrow$ coordinatore
+	\item indiretta: coordinatore $\rightarrow$ dispositivi
+\end{itemize}
+
+\paragraph{Modalità di trasferimento:} Ci sono due modalità
+\begin{itemize}
+	\item \textbf{Unslotted CSMA/CA} senza ausilio di beacon
+	\item \textbf{Slotted CSMA/CA utilizzo di beacon}
+\end{itemize}
+
+\paragraph{Slotted CSMA/CA:} La modalità slotted si fonda sull'invio di \textbf{beacon}. Questi sono inviati dal coordinatore ed eventualmente inoltrati dai router. Il coordinatore invia periodicamente dei beacon per:
+\begin{itemize}
+	\item sincronizzare gli altri dispositivi
+	\item organizzare i periodi di trasmissione per le diverse tipologie di trasmissione (periodiche, asincrone e bassa latenza)
+	\item gestione della trasmissione indiretta: il coordinatore mantiene in una lista le frame non ancora mandate ai dispositivi (poi i dispositivi faranno "Ah devo ricevere qualcosa, ascolterò quello che ha da mandarmi"); nei beacon frame trasmette anche la lista dei dispositivi che hanno frame pendenti (gli dà il permesso di parlare); i dispositivi che ascoltano i beacon sanno se c'è qualcosa per loro
+\end{itemize} 
+
+\newpage
+
+L'organizzazione che il coordinatore ha in mente (solo logica) per la gestione del tempo di comunicazione è definita \textbf{superframe} (sostanzialmente tutto ciò che passa tra un beacon e l'altro).
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/wpan/zsuperframe}
+\end{center}
+La prima metà è un momento di attività, la seconda è di inattività, poi si ripete il duty cycle. Il \textbf{duty cycle} vuol dire che si alternano periodi di attività, in cui la radio è accesa, a periodi di inattività, a radio spenta (momenti in cui non ci sono trasmissioni programmate, quindi è inutile tenere la radio accesa). Per sincronizzare il duty cycle, all'interno di ogni beacon è presente l'informazione su quando sarà il beacon seguente e questo accenderà la radio appena prima.\\
+Se un dispositivo non deve inviare/ricevere niente, spegne la radio fino al superframe successivo.\\
+
+Nello standard c'è una $aBaseSuperframeDuration = 960$ $symbols$, quindi ogni beacon avrà una durata multipla di questa unità base. Due parametri che determinano il duty cycle: 
+\begin{itemize}
+	\item \textbf{Beacon Order BO}: determina il beacon interval 0-14, il quale dura
+	$$ BI = aBaseSuperframeDuration \cdot 2^{BO} symbols $$
+	\item \textbf{Superframe Order SO}: determina la durata del superframe 0-14: 
+	$$ SD = aBaseSuperframeDuration \cdot 2^{SO} symbols $$
+\end{itemize}
+$960$ simboli sono $\sim 15.3 ms$ in banda $2.4 GHz$. Il duty cycle è dato da 
+$$ Duty-Cycle = \frac{2^{SO}}{2^{BO}} $$
+
+Quindi, un sensore, potrebbe accendere la radio per circa $15ms$ per poi spegnere la radio fino alla trasmissione successiva, che potrebbe essere dopo 15 \textit{minuti}. In realtà si riaccende un pochino prima del beacon per tenere conto di una possibile deriva del clock.\\
+
+\paragraph{Beacon Frame:} Un Beacon Frame è composto da
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wpan/zbframe}
+\end{center}
+
+Il campo Superframe Specs è a sua volta diviso in 
+\begin{center}
+	\includegraphics[width=0.75\linewidth]{img/wpan/zssf}
+\end{center}
+
+Dove:
+\begin{itemize}
+	\item Beacon Order: 4 bit per il beacon interval, la frequenza con cui vengono trasmessi i beacon
+	\item Superframe Order: 4 bit, definisce la durata della parte attiva del superframe
+	\item Final CAP: 4 bit, stabilisce dove termina il periodo CAP all'interno della parte attiva
+	\item Battery Life Extension: 1 bit, se a 1 abilita un meccanismo di risparmio energetico
+	\item Riservato: 1 bit
+	\item PAN Coordinator: 1 bit, indica se chi trasmette il beacon è il coordinatore o un router
+	\item Association Permit: 1 bit, indica se altri dispositivi possono associarsi alla rete tramite il dispositivo che trasmette il beacon
+\end{itemize}
+
+\newpage
+
+Gli altri campi all'interno del beacon sono: 
+\begin{itemize}
+	\item Control Frame: specifica il tipo di frame ed altri parametri relativi alle caratteristiche della trasmissione
+	\item Beacon Sequence Number: valore incrementale per identificare il singolo beacon
+	\item Source PAN ID: indica l'ID di rete del dispositivo che trasmette il beacon, identifica l'appartenenza del beacon ad una specifica rete
+	\item Source Address: Indirizzo del dispositivo che trasmette il beacon
+	\item Guaranteed Time Slot (GTS) Field: specifica i time slot riservati per la trasmissione di alcuni dispositivi collision free
+	\item Pending Address Field: indica se il coordinatore ha dati in sospeso per uno o più dispositivi
+	\item Beacon Payload: può contenere informazioni aggiuntive specifiche del livello di rete ZigBee o altre informazioni proprietarie del produttore
+	\item Frame Check Sequence (FCS): campo per il controllo dell'integrità (CRC)
+\end{itemize}
+
+Se un dispositivo legge il GTS e il Pending Address e capisce di "non aver nulla da fare", può spegnere la radio fino al prossimo beacon.\\
+
+Il superframe viene diviso in \textbf{slot con diversi tipi di accesso}:
+\begin{itemize}
+	\item \textbf{Contention Access Period CAP} (valore di default 16): Accesso al canale usando CSMA/CA
+	\item \textbf{Contention Free Period CFP} (da 0 a 7 slot): Intervallo per le comunicazioni con banda riservata tramite Guaranteed Time Slot
+\end{itemize}
+
+\newpage
+
+\paragraph{Slotted CAP CSMA/CA:} Canale a contesa, Carrier Sense Multiple Access con Collision Avoidance. Per capire quando è libero il canale viene fatto un \textbf{Clear Channel Assessment} (CCA) per brevi periodi (8 simboli). Ci sono dei parametri che determinano come questo viene fatto:
+\begin{itemize}
+	\item $NB=$ Numero di Backoff, inizialmente 0, aumenta di 1 se il canale è occupato
+	\item $BE=$ Backoff Exponent, indica il range del periodo di backoff $[0, 2^{BE} - 1]$
+	\item $CW=$ Contention Window, indica il numero di slot liberi consecutivi necessari prima di cominciare a trasmettere
+\end{itemize}
+Ogni contention slot è 20 simboli.\\
+
+Viene scelto un intero casuale nell'intervallo determinato dal $BE$, si aspetta quel numero di contention slot, e poi vengono fatti $CW$ CCA, se dopo gli assessment il canale è libero il dispositivo comincia a trasmettere. I CCA sono ravvicinati tra loro.\\
+
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wpan/zex1}
+\end{center}
+
+Se durante uno dei CCA viene ricevuta la trasmissione di un altro dispositivo viene allargata la finestra del random backoff ("siamo un po' meglio aspettare per essere sicuri"), incrementando $BE$ e $NB$, prima di fare un altro random backoff e tentativi di CCA. Dopo 4 tentativi ($NB=4$) il livello MAC dichiara transmission failure.\\
+
+Se il numero di contention slot in CAP non è sufficiente (ho meno slot rispetto al valore casuale che ho estratto), il conteggio viene interrotto e ripreso al superframe successivo (per evitare che un dispositivo sfortunato non trasmetta mai).\\
+
+In qualsiasi caso, tutta la comunicazione deve terminare prima degli slot GTS, tutto deve essere incluso nel CAP. Se un dispositivo non avrebbe tempo di trasmettere i dati che deve (troppi pochi slot rimanenti), la trasmissione viene rimandata al superframe successivo.\\
+
+Una trasmissione completa diventa:
+\begin{center}
+	\includegraphics[width=0.7\linewidth]{img/wpan/ztran}
+\end{center}
+Tempo di backoff $T_{BO}$, un frame di dati $T_{data}$, un tempo di turn around $T_a$ (aspettare che la radio passi da TX a RX), ricezione dell'ack ed un tempo per chiudere la telecomuncazione $T_{LIFS}$ (long inter-frame space).\\
+
+\paragraph{Unslotted Non Beacon Mode:} Nella modalità senza beacon i dispositivi accedono al canale usando CSMA/CA senza i vincoli di slot. Non c'è sincronizzazione, il tempo è continuo, il controller è più semplice.\\
+
+Sostanzialmente si ripete la fase di backoff e CSMA/CA finché non il dispositivo non riesce a trasmettere. Non essendoci sincronizzazione, tutto ciò che non è end device deve essere sempre attivo (radio sempre accesa, non sapendo quando qualcuno trasmetterà).\\
+
+\newpage
+
+\subsubsection{Livello di rete}
+Il livello di rete (Network Layer) di ZigBee (definito nello standard ZigBee, \textbf{sopra} l'IEEE 802.15.4) si occupa della gestione e del mantenimento della topologia di rete e delle operazioni di routing. \\
+
+In particolare, gestisce formazione della rete, indirizzamento sopra al MAC e la topologia (supportando la riconfigurazione). Dato che ci sono trasmissioni che devono giungere a dispositivi non in connessione diretta è necessario routing, questo viene gestito a livello di rete tramite protocolli di routing mesh come \href{https://en.wikipedia.org/wiki/Ad_hoc_On-Demand_Distance_Vector_Routing}{\texttt{Ad-Hoc On Demand Distance Vector AODV}}.\\
+
+\subsubsection{ZigBee Device Object ZDO}
+Posizionato sopra il livello di rete, definito nello standard ZigBee. Definisce il \textbf{ruolo del dispositivo}, permette la scoperta di nuovi dispositivi e le loro funzionalità. Inoltre fornisce un'interfaccia comune per le applicazioni.\\
+
+Stabilisce come un dispositivo si inserisce nella rete, come scopre gli altri nodi e come gestisce la sicurezza e le funzionalità di base. Ogni nodo ZigBee ha il proprio ZDO che fornisce servizi di gestione e supervisione, rendendo possibile l’interoperabilità fra dispositivi di diversi produttori. \\
+
+\newpage
+
+\subsection{Matter \& Thread}
+%Maybe img s32
+Thread ha il livello fisico e MAC secondo standard 802.15.4, ma sopra usa uno stack
+\begin{center}
+	\includegraphics[width=0.5\linewidth]{img/wpan/thread}
+\end{center}
+\begin{itemize}
+	\item Standard 6LoWPAN, compressione header, supporto a rete mesh
+	\item IP Routing, indirizzamento IPv6, distance vector routing, costi dei link variabili in base a RSSI (Received Signal Strength Indicator)
+	\item UDP
+\end{itemize}
+
+\paragraph{Rete Thread:} Cambiano un po' le capacità dei dispositivi, ci sono: 
+\begin{itemize}
+	\item \textbf{Routing Full Thread Device}: possono essere
+	\begin{itemize}
+		\item \textbf{router}: effettua routing e fornisce servizi di accesso e sicurezza (NoSleep, può essere "degradato" a Router-Eligible End Device REED)
+		\item \textbf{leader}: un router con funzionalità aggiuntive che può eleggere/destituire REED
+	\end{itemize}
+	\item \textbf{Non routing Full Thread Device}: si dividono in
+	\begin{itemize}
+		\item REED
+		\item Full End Device FED, non possono essere eletti router
+	\end{itemize}
+\end{itemize}
+
+\newpage
+
+I Non Routing Minimal Thread Devices sono dispositivi con requisiti HW minori:
+\begin{itemize}
+	\item Minimal End Device (MED): comunica solo con il router genitore e radio sempre attiva
+	\item Sleepy End Device (SED): comunica solo con il router genitore e duty-cycle
+	\item Synchronized Sleepy End Device (SSED): comunica solo con il router genitore e duty-cycle secondo intervalli schedulati
+\end{itemize}
+
+\paragraph{Border router:} Sono dei dispositivi di tipo Full Thread Device che forniscono connettività verso le altre reti con un livello fisico diverso (Wi-Fi, Ethernet, \dots). Offre funzionalità di routing all'esterno della rete thread.\\
+
+%Fine S3
+
+%Fine PAN
