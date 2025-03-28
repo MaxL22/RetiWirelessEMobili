@@ -128,3 +128,69 @@ A e D non si possono sentire in quanto fuori dal rispettivo raggio di copertura.
 \begin{center}
 	\includegraphics[width=0.55\linewidth]{img/wlan/boom}
 \end{center}
+
+Per risolvere, dopo aver fatto carrier sense, il sender invia una \textbf{Request to Send RTS} contenente sorgente e destinazione della richiesta oltre alla durata stimata da RTS ad ack finale. \\
+
+Il RTS viene ricevuto da tutti i terminali nel raggio di copertura del sender, i quali sanno che la richiesta non è per loro e usano le informazioni sul tempo previsto per allocare un \textbf{Network Allocation Vector NAV}, ovvero un tempo nella quale sanno che non potranno trasmettere.\\
+
+Il destinatario, se è libero, risponderà (dopo tempo SIFS, per evitare che comincino altre comunicazioni nel frattempo) con un \textbf{Clear to Send CTS}, contenente sorgente, destinazione ed il tempo rimanente fino alla fine della trasmissione.\\
+
+Il CTS viene ricevuto da tutti i terminali nel raggio di del destinatario, i quali allocheranno un \textbf{NAV} per il tempo indicato nel CTS (ovviamente minore di quello del RTS, è passato del tempo). Vengono a conoscenza del fatto che un altro nodo all'esterno del loro raggio di copertura vuole comunicare con un nodo a loro visibile, quindi non tentano nemmeno di accedere al canale.\\
+
+Dopo che il sender originale ha ricevuto il CTS aspetta SIFS per poi inviare il frame ed aspettare di ricevere l'ack per terminare la trasmissione.
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/wlan/rtscts}
+\end{center}
+
+\paragraph{Frammentazione:} Il canale radio è molto più sensibile ad interferenza e rumore. Considerando la dimensione della frame Ethernet (1522 byte) è molto probabile che ogni frame abbia errori; meglio \textbf{ridurre la dimensione della frame MAC}. Frame LLC viene suddivisa in frammenti più piccoli la cui dimensione è variabile in base alle condizioni del canale.
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wlan/frag}
+\end{center}
+All'interno di ogni frame "frammentato" si inseriscono informazioni riguardo al NAV per i dispositivi non direttamente coinvolti nella comunicazione.\\
+
+La frammentazione e correzione dei dati viene fatta a livello MAC, tra dispositivo e AP, dove il ritardo dovuto alla correzione è minimo. Si potrebbe lasciare la correzione dei dati al livello superiore (TCP), ma sarebbe il destinatario finale e non l'AP ad accorgersi dell'errore, allungando di molto i tempi di ritrasmissione.\\
+
+\subsection{802.11 Con Infrastruttura}
+
+Nel caso più semplice si ha un solo AP con il relativo Basic Service Set BSS, l'insieme di stazioni controllate dal singolo coordinatore. Si può anche avere un Extended Service Set ESS, ovvero un insieme di più BSS interconnessi tramite un sistema distribuito (DS).\\
+\begin{center}
+	\includegraphics[width=0.8\linewidth]{img/wlan/ess}
+\end{center}
+Il portale è un router/bridge che collega il sistema distribuito alla LAN. ESS viene visto come un unico BSS a livello LLC per funzionalità di roaming (muovermi nella rete e rimanere collegato) tra AP diversi (overlapping almeno 10\% per garantire continuità).\\
+
+\subsubsection{Point Coordination Function}
+In presenza di un AP, tutti i frame passano per l'AP. Questo permette di avere \textbf{servizi time-bounded}, con garanzie sul delay, non possibili con DCF (il random backoff non ha garanzie). Nella modalità PCF, l'AP controlla l'accesso al canale radio: 
+\begin{enumerate}
+	\item Tutto il traffico passa dall'AP
+	\item Le stazioni associate ad AP usano DCF con tempistiche SIFS e DIFS per accedere al canale
+	\item AP usa PIFS
+\end{enumerate}
+In questo modo AP riesce ad "impossessarsi" del canale radio prima delle stazioni in attesa.\\
+
+AP manda messaggi periodici ($10$-$100s$) detti \textbf{beacon frame} che sono frame di gestione contenenti
+\begin{enumerate}
+	\item Parametri operativi PHY (bit rate \& Modulation Coding Scheme)
+	\item Sincronizzazione (usato nelle prime versioni 802.11 che usavano FHSS)
+	\item Supporto a PCF con le relative informazioni
+	\item Invito per le nuove stazioni che non sono ancora associate
+\end{enumerate}
+Ovvero, una rete manda dei beacon per "farsi scoprire" e comunicare le proprie caratteristiche per le nuove associazioni.\\
+
+Il tempo è diviso in blocchi (superframe), all'interno dei quali si ha una divisione in due periodi:
+\begin{itemize}
+	\item una parte \textbf{senza contesa} opzionale, ma necessario per servizi time bounded
+	\item accesso \textbf{a contesa} (sempre presente)
+\end{itemize}
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wlan/superframe}
+\end{center}
+Se il canale radio è occupato oltre il limite del superframe il tempo non verrà recuperato (si aspetta).\\
+
+Quindi la PCF ha un funzionamento del tipo:
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/wlan/pcf1}
+\end{center}
+
+Al termine della comunicazione precedente, tutti i dispositivi attendono DIFS ma l'AP aspetta PIFS, quindi prende il lock sul canale prima degli altri, iniziando il periodo senza contesa. In seguito invia il "permesso di trasmettere" per ogni trasmissione necessaria, aspettando SIFS tra una e l'altra (per non rischiare di perdere il lock sul canale). Al termine si manda un Contention Free End per marcare la fine del periodo senza contesa.\\
+
+% End L10
