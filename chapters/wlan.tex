@@ -194,3 +194,139 @@ Quindi la PCF ha un funzionamento del tipo:
 Al termine della comunicazione precedente, tutti i dispositivi attendono DIFS ma l'AP aspetta PIFS, quindi prende il lock sul canale prima degli altri, iniziando il periodo senza contesa. In seguito invia il "permesso di trasmettere" per ogni trasmissione necessaria, aspettando SIFS tra una e l'altra (per non rischiare di perdere il lock sul canale). Al termine si manda un Contention Free End per marcare la fine del periodo senza contesa.\\
 
 % End L10
+
+\subsubsection{Formato Frame MAC}
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/wlan/macframe}
+\end{center}
+In rosso la parte sempre presente, in qualsiasi frame 802.11 sono presenti i campi in rosso. Gli altri sono presenti solo se necessari.\\
+
+I primi 2 byte sono \textbf{Frame Control} FC, il quale contiene:
+\begin{itemize}
+	\item Protocol version: versione del protocollo
+	\item 2 bit di Type
+	\item 4 bit di sottotipo
+	\item To DS/From DS sono bit che indicano se verso o dal Distributed System
+	\item More Fragments MF: indica se c'è frammentazione
+	\item Retry RT se si tratta di una retrasmissione
+	\item Power Management PM per indicare se è attivo il risparmio energetico
+	\item More Data MD se ci solo ulteriori dati
+	\item 2 bit di controllo
+\end{itemize}
+
+Il secondo gruppo di 2 byte contiene o la \textbf{Duration o Connection ID} (D/I). Contengono la durata della trasmissione rimanente (in $\mu s$), per gestire i NAV. Nei frame Power Save Poll contiene l'Association ID del client che chiede informazioni.\\
+
+Poi c'è l'\textbf{indirizzo di destinazione} del frame e \textbf{fino ad altri 3 indirizzi}, che possono esserci in base all'utilizzo, alla fine correzione degli errori. \\
+
+\paragraph{Frame Control:} Per quanto riguarda il tipo, ne esistono 3:
+\begin{itemize}
+	\item \texttt{00} Management
+	\item \texttt{01} Controllo
+	\item \texttt{10} Data
+\end{itemize}
+Sono macro-tipi che possono assumere i frame, per andare nello specifico bisogna guardare il sotto-tipo.  Ad esempio: nei frame di management \texttt{1000} sono i beacon, nei frame di controllo \texttt{1011} è una RTS mentre per i data frame \texttt{0101} indica un CF-Ack.\\
+
+\paragraph{Indirizzi:} Possono esserci \textbf{fino a 4 indirizzi}, il cui significato cambia in base ai valori di To DS e From DS: 
+%tabella s51
+
+\begin{center}
+	\renewcommand{\arraystretch}{1.5}
+	\resizebox{\textwidth}{!}{  % Resize table to fit page width
+		\begin{tabular}{|>{\centering\arraybackslash}m{1cm}|>{\centering\arraybackslash}m{1cm}|
+				>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|
+				>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|
+				>{\centering\arraybackslash}m{2.5cm}|}
+			\hline
+			\textbf{To DS} & \textbf{From DS} & \textbf{Address 1} & \textbf{Address 2} & \textbf{Address 3} & \textbf{Address 4} & \textbf{Caso di utilizzo} \\
+			\hline
+			0 & 0 & \textbf{DA} \newline Indirizzo MAC destinazione & \textbf{SA} \newline Indirizzo MAC sorgente & \textbf{BSSID} \newline della cella/ random se ad hoc & - & Rete ad hoc \newline Rete con infrastruttura singola cella \\
+			\hline
+			0 & 1 & \textbf{DA} \newline Indirizzo MAC destinazione all'interno di BSSID & \textbf{BSSID} \newline della cella a cui la frame è destinata & \textbf{SA} \newline Indirizzo MAC sorgente & - & Frame inviata attraverso DS ad un AP all'interno della cella che possiede BSSID dell'address 2 \\
+			\hline
+			1 & 0  & \textbf{BSSID} \newline della cella destinazione & \textbf{SA} \newline Indirizzo MAC sorgente & \textbf{DA} \newline Indirizzo MAC stazione che sta ricevendo & - & Frame inviata attraverso DS ad un AP di una cella diversa BSSID dell'address 1 \\
+			\hline
+			1 & 1 & \textbf{RA} \newline Indirizzo AP destinazione all'interno di DS & \textbf{TA} \newline Indirizzo AP sorgente all'interno di DS &  \textbf{DA} \newline Indirizzo della stazione che sta ricevendo & \textbf{SA} \newline indirizzo della stazione che sta inviando &  Frame tra AP di celle differenti usando DS \\
+			\hline
+		\end{tabular}
+	}
+\end{center}
+
+\newpage
+
+Le ultime 3 righe fanno riferimento alla casistica in cui sono presenti più celle e serve routing tra di queste. I casi sono:
+\begin{itemize}
+	\item \texttt{01} From DS, verso un AP all'interno della cella, letto nell'indirizzo 2
+	\item \texttt{10} Verso il DS, indico cella e indirizzo di destinazione
+	\item \texttt{11} Da e Verso il DS, devo sapere da dove arriva e dove inviare, oltre che indirizzo originale e finale (routing tra celle)
+\end{itemize}
+
+\subsection{Orthogonal Frequency Division Multiple Access OFDMA}
+
+Si parla di WiFi 6, il quale utilizza OFDMA, sfrutta \textbf{subcarrier per fornire connettività a più dispositivi contemporaneamente}. Prima tutte le sottoportanti erano usate per un dispositivo alla volta (OFDM). Con OFDMA c'è la possibilità di fornire gruppi di canali diversi a dispositivi diversi. \\
+
+Usando OFDM con TDMA potrebbe esserci una situazione tipo
+\begin{center}
+	\includegraphics[width=0.75\linewidth]{img/wlan/tab1}
+\end{center}
+
+E dato che utenti diversi avranno necessità diverse questo potrebbe portare a "sprecare" frequenze. Con OFDMA si può avere un caso tipo
+\begin{center}
+	\includegraphics[width=0.75\linewidth]{img/wlan/tab2}
+\end{center}
+
+Vengono serviti \textbf{più dispositivi allo stesso momento}, gruppi di sottoportanti a dispositivi diversi. Facendo questo si complica lo scheduling, al posto di assegnare solo lo slot di tempo bisogna assegnare scheduling e gruppo di frequenze.\\
+
+Serve definire quanto e in quale modo le frequenze possono essere raggruppate. \textbf{Resource Unit RU}: sono il gruppo di frequenze (solitamente adiacenti) allocabili ad un utente. Assegniamo "blocchi" di risorse ad ogni utente. La dimensione delle RU è variabile e dipende dalla banda disponibile e come l'AP vuole allocare le risorse agli utenti.\\
+
+Le possibili RU per una banda di 20MHz divisa in sottoportanti da 78.125kHz sono 256 e si possono dividere come:
+\begin{center}
+	\includegraphics[width=0.8\linewidth]{img/wlan/ru1}
+\end{center}
+
+Non tutta la banda viene usata, sono presenti intervalli di guardia. Alcune sotto-portanti son usate come \textbf{pilot}, trasmettono un'onda definita nello standard, in modo da poter stimare la qualità del canale e capire come correggere il segnale. Vengono ripetuti "ogni tanto" per rifare la misura.\\
+
+L'AP deve usare frame di controllo: alcuni nuovi con 802.11ax per supportare le nuove funzionalità, altri già presenti nelle precedenti versioni.\\
+
+\newpage
+
+Le informazioni di allocazione delle RU sono usate da PHY e MAC e vengono inviate. Ogni risorsa è identificata da una sequenza unica di 7 bit, ad esempio:
+\begin{center}
+	\includegraphics[width=0.75\linewidth]{img/wlan/tab3}
+\end{center}
+
+Ciascun codice rappresenta un insieme di sottoportanti ed il numero indica il range di sottoportanti usate da quella RU. I codici sono tutti diversi ed ognuno identifica univocamente una RU, tale codice viene usato per indicare al dispositivo che frequenze utilizzare.\\
+Una volta assegnata una risorsa, quelle sopra (nella tabella) non possono essere utilizzate (hanno risorse in comune, e per forza di cose gli insiemi di risorse devono essere mutualmente esclusivi); per il resto si può fare mix and match come è più comodo (non si è limitati ad usare lo stesso "livello" di RU).\\
+
+\newpage
+
+\subsubsection{Downlink DL-OFDMA}
+L'AP ha da trasmettere e conosce la lista dei destinatari, deve inoltre comunicare l'assegnamento delle risorse. 
+\begin{center}
+	\includegraphics[width=0.85\linewidth]{img/wlan/downlink}
+\end{center}
+
+Viene usata una \textbf{Multi-User Request to Send MU-RTS}, un messaggio di controllo che ha il funzionamento di RTS e assegnamento delle risorse. Stiamo dando la possibilità di trasmettere alle stazioni designate all'interno del messaggio, allo stesso tempo indicando alle altre stazioni di allocare il NAV. Le stazioni sapranno le risorse a loro dedicate e rispondono con una CTS, tutte in contemporanea (le frequenze sono ortogonali, non collidono). Per la risposta, ogni stazione ascolta solo la porzione di canale a lei associata. \\
+
+Dopo il termine dei frame i dispositivi non mandano subito l'ack, ma l'AP aspetta SIFS e invia un \textbf{Block Acknowledgement Request BAR} ed i dispositivi rispondono in parallelo con un \textbf{Block ACK}.\\
+Se gli ack fossero immediatamente al termine della trasmissione per ogni dispositivo l'ack potrebbe andare perso se l'AP non è ancora in modalità di ricezione.\\
+
+\newpage
+
+\subsubsection{Uplink UP-OFDMA}
+L'uplink è \textit{meno prevedibile} e bisogna sincronizzare tutti i dispositivi che vogliamo trasmettano contemporaneamente. La trasmissione deve avvenire in modo sincronizzato, dopo aver comunicato ad ogni stazione la risorsa su cui trasmettere; tutto coordinato dall'AP.
+\begin{center}
+	\includegraphics[width=0.85\linewidth]{img/wlan/uplink}
+\end{center}
+
+Ci sono più step:
+\begin{itemize}
+	\item \textbf{Buffer Status Report Poll BSRP}: l'AP chiede chi ha dati da trasmettere, in parallelo; interroga un sottogruppo di stazioni per chiedere chi ha da dire qualcosa
+	\item I dispositivi rispondono con un \textbf{Buffer Status Report BSR}: chi ha da trasmettere risponde con quanto ogni dispositivo deve trasmettere (per l'allocamento delle risorse)
+	\item l'AP \textbf{assegna risorse} in base alle risposte delle stazioni ed invia il \textbf{MU-RTS}, indicando la divisione delle risorse
+	\item Le stazioni rispondono con un \textbf{CTS}
+	\item Poi c'è un \textbf{trigger aggiuntivo} da parte dell'AP, per far sincronizzare i dispositivi ; tutte le stazioni devono trasmettere nello stesso momento (ad esempio, chi è più lontano comincia prima)
+	\item \textbf{Ogni stazione trasmette in parallelo} sulle risorse che gli sono state allocate; chi trasmette meno fa padding
+	\item Infine, se necessario, vengono inviati gli ack; \textbf{multi-station block acknowledgment Multi-STA Block ack} a tutte le stazioni che ne hanno fatto richiesta
+\end{itemize}
+
+% End L11
