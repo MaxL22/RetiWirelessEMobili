@@ -330,3 +330,140 @@ Ci sono più step:
 \end{itemize}
 
 % End L11
+
+\newpage
+
+In banda $2.4GHz$ sono presenti \textbf{14 canali}, ma allo stesso tempo \textbf{non sovrapposti} possono essercene solo \textbf{3}.
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wlan/24bande}
+\end{center}
+Se tutti usassero la stessa sarebbe un casino.\\
+
+Per la banda $5GHz$ la configurazione è 
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wlan/5bande}
+\end{center}
+Per ogni ampiezza di banda si ha una serie di range possibili, ognuno con il proprio identificatore. Nel momento in cui un dispositivo si deve connettere, all'interno del beacon si trova l'informazione sul canale utilizzato. All'interno di questi canali ci sono le sottoportanti.\\
+
+\newpage
+
+\subsection{WLAN Security}
+All'interno di 802.11 sono definite delle feature per la sicurezza. Per definizione il canale radio è \textbf{molto} esposto, tutti possono ascoltare/inviare su un canale intrinsecamente broadcast. Di conseguenza si ha la necessità di cifrare il canale anche a livello di data link.\\
+
+\paragraph{Wired Equivalent Privacy WEP:} Caratteristiche:
+\begin{itemize}
+	\item Algoritmo di cifratura RC4
+	\item Opzionale, non è obbligatorio attivarlo
+	\item Assenza di un sistema di gestione delle chiavi, tutto il traffico era cifrato allo stesso modo (la chiave non è la password wi-fi)
+	\item Tutto il traffico viene cifrato con la stessa chiave
+\end{itemize}
+
+\paragraph{Robust Security Network RSN:} Per sopperire alle lacune di WEP è stato introdotto un emendamento allo standard, 802.11i. Viene definito il RSN, con al suo interno diversi servizi:
+\begin{center}
+	\includegraphics[width=0.7\linewidth]{img/wlan/rns}
+\end{center}
+\begin{itemize}
+	\item \textbf{Access control}: impone l'utilizzo di protocolli di sicurezza e assiste lo scambio delle chiavi
+	\item \textbf{Authentication}: definisce lo scambio tra utente e Authentication Server AS e genera le chiavi temporanee per la comunicazione sul canale radio
+	\item \textbf{Privacy with message integrity}: il payload MAC (LLC PDU) viene cifrato (di più non posso altrimenti non so nemmeno per chi sia il messaggio, l'header MAC deve essere in chiaro) e viene aggiunto al messaggio una parte per il controllo dell'integrità
+\end{itemize}
+%completa maybe
+
+Ci sono più fasi per le operazioni:
+\begin{itemize}
+	\item \textbf{Discovery}: ovviamente il beacon non è cifrato
+	\item \textbf{Authentication}: si evidenziano AP e Authentication Server, il quale può coincidere fisicamente con l'AP o meno.
+	\item \textbf{Key management}: generazione delle chiavi specifiche per il singolo dispositivo
+	\item \textbf{Protected data transfer}: una volta ottenuta la chiave, si comincia la comunicazione cifrata
+	\item \textbf{Chiusura} della connessione
+\end{itemize} 
+\begin{center}
+	\includegraphics[width=0.85\linewidth]{img/wlan/fasop}
+\end{center}
+
+Nella fase di \textbf{discovery}: 
+\begin{itemize}
+	\item AP manda il beacon, il quale fornisce anche i servizi RSN disponibili (la modalità di accesso alla cella)
+	\item La station STA ascolta il beacon e capisce quali sono i servizi RSN che può utilizzare (negoziano le capabilities di ognuno, si decide la policy da utilizzare)
+	\item Associazione AP e STA, arrivano ad un accordo sulle funzionalità di sicurezza da utilizzare. Può anche essere negata, da entrambe le parti
+\end{itemize}
+
+Durante la fase di \textbf{autenticazione} e \textbf{gestione chiavi}: 
+\begin{itemize}
+	\item STA richiede ad AP autenticazione tramite la comunicazione con un Authentication Server AS
+	\item Il server può essere remoto in caso di utilizzo di Extensible Authentication Protocol EAP
+	\item Consegna delle chiavi in modo sicuro e generazione delle chiavi: viene generata una master key (a partire dalla password del WiFi) che viene usata per generare le altre chiavi crittografiche, richieste in seguito (lo standard non definisce come avviene lo scambio, si affida a EAP)
+\end{itemize}
+
+Come vengono \textbf{generate le chiavi}:
+\begin{itemize}
+	\item viene inviato un nonce da AP a Client
+	\item la chiave di sessione $K_S$ viene calcolata dal Client a partire dai MAC address, i nonce e la master key (generata a partire dalla password della rete)
+	\item li client invia il suo nonce, assieme ad un $MIC_S$, ovvero Message Integrity Check, dipendente dalla sessione (quindi dalla session key, in parte)
+	\item l'AP può calcolare la stessa $K_S$ del Client
+	\item L'AP invia la chiave di gruppo $K_g$, cifrandola tramite la chiave $K_S$
+	\item Il Client verifica che l'AP ha la $K_S$ calcolata in modo corretto
+	\item Il Client risponde con un ack, cifrato con la $K_S$
+	\item L'AP verifica che la chiave del Client sia corretta
+\end{itemize}
+\begin{center}
+	\includegraphics[width=0.95\linewidth]{img/wlan/keygen}
+\end{center}
+
+\newpage
+
+\paragraph{Protezione dati:} Lo standard 802.11i considera 2 alternative: 
+\begin{itemize}
+	\item \textbf{TKIP (WPA)}: aggiunge un codice di integrità 64 bit usando MAC di sorgente e destinazione; per la confidenzialità viene usato RC4; cambiamenti solo software rispetto a WEP
+	\item \textbf{CCMP (WPA-2)}: integrità della cifratura tramite cipher-block-chaining; integrità e confidenzialità tramite AES 128 bit
+\end{itemize}
+Tra i due cambia l'algoritmo di cifratura, per il primo non serviva cambiare nulla a livello hardware, per il secondo serve il supporto a Cipher-Block-Chaining CBC con AES.\\
+
+\subsection{WiFi Protected Setup WPS}
+Viene usato per evitare di mettere la password, su alcuni dispositivi in cui può essere comodo. All'interno del protocollo ci sono 3 tipi di dispositivi: 
+\begin{enumerate}
+	\item \textbf{Registrer}: entità che autorizza o revoca una stazione (AP o esterno)
+	\item \textbf{AP}
+	\item \textbf{Enrollee}: la stazione che vuole accedere
+\end{enumerate}
+
+Le \textbf{modalità di attivazione} sono in-band, due opzioni: 
+\begin{itemize}
+	\item \textbf{PIN}: può essere dell'AP da immettere sul dispositivo Enrollee, oppure dell'Enrollee da immettere sull'AP
+	\item \textbf{Push Button}: pressione di un bottone su AP e Enrollee, la procedura rimane attiva per massimo 2 minuti. Associazione FIFO (primo che entra è autenticato)
+\end{itemize}
+
+\newpage
+
+\subsection{802.11e EDCA Enhanced Distributed Channel Access}
+
+Altro emendamento allo standard, per aggiungere EDCA. Quando i livelli superiori richiedono un certo livello di qualità viene migliorato la distribuzione dell'accesso al canale, modificando i parametri: 
+\begin{itemize}
+	\item \textbf{CWMin}: Minima dimensione della contention window (numero random da aspettare)
+	\item \textbf{CWMax}: massimo dimensione della contention window
+	\item \textbf{AIFSN}: numero di SIFS+N slot time; definisce la lunghezza del tempo di attesa; il $+2$ è il minimo, equivalente a DIFS in totale (per definizione di DIFS)
+	\item \textbf{Max TXPO}: massimo tempo nel quale una stazione può trasmettere più frame senza rilasciare il canale; quanto tempo la stazione può tenere il canale (0 vuol dire senza limite)
+\end{itemize}
+
+\begin{tabular}{|l|c|c|c|c|}
+	\hline
+	\textbf{Access Category} & \textbf{CWmin} & \textbf{CWmax} & \textbf{AIFSN} & \textbf{Max TXOP} \\ 
+	\hline
+	Background (AC\_BK) & 15 & 1023 & 7 & 0 \\ 
+	\hline
+	Best Effort (AC\_BE) & 15 & 1023 & 3 & 0 \\ 
+	\hline
+	Video (AC\_VI) & 7 & 15 & 2 & 3.008ms \\ 
+	\hline
+	Voice (AC\_VO) & 3 & 7 & 2 & 1.504ms \\ 
+	\hline
+	Legacy DCF & 15 & 1023 & 2 & 0 \\ 
+	\hline
+\end{tabular}
+
+Si può vedere come per lo streaming video, e ancora di più per la voce, che la contention window viene ridotta, così come il tempo di attesa, ma il tempo massimo in cui possono occupare il canale è limitato. Si può notare inoltre come le contention window siano mutualmente esclusive, effettivamente creando un "ordine di priorità" voce, video, poi il resto.\\
+
+Si tratta di una definizione più granulare delle politiche di accesso al canale in contesa, permettendo di ridurre i tempi per le applicazioni che ne necessitano.\\
+
+%Mancano ultime slide, poi cambio
+%End L12
