@@ -1,6 +1,7 @@
 % !TeX spellcheck = it_IT
 
-\section{Wireless Local Area Network WLAN}
+%\section{Wireless Local Area Network WLAN}
+\section{WiFi 802.11}
 Lo standard considerato da adesso è 802.11. I requisiti generali sono: 
 \begin{itemize}
 	\item Throughput maggiore possibile
@@ -419,6 +420,8 @@ Come vengono \textbf{generate le chiavi}:
 \end{itemize}
 Tra i due cambia l'algoritmo di cifratura, per il primo non serviva cambiare nulla a livello hardware, per il secondo serve il supporto a Cipher-Block-Chaining CBC con AES.\\
 
+Per la sicurezza: il segreto sta nella master key (il resto sarebbe pubblicamente accessibile), il presupposto è che l'attaccante non ne sia a conoscenza. Nelle varie versioni di EAP cambia il metodo con cui la chiave viene generata, per mantenere valido questo presupposto. Attacchi di tipo \href{https://it.wikipedia.org/wiki/Attacco_man_in_the_middle}{\texttt{MitM}} vengono evitati grazie ad integrity check e nonce.\\
+
 \subsection{WiFi Protected Setup WPS}
 Viene usato per evitare di mettere la password, su alcuni dispositivi in cui può essere comodo. All'interno del protocollo ci sono 3 tipi di dispositivi: 
 \begin{enumerate}
@@ -467,3 +470,29 @@ Si tratta di una definizione più granulare delle politiche di accesso al canale
 
 %Mancano ultime slide, poi cambio
 %End L12
+
+\subsection{802.11p \& Wave - V2V}
+
+Si tratta di un WiFi "veicolare", rientra nelle \textbf{Dedicated Short-Range Communications DSRC} (con la banda dedicata $5.9GHz$). Serve per la comunicazione ad-hoc tra veicoli usando banda unlicensed.\\
+
+Si tratta di una soluzione specifica per il caso specifico: 
+\begin{itemize}
+	\item Rete \textit{altamente} dinamica
+	\item Supporto alla guida autonoma (alert, dati sensori, ecc.; scambiati tra veicoli)
+	\item Associazione veloce (rete molto dinamica, non c'è troppo tempo)
+	\item Supporto per servizi critici, come collisione (20ms), pedaggi (50ms), servizi a bordo strada (500ms), quindi con tempi anche molto ridotti
+	\item Supporto infotainment
+\end{itemize}
+
+\paragraph{Wireless Access for Vehiular Environment WAVE:} Si tratta di un protocollo specifico per la situazione descritta, include una parte "normale" per il trasferimento di dati (TCP e famiglia), ma è presente anche una parte dedicata ai servizi necessari nell'ambito veicolare.
+\begin{center}
+	\includegraphics[width=0.6\linewidth]{img/wlan/wave}
+\end{center}
+
+Tutto lo stack si poggia sullo stesso standard IEEE (livello MAC e PHY), quindi viene usato l'emendamento 802.11e, che permette di gestire meglio diverse priorità a livello MAC.\\
+
+Il canale fisico (802.11p) usa la banda $5.9GHz$ e permette diverse modulazioni e coding rate in base al range e quantità di informazioni richieste. Solitamente viene usato $QPSK 1/2$.\\
+
+L'associazione deve essere molto veloce, quindi non sono previsti RTS e CTS.\\
+
+%End slide WLAN1
