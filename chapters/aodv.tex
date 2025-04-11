@@ -99,7 +99,9 @@ Il SN viene confrontato per capire \textit{chi ha l'informazione più aggiornata
 
 \newpage
 
-\paragraph{RREQ Formato:} Il formato di una RREQ è 
+\subsection{RREQ}
+
+\paragraph{Formato:} Il formato di una RREQ è 
 \begin{verbatim}
 	 0                   1                   2                   1
 	 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -145,7 +147,6 @@ Il \textbf{Destination IP Address} è l'indirizzo della destinazione ed il SN in
 \end{itemize}
 
 \subsubsection{Expanding Ring Search}
-
  Vogliamo evitare di propagare "inutilmente" una RREQ in tutta la rete, magari la destinazione è vicina. Il TTL dell'header IP viene usato per impostare il massimo numero di hop che una RREQ può fare.\\
 
 Si hanno dei parametri:
@@ -176,3 +177,178 @@ Quando un nodo riceve un messaggio RREQ:
 \end{itemize}
 
 %End L13
+
+Se il nodo intermedio non può rispondere con RREP (anche per flag \texttt{D}) allora deve inoltrare RREQ ai vicini. Per farlo, modifica il messaggio RREQ:
+\begin{itemize}
+	\item incrementa di 1 Hop Count
+	\item il SN della DST (in RREQ) deve essere il massimo tra quello nella richiesta e il SN nella routing table (la richiesta è "vecchia", ho informazioni più nuove)
+	\item manda la RREQ in broadcast (indirizzo IP 255.255.255.255)
+\end{itemize}
+In questo modo, il propagarsi di una richiesta permette ai nodi che la ricevono di costruire un percorso verso l'orig.\\
+
+\subsection{RREP}
+
+\paragraph{Formato:} 
+\begin{verbatim}
+	0                   1                   2                   1
+	0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|     Type      |R|A|    Reserved     |Prefix sz|   Hop Count   |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                     Destination IP Address                    |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                  Destination Sequence Number                  |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                     Originator IP Address                     |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|                           Lifetime                            |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\end{verbatim}
+
+Qua il tipo è 2.\\
+
+Flag:
+\begin{itemize}
+	\item \texttt{A}: acknowledgment richiesto in risposta per prevenire link non affidabili
+\end{itemize} 
+
+Il \textbf{prefix size} viene utilizzato per subnet, indica la lunghezza del prefisso di rete dell'indirizzo IP di destinazione (in bit).\\
+
+Il \textbf{destination IP Address} indica chi ha generato la risposta.\\
+
+Il \textbf{destination Sequence Number} si riferisce al SN più aggiornato della destinazione.\\
+
+L'\textbf{originator IP Address} indica a chi sta rispondendo questa richiesta.\\
+
+\textbf{Lifetime}: determinato da chi crea RREP, millisencondi di validità della risposta.\\
+
+\paragraph{Creazione:} Chi può generare una RREP?
+\begin{enumerate}
+	\item La \textbf{destinazione}
+	\begin{itemize}
+		\item Incrementa il suo SN prima di inviare
+		\item Hop count $= 0$
+		\item Aggiorna la lista dei precursori (chi usa la destinazione stessa come hop)
+		\item Imposta il campo lifetime \texttt{MY-ROUTE-TIMEOUT} (default 6s)
+		\item Invia RREP lungo il percorso reverse (unicast)
+		\item Effettua il drop della RREQ (non viene più inoltrata)
+	\end{itemize}
+	
+	\item Un \textbf{nodo intermedio}: può farlo, ma con delle condizioni:
+	\begin{enumerate}
+		\item Avere una entry con un percorso valido per la destinazione
+		\item Flag \texttt{D == 0}
+		\item DST SN della entry $\geq$ DST SN della RREQ
+	\end{enumerate}
+	Se tutte soddisfatte, allora:
+	\begin{itemize}
+		\item Hop count = valore Hop count della entry (distanza dalla destinazione, al posto dello 0 di prima)
+		\item Aggiorna la lista dei precursori (il nodo a cui sto inviando la RREP userà "me" come hop per arrivare alla destinazione)
+		\item Imposta il campo lifetime in base a quello che ho nella entry (il tempo che rimane nella entry)
+		\item Invio RREP lungo il percorso reverse in unicast
+		\item Drop della RREQ
+		\item Se il flag \texttt{G == 1} allora invio RREP anche alla destinazione (vedi dopo)
+	\end{itemize}
+\end{enumerate}
+
+\subsubsection{RREP Processamento e Inoltro}
+
+Quando un nodo riceve un messaggio RREP:
+\begin{itemize}
+	\item Aggiorna la entry nella tabella se
+	\begin{itemize}
+		\item La entry corrente non è valida
+		\item DST SN della RREP è maggiore di quello della entry
+		\item Il numero di hop è minore rispetto a quello della entry
+	\end{itemize}
+
+	\item Aggiorna
+	\begin{itemize}
+		\item Entry marcata come valida
+		\item Next hop della entry $=$ nodo da cui proviene RREP (destinazione della RREQ)
+		\item Aggiorno RREP hop count, incremento di 1
+		\item Aggiorno campo lifetime della entry
+		\item Aggiorno la lista dei precursori (chi sta usando "me" per raggiungere l'originator)
+	\end{itemize}
+\end{itemize}
+
+Mentre torna la RREP, ogni nodo intermedio crea il path da se stesso alla destinazione originale della RREQ. Ma il percorso "bidirezionale" viene creato solo nella porzione di rete tra il nodo intermedio e l'originator, non anche verso la destinazione.\\
+%Si risolve con G?
+
+Dopo la RREP di un nodo intermedio, dato che la RREQ originale era in broadcast, anche la sorgente (eventually) invierà la sua RREP. Entrambe le RREP torneranno all'originator, probabilmente quella della destinazione arriverà dopo, in qualsiasi caso la migliore viene tenuta (SN maggiore e Hop count minore).\\
+
+\paragraph{RREP a RREQ con flag Gratuitous:} Se un nodo intermedio riceve una RREQ con flag gratuitous attivo, il nodo deve occuparsi di "costruire" il rimanente percorso verso la destinazione della RREQ.\\
+
+Il nodo quindi invia 2 RREP indipendenti
+\begin{enumerate}
+	\item Verso il nodo Origine (che ha creato la RREQ)
+	\item Verso la destinazione della RREQ (Gratuitous), con 
+	\begin{itemize}[noitemsep]
+		\item Hop count = numero hop nella entry verso origine RREQ
+		\item Destinazione = IP origine delle RREQ
+		\item Destinazione SN = SN nella entry verso origine RREQ
+		\item Originator IP = DST della RREQ
+		\item Lifetime = lifetime nella entry verso origine RREQ
+	\end{itemize}
+\end{enumerate}
+
+Serve a "simulare" che la destinazione abbia fatto una reply, finisco di costruire il percorso tra nodo intermedio e destinazione. Mi garantisce che il nodo di destinazione e tutti quelli sul percorso conoscano la strada per arrivare anche all'originator della RREQ iniziale. Come se il nodo destinazione avesse fatto una RREQ verso l'originator (i parametri della RREP sono quelli), completando il path bidirezionale.\\
+
+\subsubsection{Hello Message}
+
+Ogni nodo può indicare informazioni riguardo la propria connettività inviando periodicamente in broadcast degli "hello message" ai propri vicini. Si tratta di un messaggio broadcast con \texttt{TTL = 1} (senza incrementare il SN, lascio quello più recente). \\
+
+Si tratta di una RREP speciale, con i seguenti campi: 
+\begin{itemize}
+	\item DST IP = IP del nodo stesso
+	\item DST SN = SN del nodo stesso
+	\item Hop Count = 0
+	\item Lifetime = \texttt{ALLOWED\_HELLO\_LOSS} * \texttt{HELLO\_INTERVAL}
+\end{itemize}
+
+Si tratta di un meccanismo facoltativo e sono usati solo se non si ricevono altri pacchetti da un vicino, qualunque pacchetto valido può essere usato per aggiornare la "vicinanza" di un nodo.\\
+
+\newpage
+
+\subsection{Mantenimento della Connettività Locale}
+
+Ogni nodo ha come compito tenere traccia della connettività con i nodi indicati come "next hop" nelle entry della tabella di routing.\\
+
+Ci sono diversi meccanismi:
+\begin{enumerate}
+	\item \textbf{Livello data-link}: invio pacchetto RTS/CTS/ACK, in caso di mancanza di CTS/ACK \textit{probabilmente} il link non è più valido
+	\item \textbf{Livello di rete}: la ricezione di qualsiasi pacchetto dal next hop è \textit{un'informazione} (quindi il link è attivo e posso mantenere entry), ad esempio una RREQ con destinazione il next hop, ICMP Echo unicast per il next hop (ping)
+\end{enumerate}
+
+\paragraph{Percorso interrotto/scaduto e cancellazione:} Quando un nodo identifica un link interrotto il quale è parte di un percorso attivo:
+\begin{enumerate}
+	\item Vengono invalidati i percorsi esistenti
+	\item Identifica le destinazioni per le quali viene usato come next hop il link interrotto
+	\item Determina quali vicini possono essere affetti da questo problema (lista dei predecessori)
+	\item A questi vicini invia un messaggio di \textbf{Route Error RERR}
+\end{enumerate} 
+
+\paragraph{Formato RERR:}
+\begin{verbatim}
+	0                   1                   2                   1
+	0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|     Type      |R|A|    Reserved     |Prefix sz|   Hop Count   |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|            Unreachable Destination IP Address (1)             |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|        Unreachable Destination Sequence Number (1)            |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|  Additional Unreachable Destination IP Addresses (if needed)  |
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	|Additional Unreachable Destination Sequence Numbers (if needed)|
+	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\end{verbatim}
+
+Il tipo è 3. 
+
+L'unica \textbf{flag} \texttt{N} indica alla destinazione della RERR di non eliminare la entry (No Delete flag) perché il percorso è stato riparato localmente. Il nodo che invia con il flag \texttt{N} alzato si è reso conto che il link era rotto, ma lo ha anche riparato (non sullo stesso link, altra RREQ, non importa come), quindi chi riceve il RERR sa che c'è una soluzione e potrebbe mantenere il link, anche se potrebbe essere più lungo o simili. Insomma, si era rotto ma ci ha pensato il nodo.\\
+
+Il \textbf{Dest Count} indica il numero delle destinazioni che non sono più raggiungibili contenute in questo messaggio (quanti link si sono rotti); il numero di coppie a 32 bit all'interno del messaggio.\\
+
+%End L14
