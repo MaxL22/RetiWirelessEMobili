@@ -352,3 +352,44 @@ L'unica \textbf{flag} \texttt{N} indica alla destinazione della RERR di non elim
 Il \textbf{Dest Count} indica il numero delle destinazioni che non sono più raggiungibili contenute in questo messaggio (quanti link si sono rotti); il numero di coppie a 32 bit all'interno del messaggio.\\
 
 %End L14
+
+\paragraph{Quando viene inviato un messaggio RERR?} I casi sono:
+\begin{enumerate}
+	\item Viene identificato un link interrotto quando il nodo deve inoltrare pacchetti DATA lungo quel link; qualcuno sta usando il nodo per arrivare alla destinazione
+	\item Se riceve un pacchetto DATA per una destinazione per cui non possiede una entry; chi precedeva nel percorso sta usando informazioni troppo vecchie, si tratta di un errore di rotta, non sa come arrivare alla destinazione
+	\item Se riceve un pacchetto RERR da un vicino per uno o più dei percorsi attivi (informazione contenuta in RERR)
+\end{enumerate}
+
+RRER può essere inviato broadcast/unicast ai vicini (lista predecessori).\\
+
+\subsubsection{RERR Processamento e Inoltro}
+
+Quando un nodo riceve una RERR
+\begin{itemize}
+	\item Marca come invalide le entry delle destinazioni indicate nel RERR
+	\item Ogni entry che viene invalidata viene preservata per un tempo \texttt{DELETE\_PERIOD}
+	\item Inoltro RERR ai predecessori (sempre \texttt{TTL=1}, broadcast/unicast)
+\end{itemize}
+
+\subsubsection{Local Repair}
+
+Se un nodo riceve un pacchetto per una destinazione lungo un percorso interrotto e la destinazione non è "troppo lontana" (dove "lontano" viene definito come \texttt{MAX-REPAIR-TTL=0.3*NET-DIAMETER}). Il nodo che si accorge che "qualcosa non funziona", ma magari si può trovare una soluzione. Il nodo prova a riparare il percorso per quella destinazione.\\
+
+Se altre destinazioni non sono raggiungibili tramite lo stesso link, la riparazione viene fatta solo se arrivano pacchetti (solo se serve, riparazione solo reattiva non proattiva).\\
+
+Per "riparare", il nodo invia una RREQ con un TTL impostato in modo da non raggiungere la sorgente (del pacchetto DATA, l'originator della richiesta che doveva passare sul link rotto), guardando hop count della entry verso la sorgente; i risultati possibili sono:
+\begin{itemize}
+	\item la procedura fallisce: manda RERR
+	\item trova un percorso alternativo: aggiorna la propria entry
+\end{itemize}
+
+Se il percorso trovato è più lungo del precedente il nodo inia un messaggio RERR con il flag \texttt{N} (No Delete) impostato a 1; se più corto tutto a posto, va bene lo stesso. La sorgente deciderà autonomamente se procedere con una nuova RREQ. Sa che la destinazione è più lontana di quanto pensava, deve stabilire se il percorso più lungo è accettabile o meno (la nuova lunghezza può causare problemi? Si tratta di dati real-time?).\\
+
+\subsubsection{Reboot}
+
+Quando un nodo viene acceso per la prima volta o riavviato. Dopo il reboot un nodo può avere informazioni vecchie sullo stato della rete, quindi deve: 
+\begin{itemize}
+	\item Aspettare un tempo \texttt{DELETE\_PERIOD} prima di trasmettere qualsiasi RREQ
+	\item Durante questo tempo \textbf{non inoltra} alcun messaggio
+	\item Se riceve dei pacchetti DATA per altre destinazioni risponde con RERR
+\end{itemize}
