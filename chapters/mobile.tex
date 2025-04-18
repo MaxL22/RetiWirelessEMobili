@@ -41,7 +41,7 @@ Le componenti sono:
 	\item \textbf{Base Transceiver Station (BTS)}:L'elemento principale dell'infrastruttura della rete mobile, gestisce il traffico dati e vocale, coordina i protocolli radio, si interfaccia con la rete di trasporto verso il core network dell'operatore e invia i segnali digitali agli RRH. Al suo interno si trova l'elettronica di baseband (elaborazione del segnale, modulazione/demodulazione, protocolli) e vari componenti di controllo
 \end{itemize}
 
-\subsubsection{Organizzazione Geometrica delle Celle}
+\subsection{Organizzazione Geometrica delle Celle}
 
 Bisogna capire come disporre le celle. I requisiti sono:
 \begin{itemize}
@@ -67,3 +67,284 @@ Questo permette bandwidth maggiore per utenti interni ma richiede un sofisticato
 
 %fino s16
 %End L15
+
+\newpage
+
+\subsubsection{Aumento della capacità per migliorare la scalabilità}
+ 
+Uno degli obiettivi fondamentali delle reti cellulari è servire sempre più utenti utilizzando lo spettro disponibile (costo elevato), evitando di utilizzare ed installare troppe BS. La rete cellulare è formata da celle, e una BS può contenere più celle.\\ 
+
+Una gestione dinamica delle frequenze tra celle vicine permetterebbe il prestito di frequenze, con i relativi costi di sincronizzazione.\\
+
+Si possono aumentare le celle, suddividendole e rendendole più dense in aree con più elevato traffico, ma più celle ci sono più è frequente il cambio di cella (handoff/handover), con il relativo traffico di controllo.\\
+
+\paragraph{Cell sectoring:} Una BS può avere diverse antenne direzionali (al posto di una omnidirezionale) che permettono di creare diverse celle
+\begin{center}
+	\includegraphics[width=0.8\linewidth]{img/mobile/sectoring}
+\end{center}
+
+Sono effettivamente celle diverse, con i relativi problemi di bordo e handover, ma restringere la cella permette di migliorare il data rate. Dare una direzionalità di gain molto alta permette di ridurre il path loss (\textbf{Beamforming}).\\
+
+\newpage
+
+\subsection{Architettura}
+
+L'architettura di una rete cellulare si divide in grosse macro aree: 
+\begin{itemize}
+	\item \textbf{Radio Acces network RAN}: la parte di stazioni e collegamento radio che forniscono collegamento ai dispositivi mobili
+	\item \textbf{Core Network}: la parte centrale responsabile della gestione e del controllo della comunicazione tra utenti e servizi esterni
+\end{itemize}
+\begin{center}
+	\includegraphics[width=0.8\linewidth]{img/mobile/archop}
+\end{center}
+Tutto il core network è rete fissa, fino alle antenne, per poi essere wireless. \\
+%Boh, compl
+Tutte le operazioni delle rete cellulare sono automatiche e non richiedono alcun intervento da parte dell'utente. Si ha una separazione netta tra quelli che sono i canali di controllo, fisici o virtuali. \\
+
+Esistono \textbf{2 tipi di canali} che trasportano 2 tipologie di traffico:
+\begin{itemize}
+	\item \textbf{Canali di controllo}: trasportano tutte le informazioni per la gestione delle operazioni, \textbf{Control Plane} (es. handoff, autenticazione, \dots)
+	\item \textbf{Canali di traffico}: trasportano voce e dati (traffico dei servizi offerti all'utente), \textbf{Data Plane}
+\end{itemize}
+Si ha una divisione Control/Data plane netta ed esplicita.\\
+
+\newpage
+
+\subsection{Operazioni}
+
+\paragraph{Inizializzazione:} Ci sono diverse funzionalità. Si ha una fase di inizializzazione che serve a capire i segnali che vengono ricevuti, il dispositivo utente monitora i segnali delle celle per identificare quella migliore. Periodicamente ogni BS invia dei \textbf{pilot} che permettono al dispositivo di determinare la qualità del segnale di quella cella.\\
+
+Quando un dispositivo vuole iniziare una comunicazione con la rete cellulare:
+\begin{enumerate}
+	\item \textbf{Disponibilità di canali radio con BS}: ascolta le trasmissioni broadcast delle BS per individuare quale cella ha segnale sufficiente, quali canali radio sono liberi e quali parametri di accesso usare
+	\item \textbf{Traffico di controllo per iniziare la comunicazione con MTSO}: viene inoltrata la richiesta di comunicazione, fino al MTSO, che si occupa di autenticare l'utente, verificare permessi e risorse, decidere se e come procedere (Core network)
+	\item \textbf{Creazione dei "collegamenti" su data plane}: se la fase di controllo va a buon fine, vengono allocati i canali fisici e logici necessari per il traffico dati, il dispositivo potrà cominciare a scambiare dati liberamente
+\end{enumerate}
+
+\paragraph{Paging:} L'operazione di pagine è il "cercare" il dispositivo, perché c'è \textit{qualcosa} che deve raggiungerlo. I device non sono sempre attivi nella rete cellulare, quindi potrebbe essere necessario cercarli. Il dispositivo si può muovere in completa libertà, è \textbf{compito della rete} "ritrovare" la posizione quando necessario.\\
+
+MTSO non è sempre a conoscenza della posizione del dispositivo (ovvero la cella a cui è associato), il dispositivo può essere in idle mode (senza una connessione attiva). MTSO quindi contatta le BS delle celle per "trovare" il dispositivo.\\
+
+\newpage
+
+\paragraph{Chiamata accettata:} La chiamata (in realtà i dati, si parla in generale) passa \textbf{sempre} attraverso il core network:
+\begin{itemize}
+	\item Il dispositivo destinatario accetta la chiamata
+	\item MTSO crea un circuito (fino a 3G, da 4G VoIP)
+	\item le BS impostano i canali radio data plane
+\end{itemize}
+
+Durante una chiamata I due dispositivi si scambiano informazioni attraverso le BS a cui sono collegate e MTSO. In realtà, oltre a up e down link, può esistere il side link: un meccanismo che permette di bypassare BS e (in parte) core network per la comunicazione; nasce per scenari Device-to-Device D2D e Vehicle-to-Everything V2X.\\
+
+\paragraph{Handoff:} I dispositivi possono muoversi al di fuori del raggio della cella nella quale hanno iniziato la comunicazione. Serve collegarsi ad un'altra cella; le fasi sono:
+\begin{enumerate}
+	\item Decisione di nuova associazione
+	\item Gestione nuova associazione
+	\item Riconfigurazione percorsi di comunicazione
+\end{enumerate}
+
+Il tutto deve avvenire in maniera \textbf{automatica} e \textbf{senza interruzione della comunicazione} (entro certi limiti della tecnologia, ad esempio meno di 200km/h).\\
+
+\newpage
+
+\subsection{Ambiente}
+
+Il contesto nel quale la rete cellulare opera è molto più dinamico e imprevedibile degli altri scenari wireless. Contesti \textbf{molto eterogenei} e molto complessi. \\
+
+La \textbf{potenza del segnale} deve essere: 
+\begin{itemize}
+	\item sufficiente per offrire un servizio di buona qualità
+	\item non troppo per non creare interferenza
+	\item molto variabile per via degli ostacoli
+\end{itemize}
+
+Il \textbf{fading} (attenuazione del segnale) dipende anche da frequenza e tipo di ambiente.\\
+
+\subsubsection{Deployment}
+
+Gli operatori di rete mobile pianificano con molta attenzione l'installazione delle BS al fine di ottimizzare la rete. Operazione chiamata Network Planning. Questo include:
+\begin{itemize}
+	\item Posizionamento delle BS
+	\item Dimensionamento delle BS
+	\item Rete di trasporto verso MTSO
+	\item Bande da utilizzare (frequenze più basse maggiore copertura, bandwidth limitata, frequenze più alte maggiore bandwidth, minore penetrazione ostacoli)
+\end{itemize}
+
+\newpage
+
+\subsection{Handoff/Handover}
+
+Uno degli aspetti più rilevanti è la \textbf{gestione dell'handover}, ovvero il cambio da una cella all'altra. La procedura può essere decisa in due modi:
+\begin{itemize}
+	\item \textbf{solo dalla rete}: basata sulla misurazione del segnale ricevuto dal dispositivo (uplink)
+	\item \textbf{dispositivo coinvolto nella decisione}: fornisce un feedback sul segnale percepito (downlink)
+\end{itemize}
+Diverse metriche vengono monitorate dalle BS per prendere una decisione, ma il parametro principale per la decisione è la potenza del segnale ricevuta a livello di BS (e dal dispositivo coinvolto).\\
+
+Il metodo più semplice è guardare \textbf{solo la potenza relativa}: l'associazione viene fatta alla BS che ha il migliore segnale. Ma l'handover è una procedura costosa e il segnale potrebbe fluttuare (ad esempio sui bordi della cella), portando all'effetto ping pong, ovvero un cambio continuo tra le BS. Questo può essere parzialmente risolto tenendo sul device uno storico delle BS a cui si è collegato, evitando di ri-collegarsi a BS da cui è stato fatto handover di recente.\\
+
+Il primo miglioramento può essere \textbf{introdurre una soglia}: se il segnale è abbastanza buono (oltre una soglia), perché cambiare? L'handover ora viene effettuato solo nel caso il segnale sia peggiore di un'altra BS ma deve anche essere sotto una certa soglia. Si ha il problema di definire queste soglie, in quanto dipendono da diverse condizioni di contesto.\\
+
+\newpage
+
+Un altro miglioramento è aggiungere \textbf{isteresi}: si tiene un margine, per far partire l'handover deve esserci una differenza significativa di potenza. 
+\begin{center}
+	\includegraphics[width=0.55\linewidth]{img/mobile/isteresi}
+\end{center}
+
+Risolve il Ping-Pong ma rimane il problema che il segnale della prima BS può essere ancora "abbastanza buono". Si possono \textbf{combinare le idee}, per determinare l'handover si usano 
+\begin{itemize}
+	\item \textbf{potenza relativa}: deve essere abbastanza grande
+	\item \textbf{soglia}: il segnale deve essere abbastanza "brutto"
+	\item \textbf{isteresi}: la differenza deve essere significativa
+\end{itemize}
+
+\paragraph{Hard vs Soft Handoff:}
+\begin{itemize}
+	\item \textbf{Hard handoff}:
+	\begin{itemize}
+		\item il dispositivo è associato ad una sola BS alla volta
+		\item cambio immediato di frequenza per agganciarsi alla BS vicina
+		\item protocolli di handoff vicini
+	\end{itemize}
+	
+	\item \textbf{Soft handoff}
+	\begin{itemize}
+		\item il dispositivo mantiene la connettività con entrambe le BS
+		\item il rilascio di una BS quando il segnale è chiaramente dominante
+		\item richiede più risorse in quanto il dispositivo è allocato più volte
+	\end{itemize}
+\end{itemize}
+
+\newpage
+
+\subsection{Duplex}
+Per la gestione del duplex ci sono 2 modalità:
+\begin{itemize}
+	\item \textbf{Frequency Division Duplex FDD}: utilizzo di frequenze diverse per uplink e downlink; minore delay, maggiori risorse richieste
+	\item \textbf{Time Division Duplex TDD}: una sola frequenza sia per uplink che downlink, maggiore ritardo perché bisogna aspettare
+\end{itemize}
+
+\subsection{GSM Mobile Station (MS)}
+
+Si intende un dispositivo, cambia un po' nome attraverso alle generazioni ma sempre terminale finale si intende. In generale la struttura è
+\begin{center}
+	\includegraphics[width=0.65\linewidth]{img/mobile/ms1}
+\end{center}
+
+Ogni dispositivo (solo terminale mobile) possiede un identificativo unico detto \textbf{Internetional Mobile Equipment Identiity IMEI} (15 cifre). Hanno struttura
+\begin{center}
+	%\renewcommand{\arraystretch}{1.4}
+	\begin{tabular}{| >{\centering\arraybackslash}m{3cm} | >{\centering\arraybackslash}m{2cm} | >{\centering\arraybackslash}m{3cm} | >{\centering\arraybackslash}m{2cm} |}
+		\hline
+		\textbf{TAC (6)} & \textbf{FAC (2)} & \textbf{SN (6)} & \textbf{Check digit (1)} \\
+		\hline
+		Type Approval Code, Codice del costruttore & 
+		Final Assembly Code, Luogo costruzione & 
+		Numero seriale & 
+		Numero di controllo di validità del codice \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Identificano a livello mondiale ogni dispositivo mobile.\\
+
+\newpage
+
+\subsubsection{SIM Card}
+
+La SIM contiene informazioni per \textbf{identificare l'utente} (abbonato) e la chiave segreta per autenticazione e generazione chiavi di cifratura, reti preferite e proibite, PIN, PUK, ultime location, ecc.\\
+
+Si hanno diversi formati, di diverse dimensioni, fino a Embedded SIM (eSIM), un chip programmabile all'interno del dispositivo.\\
+
+Ha un \textbf{International Mobile Subscriber Identity IMSI} (diverso dal numero di telefono), il quale identifica una specifica SIM card (max 15 cifre).\\
+
+Il numero di telefono viene chiamato \textbf{Mobile Subscriber Integrated Service Digital Number MSISDN}. Struttura:
+\begin{center}
+	\begin{tabular}{| >{\centering\arraybackslash}m{2cm} | >{\centering\arraybackslash}m{2cm} | >{\centering\arraybackslash}m{4cm} | }
+		\hline
+		\textbf{CC} & \textbf{NDC} & \textbf{Numero} \\
+		\hline
+		Country CODE & Network Destination Code & Numero utente \\
+		\hline
+		+39 & 123  & 1234567 \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Si può avere l'associazione 1:1 tra SIM e numero di telefono, oppure un'associazione 1:N. Funzionalità per la portabilità del numero telefonico. \\
+
+Il campo NDC, dopo l'introduzione della portabilità del numero, non ha più senso, non rappresenta più l'operatore.\\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% STORY TIME %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+%**History Time, Fino 4G**
+%
+%**GSM**
+%
+%Creata all'inizio degli anni '90. Inizialmente la trasmissione dati Circuit Switched.\\
+%%s up to 52
+%
+%Dalle prime versioni di GSM Circuit-Switched si è progressivamete passati a soluzioni basate su Virtual Circuit Switching over IP. Risorse allocate in modo bidirezionale per tutta la durata del servizio.\\
+%
+%Viene stadardizzato da %... s54
+%
+%Come si trasmette? Interfaccia radio tra ... %s55
+%Usa Frequency Division Duplex (FDD) ...
+%
+%%s56
+%Una singola cella può avere estensione fino 35km (anche se molto meno in pratica). 
+%
+%%s57
+%GSM implementa il multiple access usando due tecniche: 
+%1. %...
+%
+%**General Packet Radio Service GPRS \& Enhanced Datarates for GSM Evolution EDGE**
+%
+%La rete GSM è perfetta per trasportaer traffico voce: 
+%* bit rate costante
+%* risorse pre-allocate e riservate (Time slot TDM diverso per ogni utente)
+%* delay costante (time slot TDM)
+%* No overhead %... s59
+%
+%Idonea per gli SMS %s60
+%
+%Ma la rete GSM è idonea per offrire un serviizo dati internet? 
+%%s62
+%Il traffico dati internet ha un data rate variabile e l'interazione è intermittente e a burst. Il sistema circuit-swiched non è ottimale: %....
+%
+%GPRS è una rete a pacchetto (packet switched) realizzata come overlay (RAN) e aggiunta (Core) della rete GSM. Cerca di mantenere fissa la parte di RAN e Core per adattarla all'uso di internet. Permette: 
+%* Data rate per utente di 20kbps
+%* Tariffazione a volume di traffico
+%* Rilascio degli slot in idle (per natura burst del traffico)
+%* "Ridotto" tempo di connessione ad internet (da 20s GSM a 5s GPRS)
+%* La connessione (logica) non viene rilasciata, vengono rilasciati solo i time-slot radio; libera le risorse radio, mantiene l'IP associato
+%* La connessione (logica) è indipendente dalla connessione fisica, la mobilità o la perdita di copertura non interrompe la connessione
+%
+%**GPRS Tunneling Protocol GTP**
+%Il GTP risolve il problema della mobilità per IP: dove invio i paccheti se il dispositivo continua a muoversi? Non è possibile aggiornare le tabelle di routing ad ogni cambio della rete.\\
+%
+%La soluzione è incapsulare il pacchetto, fornire un Tunnel End Point ID TEID, si ha un tunnel ....%compl
+%
+%Realizza un tunnel sopra il livello di trasporto.\\
+%
+%**Universal Mobile Telecommunication System UMTS**
+%La velocità della rete fissa è aumentata, quindi in mobilità si vogliono offrire: %s72 compl
+%
+%Viene cambiata la rete di accesso (UTRAN, UMTS Terrestrial Radio Access Network):
+%* nuovo modello di architettura della BS
+%* nuovo concetto di caale radio (Radio Access Bearer RAB)
+%* Utilizzo di Code Division Multiple Access (CDMA)
+%* Maggiroe %s73
+%
+%%s75
+%
+%Il numero di chip è variabile in funzione della quantità di traffico che deve essere trasmessa e quanti utenti sono connessi.\\
+%
+%%S78 + s79, completa
+%
+%%End L16
