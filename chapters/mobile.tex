@@ -282,69 +282,125 @@ Il campo NDC, dopo l'introduzione della portabilità del numero, non ha più sen
 
 \newpage
 
-%**History Time, Fino 4G**
-%
-%**GSM**
-%
-%Creata all'inizio degli anni '90. Inizialmente la trasmissione dati Circuit Switched.\\
-%%s up to 52
-%
-%Dalle prime versioni di GSM Circuit-Switched si è progressivamete passati a soluzioni basate su Virtual Circuit Switching over IP. Risorse allocate in modo bidirezionale per tutta la durata del servizio.\\
-%
-%Viene stadardizzato da %... s54
-%
-%Come si trasmette? Interfaccia radio tra ... %s55
-%Usa Frequency Division Duplex (FDD) ...
-%
-%%s56
-%Una singola cella può avere estensione fino 35km (anche se molto meno in pratica). 
-%
-%%s57
-%GSM implementa il multiple access usando due tecniche: 
-%1. %...
-%
-%**General Packet Radio Service GPRS \& Enhanced Datarates for GSM Evolution EDGE**
-%
-%La rete GSM è perfetta per trasportaer traffico voce: 
-%* bit rate costante
-%* risorse pre-allocate e riservate (Time slot TDM diverso per ogni utente)
-%* delay costante (time slot TDM)
-%* No overhead %... s59
-%
-%Idonea per gli SMS %s60
-%
-%Ma la rete GSM è idonea per offrire un serviizo dati internet? 
-%%s62
-%Il traffico dati internet ha un data rate variabile e l'interazione è intermittente e a burst. Il sistema circuit-swiched non è ottimale: %....
-%
-%GPRS è una rete a pacchetto (packet switched) realizzata come overlay (RAN) e aggiunta (Core) della rete GSM. Cerca di mantenere fissa la parte di RAN e Core per adattarla all'uso di internet. Permette: 
-%* Data rate per utente di 20kbps
-%* Tariffazione a volume di traffico
-%* Rilascio degli slot in idle (per natura burst del traffico)
-%* "Ridotto" tempo di connessione ad internet (da 20s GSM a 5s GPRS)
-%* La connessione (logica) non viene rilasciata, vengono rilasciati solo i time-slot radio; libera le risorse radio, mantiene l'IP associato
-%* La connessione (logica) è indipendente dalla connessione fisica, la mobilità o la perdita di copertura non interrompe la connessione
-%
-%**GPRS Tunneling Protocol GTP**
-%Il GTP risolve il problema della mobilità per IP: dove invio i paccheti se il dispositivo continua a muoversi? Non è possibile aggiornare le tabelle di routing ad ogni cambio della rete.\\
-%
-%La soluzione è incapsulare il pacchetto, fornire un Tunnel End Point ID TEID, si ha un tunnel ....%compl
-%
-%Realizza un tunnel sopra il livello di trasporto.\\
-%
-%**Universal Mobile Telecommunication System UMTS**
-%La velocità della rete fissa è aumentata, quindi in mobilità si vogliono offrire: %s72 compl
-%
-%Viene cambiata la rete di accesso (UTRAN, UMTS Terrestrial Radio Access Network):
-%* nuovo modello di architettura della BS
-%* nuovo concetto di caale radio (Radio Access Bearer RAB)
-%* Utilizzo di Code Division Multiple Access (CDMA)
-%* Maggiroe %s73
-%
-%%s75
-%
-%Il numero di chip è variabile in funzione della quantità di traffico che deve essere trasmessa e quanti utenti sono connessi.\\
-%
-%%S78 + s79, completa
-%
-%%End L16
+\subsection{Story Time: Prima del 4G}
+
+\subsubsection{Global System for Mobile Communications GSM}
+
+Standard sviluppato all'inizio degli anni '90. Inizialmente la trasmissione dati era di tipo Circuit Switched (principalmente voce, ogni chiamata aveva una linea dedicata).  Riutilizzava tecnologie preesistenti, principalmente per la telefonia fissa, adattate pe rla rete mobile. All'inizio la trasmissione era analogica, dalla seconda metà degli anni '80 la voce comincia ad essere digitalizzata.\\
+
+Dalle prime versioni di GSM circuit-switched si è progressivamente passati a soluzioni basate su Virtual Circuit Switching over IP (da commutazione di circuito a soluzioni IP-based). Si crea un "circuito virtuale" con una connessione logica temporanea su una rate IP. Risorse allocate in modo bidirezionale per tutta la durata del servizio.\\
+
+
+Viene standardizzato dall'ETSI (European Telecommunication Standard Institute), prima a livello europeo, poi mondiale. Si tratta della prima volta in cui sono presenti standard comuni. Da UMTS in poi la standardizzazione è affidata a 3GPP.\\
+
+Come si trasmette? Interfaccia radio tra device e base station è denominata Um ("U mobile", da ISDN). Usa Frequency Division Duplex (FDD), 2 bande attorno ai $900MHz$, $25MHz$ ognuna. Ogni banda è divisa in 125 canali da $200kHz$. \\
+
+Una singola cella può avere estensione fino 35km (teoricamente, molto meno nella pratica). Suddivisione in celle e settori più piccoli permette di aumentare la capacità. Si ha una pianificazione del riuso delle frequenze in base alla posizione delle celle.\\
+
+GSM implementa il multiple access usando due tecniche: 
+\begin{enumerate}
+	\item FDMA (divisione in frequenza): Divide lo spettro disponibile in canali da $200 kHz$, con 125 canali per direzione (Uplink e Downlink, $25MHz$ ciascuno). Tuttavia, non tutti i canali possono essere usati in ogni cella per evitare interferenze tra celle vicine
+	\item TDMA (divisione temporale): ogni canale in frequenza può essere diviso in 8 slot temporali, permettendo l'accesso a 8 dispositivi tramite turni di trasmissione
+\end{enumerate}
+
+La trasmissione duplex non è possibile, i dispositivi devono alternare la trasmissione e la ricezione, richiede tempo. \\
+
+\subsubsection{General Packet Radio Service GPRS \& Enhanced Datarates for GSM Evolution EDGE}
+
+La rete GSM è perfetta per trasportare traffico voce: 
+\begin{itemize}
+	\item bit rate costante
+	\item risorse pre-allocate e riservate (Time slot TDM diverso per ogni utente)
+	\item delay costante (time slot TDM)
+	\item No overhead di informazioni per segnalazione
+	\item Tariffazione a durata (pago minuti/scatti)
+\end{itemize}
+ma anche per trasportare SMS:
+\begin{itemize}
+	\item Servizio delay-tolerant su canale di segnalazione
+	\item Contenuto testuale semplice
+	\item Tariffazione per SMS
+\end{itemize}
+
+Ma la rete GSM è idonea per offrire un servizio dati internet? 
+\begin{itemize}
+	\item Il traffico dati Internet ha un data rate variabile e l'interazione è intermittente e a burst
+	\item Circuit-switched non è ottimale:
+	\begin{enumerate}
+		\item Le risorse pre-allocate sono inutilizzate per molto tempo
+		\item Allocazione fissa non compatibile con traffico dati Internet
+		\item Le risorse non utilizzate sono sprecate e non utilizzabili da altri utenti
+	\end{enumerate}
+	\item La tariffazione a durata non ha molto senso con dati Internet
+\end{itemize}
+
+GPRS è una rete a pacchetto (packet switched) realizzata come overlay (RAN) e aggiunta (Core) della rete GSM. Cerca di mantenere fissa la parte di RAN e Core per adattarla all'uso di internet. Permette: 
+\begin{itemize}
+	\item Data rate per utente di $20kbps$ ($270kbps$ EDGE)
+	\item Tariffazione a volume di traffico
+	\item Rilascio degli slot in idle (per natura burst del traffico)
+	\item "Ridotto" tempo di connessione ad internet (da 20s GSM a 5s GPRS)
+	\item La connessione (logica) non viene rilasciata, vengono rilasciati solo i time-slot radio; libera le risorse radio, mantiene l'IP associato
+	\item La connessione (logica) è indipendente dalla connessione fisica, la mobilità o la perdita di copertura non interrompe la connessione
+\end{itemize}
+
+\subsubsection{GPRS Tunneling Protocol GTP}
+
+Il GTP risolve il problema della mobilità per IP: dove invio i pacchetti se il dispositivo continua a muoversi? Non è possibile aggiornare le tabelle di routing ad ogni cambio della rete.\\
+La connessione logica tra MS e GGSN è identificata da una sessione del protocollo Packet Data Protocol (PDP). MS è libero di muoversi all'interno della rete e possiede un proprio IP unico all'interno della rete (DHCP/NAT) e mantenuto per tutta la durata della sessione.\\
+
+La soluzione è creare tunnel virtuali tra nodi della rete mobile, incapsulare il pacchetto, fornire un Tunnel End Point ID TEID, GTP realizza tunneling sopra al livello di trasporto. \\
+
+\subsubsection{Universal Mobile Telecommunication System UMTS}
+
+La velocità della rete fissa è aumentata, quindi in mobilità si vuole offrire accesso a Broadband Internet, oltre che gestione senza interruzione tra celle UMTS e GSM/GPRS, retro-compatibilità.\\
+
+Viene cambiata la rete di accesso (UTRAN, UMTS Terrestrial Radio Access Network):
+\begin{itemize}
+	\item nuovo modello di architettura della BS
+	\item nuovo concetto di canale radio (Radio Access Bearer RAB)
+	\item Utilizzo di Code Division Multiple Access (CDMA)
+	\item Maggiore banda per canale (da $200kHz$ a $5MHz$)
+\end{itemize}
+
+Vengono separate nettamente le funzionalità di segnalazione tra rete core e RAN:
+\begin{itemize}
+	\item Access Stratum (AS): Responsabile della gestione dei canali radio e della comunicazione tra il terminale e la rete.
+	\item Non-Access Stratum (NAS): Gestisce le funzioni di mobilità, autenticazione e gestione della sessione tra l'utente e la rete core
+\end{itemize}
+
+Inoltre UMTS mantiene la compatibilità con le reti GSM e GPRS esistenti, per non richiedere cambiamenti radicali dell'infrastruttura.\\
+
+\paragraph{CDMA:} Riuso totale delle frequenze, ogni cella usa le stesse frequenze, i codici ortogonali permettono di "eliminare" interferenza. Rispetto a GSM/GPRS, CDMA offre una trasmissione più fluida con latenze ridotte. CDMA è particolarmente resistente alle interferenze multipath. Grazie all'assegnazione di codici unici a ciascun utente, CDMA offre maggiore privacy. Inoltre, si tratta di un sistema altamente scalabile.\\
+
+Il numero di chip è variabile in funzione della quantità di traffico che deve essere trasmessa e quanti utenti sono connessi.\\
+
+Nel sistema GSM/GPRS, i canali erano definiti in base alla loro funzione e la loro posizione nello scheduling era predefinita e statica. Ogni canale aveva un compito specifico e non poteva essere adattato.  In UMTS, invece, i canali radio sono dinamici e vengono definiti attraverso una serie di parametri che ne determinano le caratteristiche. \\
+
+Viene introdotta la nozione di Radio Access Bearer (RAB), cioè un canale radio che viene configurato in base a parametri specifici, tra cui:
+\begin{itemize}
+	\item Classe del servizio: Voce, streaming, interattivo, background
+	\item Velocità massima: Indica la massima capacità di trasmissione del canale
+	\item Velocità garantita: La velocità minima che il sistema assicura per la trasmissione dei dati
+	\item Ritardo: Il tempo di latenza nella trasmissione dei dati.
+	\item Probabilità di errore: Indica la qualità del canale in termini di errore nella trasmissione.
+\end{itemize}
+
+In UMTS ogni canale logico (dati/controllo) ha requisiti diversi, che vengono comunicati al sistema al momento della richiesta di connessione. \\
+
+\subsubsection{HSDPA/HSUPA}
+
+HSDPA è un'evoluzione della rete UMTS che migliora significativamente le velocità di download, ottimizzando l’uso delle risorse radio. Le tecnologie chiave dietro HSDPA sono:
+\begin{itemize}
+	\item Modulazione avanzata: Utilizza principalmente 16-QAM e 64-QAM
+	\item MIMO (Multiple Input Multiple Output): sfrutta più antenne per migliorare la velocità e la stabilità della connessione
+	\item Dual Carrier: Permette l'uso simultaneo di due portanti per raddoppiare la larghezza di banda disponibile.
+\end{itemize}
+
+Le diverse categorie di HS-DSCH (parametro) determinano il numero massimo di HS-PDSCH (High Speed Physical Downlink Shared Channel) utilizzabili simultaneamente e la velocità di trasmissione raggiungibile.\\
+
+HSUPA è complementare a HSDPA (High-Speed Downlink Packet Access) e migliora la velocità in upload. Insieme, queste tecnologie formano HSPA (High-Speed Packet Access).\\
+
+%End L16
+
+\newpage
