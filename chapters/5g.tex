@@ -1,0 +1,113 @@
+% !TeX spellcheck = it_IT
+\section{5G}
+
+Vengono aggiunti \textit{sempre più casi d'uso diversi tra loro}, e quindi il relativo supporto. Ci sono diversi casi d'uso completamente differenti, come ad esempio:
+\begin{itemize}
+	\item Multi-hop communication: comunicazione a più salti tra dispositivi per estendere la copertura e migliorare la connettività, utile in ambienti urbani o in aree remote
+	\item Device-to-device communication and cooperative devices: comunicazione diretta tra dispositivi senza passare dalla rete centrale, per aumentare efficienza e ridurre la latenza	
+	\item Ultra-reliable communication: comunicazioni ad altissima affidabilità, ad esempio per infrastrutture critiche come reti elettriche o trasporti
+	\item Massive machine communication: connessione simultanea di un gran numero di dispositivi IoT, tipico di fabbriche smart, logistica e sensori ambientali	
+	\item Inter-vehicular/vehicular-to-road communication: comunicazioni tra veicoli e tra veicoli e infrastrutture stradali per supportare la guida autonoma e la sicurezza stradale
+	\item Ultra-dense deployments: aree con altissima densità di dispositivi connessi, come uffici o stadi, dove il 5G garantisce prestazioni elevate nonostante l'affollamento.
+\end{itemize}
+Si ampia il range di frequenze: va da $300MHz$ a $300GHz$. Comprende diverse fasce di frequenza.\\
+
+\newpage
+
+\paragraph{Classificazione International Telecommunication Unit ITU:} Secondo l'ITU le applicazioni possono essere classificate in tre principali categorie di utilizzo:
+\begin{itemize}
+	\item \textbf{Enhanced Mobile Broadband (eMBB)}
+	\begin{itemize}
+		\item Servizi orientati alle persone
+		\item Elevata banda
+		\item HD Streaming, AR/VR
+	\end{itemize}
+	\item \textbf{Ultra-reliable and Low-latency communication (uRLLC)}
+	\begin{itemize}
+		\item Servizi orientate alle industrie
+		\item Bassissima latenza e affidabilità
+		\item Controllo remoto, guida autonoma
+	\end{itemize}
+	\item \textbf{Massive Machine Type Communications (mMTC)}
+	\begin{itemize}
+		\item alta densità di connessioni (anche con bassa quantità di dati trasmessi)
+		\item smart cities/smart agriculture
+	\end{itemize}
+\end{itemize}
+
+\begin{center}
+	\resizebox{\linewidth}{!}{\renewcommand{\arraystretch}{1.2}
+		\begin{tabular}{l | l}
+			\textbf{Key Performance Indicator KPI} & \textbf{Minimum Performance Requirement} \\
+			\hline
+			\multirow{2}{*}{Peak Data Rate} & Downlink: 20 Gbps \\
+			\cline{2-2}
+			& Uplink: 10 Gbps \\
+			
+			\hline 
+			\multirow{2}{*}{Peak Spectral Efficiency} & Downlink: 30 bps/Hz \\
+			\cline{2-2}
+			& Uplink: 15 bps/Hz \\
+			\hline
+			
+			\multirow{2}{*}{User-Experienced Rate} & Downlink: 100 Mbps \\
+			\cline{2-2}
+			& Uplink: 50 Mbps \\
+			\hline
+			
+			5th-Percentile User & Downlink: 0.12 bps/Hz $\approx$ 0.3 bps/Hz \\
+			\cline{2-2}
+			Spectral Efficiency & Uplink: 0.045 bps/Hz $\approx$ 0.21 bps/Hz \\
+			\hline
+			
+			\multirow{2}{*}{Average Spectral Efficiency} & Downlink: 3.3 bps/Hz $\approx$ 9 bps/Hz \\
+			\cline{2-2}
+			& Uplink: 1.6 bps/Hz $\approx$ 6.75 bps/Hz \\
+			\hline
+			
+			Area Traffic Capacity & 10 Mbps/m$^2$ (Indoor Hotspot) \\
+			\hline
+			
+			\multirow{2}{*}{User Plane Latency} & 4ms - eMBB \\
+			\cline{2-2}
+			& 1ms - URLLC \\
+			\hline
+			
+			Control Plane Latency & 20ms \\
+			\hline
+			
+			Connection Density & 1'000'000 devices per km$^2$ \\
+			\hline
+			
+			\multirow{3}{*}{Energy Efficiency} & The support for two aspects: \\
+			\cline{2-2}
+			& (1) Efficient data transmission in a loaded case \\
+			\cline{2-2} 
+			& (2) Low energy consumption when there are no data \\
+			\hline
+			
+			Reliability & $1-10^{-5}$ ($99.999\%$) \\
+			\hline
+			
+			Mobility & Up to 500km/h \\
+			\hline
+			
+			Mobility Interruption Time & 0ms \\
+			\hline
+			
+			\multirow{2}{*}{Maximal Bandwidth} & 100 MHz for sub-6 GHz \\
+			\cline{2-2}
+			& 1 GHz for mmWave \\
+			\hline
+	\end{tabular}}
+\end{center}
+
+Le "direzioni" dell'evoluzione per 5G sono: 
+\begin{itemize}
+	\item Maggiore spettro
+	\item Maggiore efficienza spettrale
+	\item Riuso spaziale
+	\item "Softwarizzazione" della rete
+\end{itemize}
+
+%End L19

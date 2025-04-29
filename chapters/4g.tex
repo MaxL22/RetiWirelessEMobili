@@ -570,3 +570,117 @@ Tabella QCI:
 \end{center}
 
 %End L18
+
+\newpage
+
+\subsection{Procedura di Collegamento alla rete operatore}
+
+Cosa succede quando un dispositivo spento (o almeno la radio) si accende. Quando il dispositivo UE viene acceso si trova in uno degli \textbf{stati}: 
+\begin{itemize}
+	\item \texttt{EMM-DEREGISTERED}: EPS Mobility Management EMM non registrato e la sua mobilità non è gestita; all'interno della rete core nessuno gestisce questo dispositivo
+	\item \texttt{ECM-IDLE}: EPS Connection Management: connessione tra UE e MME per il traffico di controllo non attivo
+	\item \texttt{RRC\_IDLE}: Radio Resource Control UE non è connesso a nessun eNodeB; rilascia anche tutti i canali di controllo. Questo stato è quello in cui il dispositivo si trova quando in risparmio energetico
+\end{itemize}
+
+Due \textbf{modalità di selezione} della rete: 
+\begin{itemize}
+	\item \textbf{automatica}: in base alla SIM, la quale contiene country code e network code
+	\item \textbf{manuale}: selezionandola manualmente dall'elenco delle reti operatore presenti
+\end{itemize}
+
+Certe BS possono essere riservate a certi abbonati (femtocella): \textbf{Closed Subscriber Group CSG}. Opzionale, attivata solo in presenza di una femtocella. Viene fatto dopo la selezione della rete a cui collegarsi.\\
+
+L'ultimo passaggio prima di potersi collegare alla BS è la \textbf{scelta della cella} con cui iniziare la procedura di registrazione. Il criterio di selezione si basa su diversi fattori, tra cui: 
+\begin{itemize}
+	\item potenza di trasmissione UE (ci arrivo alla BS?)
+	\item potenza del segnale ricevuto
+\end{itemize}
+
+%Tutto questo prima di inviare dati, sta solo ascoltando, guarda img s120 ca, metti in ordine le operazini
+
+Tutto questo era ancora prima di inviare dati, lo UE ha solo ascoltato.  Adesso Inizia la \textbf{procedura di contesa} per l'\textbf{accesso allo scheduling della cella} selezionata. \\
+
+Dopo aver ottenuto l'accesso, inizia una prima fase di \textbf{configurazione livelli MAC e L1}, configurazione dei canali radio per la trasmissione.\\
+
+A questo punto il dispositivo è all'interno dello scheduling della BS ed ha una connessione alla rete core, quindi lo stato è \texttt{RRC\_CONNECTED}. Non si ha nessuna garanzia sulla procedura di allacciamento alla rete core, per ora si ha solo la connessione con una BS.\\
+
+Si avvia la procedura di \textbf{collegamento tra UE e la rete core} tramite i messaggi di controllo scambiati con l'MME. Prima fase che coinvolge anche la rete core, si usano i protocolli NAS Non Access Stratum.\\
+
+A questo punto lo stato è \texttt{EMM-REGISTERED}, \texttt{ECM-CONNECTED} (se tutto è andato a buon fine).\\
+
+Nel caso UE rimanga inattivo (si scollega per qualsiasi motivo), lo stato non diventa "deregistrato", ma solamente \texttt{RRC\_IDLE} (non bisogna ripetere la connessione completa, troppo lunga).
+
+\begin{center}
+	\includegraphics[width=0.75\linewidth]{img/4g/collop}
+\end{center}
+
+\subsection{Procedure di Handover}
+
+In LTE esiste \textbf{solo hard-handover}, non c'è mai un momento in cui un UE è collegato a due BS contemporaneamente.\\
+
+Si distinguono due classi di handover (sempre hard):
+\begin{itemize}
+	\item \textbf{Seamless handover}: minore latenza, ammette ritrasmissioni; l'obiettivo è non far percepire l'handover, viene fatto nel modo più veloce possibile. Viene usato per cose come Traffico VoIP. Suscettibile al buco di connessione, ma veloce
+	\item \textbf{Lossless handover}: maggiore latenza, riduce la perdita di pacchetti. Tipicamente usato per traffico HTTP/FTP, usato quando la ritrasmissione è lenta e la si vuole eliminare il più possibile.
+\end{itemize}
+
+\paragraph{Lossless handover:} Tipicamente a livello di data link si ha affidabilità (ACK e NACK per i dati trasmessi). Si tratta di un hard handover, quindi ci sarà un momento in cui il device non è collegato a nulla (sta tentando di entrare nello scheduling della BS destinazione). Per evitare di perdere pacchetti in downlink durante questa fase, il flusso di download continuerà a mandare i dati alla vecchia BS (TEID ancora quello vecchio), ma le due eNodeB sanno che è in corso un handover quindi la vecchia BS inoltra tramite X2 tutti i dati di cui non è stato ancora fatto ACK alla BS destinazione che li buffererà per poi inviarli alla fine della procedura di handover. \\
+
+Ci sono dei limiti, entro una certa durata di handover (e di quantità di dati) la prima BS gestisce i dati. Se la procedura dura troppo cade la linea.\\
+
+\newpage
+
+\subsubsection{Handover S1}
+
+Lo UE vuole \textbf{cambiare BS e MME}. Quindi 5 parti (UE, source e target eNodeB e MME). L'handover viene \textbf{deciso lato eNodeB}. Gran parte della procedura coinvolge la rete core: questo per rendere tutto il più possibile trasparente all'UE. Dato che si tratta di hard handover, il passaggio viene effettuato solo una volta che le risorse "dall'altro lato" sono pronte. \\
+
+Passaggi: 
+\begin{itemize}
+	\item Il primo passo è la \textbf{source eNodeB} che notifica la \textbf{richiesta di handover} all'MME che lo gestisce
+	\item Il \textbf{source MME} invia una \textbf{Forward Relocation Request} (c'è da cambiare una connessione) al target MME
+	\item Il \textbf{target MME} contatta il target eNodeB per notificargli la \textbf{richiesta di handover} che riguarda quella BS
+	\item Poi c'è una fase di \textbf{resource setup}: la \textbf{target BS} prepara le risorse per ospitare il futuro UE
+	\item La \textbf{target eNodeB} risponde al suo MME con un \textbf{handover request ACK}
+	\item Il \textbf{target MME} risponde alla \textbf{relocation request} fatta dal source MME
+	\item Il \textbf{source MME} a questo punto invia alla sua BS (source eNodeB) il \textbf{comando di handover}
+	\item La \textbf{BS} inoltra all'UE il \textbf{comando di handover}, contenente tutte le informazioni per cambiare connessione
+	\item La \textbf{source eNodeB} invia il \textbf{trasferimento dello stato} di gestione al suo MME
+	\item Se lossless handover: si ha un collegamento diretto su X2 tra le eNodeB per inoltrare i dati
+	\item Una volta avvenuto il trasferimento dello stato lato core, il \textbf{target MME} dice al target eNodeB le \textbf{informazioni} sul \textbf{trasferimento di stato}
+	\item Lo \textbf{UE} invia la \textbf{conferma dell'handover} al target eNodeB
+	\item Il \textbf{target eNodeB} conferma al suo MME che l'handover è avvenuto con successo (\textbf{handover notify})
+	\item I \textbf{due MME} si scambiano un messaggio di \textbf{Forward relocation complete} e il relativo \textbf{ACK}
+	\item Lo \textbf{UE} invia all'MME l'\textbf{update della tracking area}
+	\item Il vecchio MME dice alla vecchia BS di \textbf{rilasciare le risorse}
+\end{itemize}
+
+\begin{center}
+	\includegraphics[width=0.98\linewidth]{img/4g/hand1}
+\end{center}
+
+Si ha una parte di \textbf{predisposizione delle risorse} sulla rete core, quando è tutto pronto viene mandato il \textbf{comando di handover}, una volta confermato l'handover l'ultima cosa è \textbf{rilasciare le risorse} originali.\\
+
+\subsubsection{Handover X1}
+
+Coinvolge meno la rete core; fatta nel caso in cui \textbf{non bisogna cambiare TA e MME}. \\
+
+\newpage
+
+Passaggi: 
+\begin{itemize}
+	\item Viene \textbf{deciso l'handover}
+	\item La \textbf{richiesta di handover} viene mandata direttamente \textbf{tra source e target eNodeB} (tramite X2)
+	\item Viene fatto il \textbf{setup delle risorse} per la \textbf{target eNodeB}
+	\item Quando è tutto pronto viene mandato un \textbf{ACK} alla source eNodeB
+	\item La \textbf{source eNodeB} manda il \textbf{comando di handover} allo UE
+	\item \textbf{Trasferimento di stato} tra le eNodeB
+	\item Messaggio da \textbf{UE} a target eNodeB di \textbf{handover completato}
+	\item L'ultima cosa è una \textbf{path switch request} (e il suo \textbf{ACK}): cambio dei bearer di livello tra rete core e RAN (cambio TEID)
+	\item Una volta terminata la path switch il nuovo eNodeB dice alla source eNodeB di \textbf{lasciare le risorse}
+\end{itemize}
+
+\begin{center}
+	\includegraphics[width=0.94\linewidth]{img/4g/hand2}
+\end{center}
+
+La procedura è sempre simile: preparazione risorse, comando di handover, se tutto è andato bene rilascio delle risorse originali.\\
