@@ -291,3 +291,172 @@ Per ogni classe di servizio/esigenza viene costruito un overlay di rete ad hoc a
 %End L20
 
 \newpage
+
+\subsection{Architettura}
+
+\subsubsection{LTE CUPS (Control User Plane Separation)}
+
+Un po' di "storia": due release prima di 5G effettivo (Rel-14, 5G è la 16, quindi si parla ancora di LTE, anche se 6 release dopo). 
+\begin{center}
+	\includegraphics[width=0.7\linewidth]{img/5g/ltecups}
+\end{center}
+Si ha una \textbf{separazione} tra \textbf{user plane e control plane} in modo che siano indipendenti l'una dall'altra, permettendo una migliore scalabilità, indipendente tra piano dati e piano di controllo (ognuno dei due piani può essere scalato senza che l'altro vada necessariamente modificato). \\
+
+\subsubsection{Divisione dei Plane}
+In 5G, rispetto le versioni precedenti, si ha un data plane semplificato quasi all'estremo (un solo componente che si occupa del controllo), mentre il control plane prevede una sempre maggior divisione dei compiti su componenti diverse.
+\begin{center}
+	\includegraphics[width=0.9\linewidth]{img/5g/arch}
+\end{center}
+
+Per la parte di comunicazione all'interno del data plane e tra i due piani rimane una comunicazione punto-punto tra i vari componenti. Invece, all'interno del control plane viene usata una \textbf{service-based architecture} con un \textbf{modello publish-subscribe}: ogni componente è una VNF ed ognuna di queste implementa un servizio con API REST. Ogni VNF può consumare una o più API delle altre VNF. Si ha un bus comune di comunicazione tra tutte le VNF.\\
+
+Ogni componente del control plane è una VFN, quindi ognuno può evolvere indipendentemente, ogni VNF può essere (dis)attivata o scalata in base alla necessità. Ci sono tanti "micro-servizi" che svolgono le funzioni precedentemente svolte dal control plane.\\
+
+\paragraph{Control Plane: } All'interno del control plane si trovano
+\begin{itemize}
+	\item \textbf{NRF Network Repository Function}: permette od ogni servizio di registrarsi e rendersi individuabile dalle altre VNF
+	
+	\item \textbf{AMF Access \& Mobility Management Function}: gestisce la maggior parte del traffico di segnalazione per autenticazione, registrazione e mobilità; una delle 3 parti in cui è stato diviso l'MME, gestisce una parte delle funzionalità precedentemente svolte dall'MME ma non gestisce dati di sessione (compito dell'SMF)
+	
+	\item \textbf{SMF Session Management Function}: Gestisce il controllo relativo alla creazione di sessioni dati; permette di creare delle sessioni user plane; unico che comunica con l'unica funzionalità core del data plane (ovvero la User Plane Function UPF)
+	
+	\item \textbf{UDM Unified Data Management Function}: fornisce un front-end unico per tutti i dati che ciascuna funzionalità di rete può richiedere; ogni NF può aver bisogno di dati diversi (strutturati, non-strutturati, semi-strutturati); qualsiasi NF che richiede un qualche tipo di database effettua le richieste di dati qua
+	
+	\item \textbf{PCF Policy Control Function}: effettua la parte di gestione e controllo delle politiche di accesso/mobilità in rete e di utilizzo dello user plane (prima dato alle PCRF)
+	
+	\item \textbf{AUSF Authentication Server Function}: gestisce tutto ciò che riguarda l'autenticazione e la generazione delle chiavi di cifratura
+	
+	\item \textbf{NSSF Network Slice Selection Function}: la funzione che dice quale può essere la slice migliore e consentita per un determinato servizio richiesto da un determinato utente
+	
+	\item \textbf{NEF Network Exposure Function e AF Application Function}: per integrare e permettere di utilizzare più informazioni; la NEF espone all'esterno della rete delle funzionalità, la AF permette all'applicazione di rendersi visibile all'interno della rete core; permettono alla rete e alle applicazioni/servizi esterni di dialogare tra loro esponendo funzionalità
+\end{itemize}
+
+
+\paragraph{User Plane:} Semplificato, rispetto alle release precedenti: 
+\begin{itemize}
+	\item \textbf{UE User Equipment}
+	\item \textbf{RAN}: composta da gNodeB (per distinguerla dalle precedenti principalmente), gestisce la parte radio (link allo UE)
+	\item \textbf{UPF User Plane Function}: unica componente dello user plane, si occupa dell'inoltro dei pacchetti utente da/verso l'esterno (DN); il loop con interfaccia N9 permette routing tra da data network
+	\item \textbf{DN Data Network}: rete esterna
+\end{itemize}
+
+\paragraph{Protocol Data Unit PDU:} I pacchetti utente viaggiano all'interno di una connessione end-to-end sullo user plane chiamata PDU session. La sessione va da uno UE a uno specifico DN. Connessione dal device alla rete esterna (DN). Al di sopra di ha il livello applicativo, al di sotto uno stack (idealmente) IP-MAC-PHY.\\
+
+Lo stack di protocolli lato user plane rimane simile a quello 4G (con le necessarie modifiche per la PDU).
+
+\paragraph{Multiple PDU Sessions:} Un singolo UE può avere più connessioni attive, verso diverse data network, attraverso diverse UPF. Viene utilizzata una UPF per ogni collegamento.
+
+\paragraph{Interfaccia N9:} Permette di connettere tra loro più UPF e fare routing verso altre data network. Per fare ciò si usa un ulteriore UPF che classifica il traffico in downlink: chiamata \textbf{ULCL (UpLink CLassifier)}, questa viene configurata apposta per classificare il traffico in uplink di ciascun dispositivo, permettendo di fare routing verso la corretta Data Network in modo trasparente all'utente.\\
+
+\newpage
+
+\subsubsection{Network Slices}
+
+Si espandono le funzionalità dei TTF in 4G, i quali permettevano \textit{solo} la configurazione di alcuni parametri di rete. Le \textbf{Network Slices 5G} permettono di \textbf{classificare diversi casi d'uso} e per ciascuno si hanno diversi siti (a livello di distanza rispetto all'utente)
+\begin{center}
+	\includegraphics[width=0.97\linewidth]{img/5g/slicing}
+\end{center}
+
+Permette non solo di stabilire le \textbf{caratteristiche del servizio}, ma specifica anche la \textbf{composizione delle NF che permettono il servizio}. Rende possibile avere anche più livelli di Control Plane CP, per diversi servizi all'interno dello stesso caso d'uso (un servizio magari necessita di tempi di risposta molto brevi, ma non tutti); l'uscita dalla rete può essere prevista in diversi punti in base al servizio (vedi Critical IoT URLLC). I servizi sono "confezionati" anche a livello di collegamenti logici tra NF.\\
+
+Fornisce grande flessibilità alla rete oltre che alla qualità di servizio, tutto questo grazie alle tecnologie di virtualizzazione.\\
+
+\newpage
+
+\paragraph{Identificazione:} Per l'identificazione della slice si usa uno slice identifier a 32 bit
+\begin{center}
+	\begin{tabular}{| C{2cm} | C{6cm} :}
+		\multicolumn{2}{c}{Single-Network Slice Selection Assistance Information (S-NSSAI)} \\
+		\cline{1-1} \cdashline{2-2}
+		Slice Service Type (SST) \newline 8 bits & Slice Differentiator (SD) 24 bits \\
+		\cline{1-1} \cdashline{2-2}
+	\end{tabular}
+\end{center}
+
+I primi 8 bit indicano l'utilizzo per cui è pensata la network slice: 
+\begin{center}
+	\renewcommand{\arraystretch}{1.6}
+	\begin{tabular}{| C{1.3cm} | C{1.2cm} | C{8.5cm} |}
+		\hline
+		0  & & Reserved \\
+		\hline
+		1  & eMBB & suitable for handling of 5G Enhanced Mobile Broadband \\
+		\hline
+		2  & URLLC & suitable for handling of Ultra-Reliable Low Latency Communications \\
+		\hline
+		3  & MIoT & suitable for handling of Massive IoT \\
+		\hline
+		4  & V2X & suitable for handling of V2X services \\
+		\hline
+		5-127  & & Reserved \\
+		\hline
+		128-255  & & Operator-specific \\
+		\hline
+	\end{tabular}
+\end{center}
+Mentre gli ultimi 24 definiscono la specifica istanza di un determinato tipo. \\
+
+La slice consentita all'utente viene determinata con il dialogo tra UE + AMF + NSSF + UDM. In questo modo il dispositivo è a conoscenza della slice a cui è assegnato e metterà l'identificativo della slice all'interno dei pacchetti.\\
+
+\subsubsection{5G e MEC}
+
+L'integrazione tra 5G e MEC avviene tramite UPF come data plane nell'architettura MEC. UE che usa un servizio MEC ha UPF (PSA) collegato alla MEC platform dove è attivo il servizio che utilizza.\\
+
+\subsubsection{5G RAN - 5G NR (New Radio)}
+
+Vogliamo mantenere i 14 simboli OFDMA ma lo slot da 10ms non va bene, si vuole ridurre la latenza. La soluzione è \textbf{ridurre la durata dei simboli} (stesso numero, mento tempo), risparmiando banda.\\
+
+Lo standard 5G NR definisce 5 diverse durate, indicate come \textbf{numerology}. Definisce anche due possibili intervalli di frequenze:
+\begin{itemize}
+	\item \textbf{FR1 (Frequency Range 1)}: 410MHz - 7125MHz
+	\item \textbf{FR2 (Frequency Range 2)}: 24250MHz - 52600MHz
+\end{itemize}
+
+Di conseguenza, per una numerology $\mu$ si ha una $\Delta f$ (distanza tra le frequenze) calcolabile come
+$$ \Delta f = 2^\mu \cdot 15 [kHz] $$
+\begin{center}
+	\begin{tabular}{| C{1.5cm} | C{2cm} | C{3cm} | C{2cm} | C{2cm} |}
+		\hline
+		$\mu$ & $\Delta f$ & Cyclic Prefix & Banda di frequenza & Utilizzo  \\
+		\hline
+		0 & 15 & Normal & FR1 & Dati \\
+		\cline{1-4}
+		1 & 30 & Normal & FR1 & e \\
+		\cline{1-4}
+		2 & 60 & Normal, Extended & FR1 \& FR2 & Controllo \\
+		\cline{1-4}
+		3 & 120 & Normal & FR2 & \\
+		\hline
+		4 & 240 & Normal & FR2 & Controllo \\
+		\hline
+	\end{tabular}
+\end{center}
+
+Quando aumenta la distanza tra le portanti si usa solo il secondo range di frequenze, considerevolmente più ampio, altrimenti non ci starebbero abbastanza utenti all'interno. Per formare un Resource Block con 21 subcarrier servono, in base alla numerology, un range di
+\begin{center}
+	\begin{tabular}{ c | c | c | c | c | c}
+		$\mu$ & 0 & 1 & 2 & 3 & 4 \\
+		\hline
+		& 180kHz & 360kHz & 720kHz & 1,44MHz & 2,88MHz 
+	\end{tabular}
+\end{center}
+
+Raddoppiare la banda permette di dimezzare il tempo necessario per ogni simbolo. All'interno dello scheduling si possono allocare resource block con numerology diverse, magari anche in base alla slice utilizzata. Oltre alla rete, anche la configurazione della radio si può adattare all'utilizzo (se richiede latenza bassa si aumenterà la banda e diminuirà la durata del simbolo).\\
+
+\newpage
+
+%TODO: Da rivedere, non nell'esame
+%\subsection{Open-RAN O-RAN}
+%
+%Rientra nello standard. Prevede separazione tra 
+%* Central Unit CU
+%* Distributed Unit DU
+%* Radio Unit RU
+%%compl, idk s109
+%
+%La parte interessante sono i controller al di sopra, che sono programmabili e gestibili dall'utente. Dialogano con le varie componenti. \\
+%
+%I blocchi blu sono standard 5G (3GPP), O-RAN aggiunge sulla BS una parte programmabile e ottimizzabile, anche con tecniche ti AI/ML, il tutto svolgibile direttamente sulla BS.\\
+
+%Un saaacco di cose da rivedere, non vedo l'ora
+%End L22
