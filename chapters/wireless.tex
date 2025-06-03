@@ -46,7 +46,7 @@ Una data bandwidth può supportare diversi data rate, a seconda dell'abilità de
 
 Possiamo codificare tramite una modulazione in ampiezza: data una entry di bit scegliamo il voltaggio corrispondente
 \begin{center}
-	\includegraphics[width=\linewidth]{img/wireless/modam1}
+	\includegraphics[width=\linewidth]{img/wireless/modAM1}
 \end{center}
 
 Moduliamo la portante (modifichiamo l'ampiezza) in base ai bit da codificare. Usato nelle radio AM. Si può vedere che symbol rate e data rate sono diversi, ogni simbolo (livello di ampiezza) rappresenta due bit.
@@ -292,18 +292,14 @@ Rimangono valide le tecniche di error detection, in cui a livello di RX riusciam
 
 %End L3
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO: From here
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %start from s89
 %Tipico esercizio d'esame su AMC
 % Esercizio s89
 
-\paragraph{Esempio:} Dati un $SNR$ sul canale, un $BER$ che si vuole garantire ed un symbol rate
+\paragraph{Esempio:} Dati un $SNR$ sul canale, un $BER$ da garantire e un symbol rate
 $$ SNR = 8dB, \; BER = 10^{-2}, \; SR = 1000 sym/s$$
-Che modulation and coding scheme posso usare sul mio canale per avere l'error rate desiderato, sapendo che il coding rate per ogni codifica è
+
+Quali modulation e coding scheme possono essere usati sul canale per avere l'error rate desiderato? Sapendo che il coding rate per ogni codifica è
 \begin{center}
 	\begin{table}[h]
 		\centering
@@ -320,7 +316,7 @@ Che modulation and coding scheme posso usare sul mio canale per avere l'error ra
 		\end{tabular}
 	\end{table}
 \end{center}
-Ed il BER per ogni codifica è 
+E il BER, per ogni codifica:
 \begin{center}
 		\includegraphics[width=0.45\linewidth]{img/wireless/esber}
 \end{center}
@@ -334,70 +330,97 @@ Quindi
 \end{itemize}
 
 \subsubsection{Orthogonal Frequency Division Multiplexing OFDM}
-Vogliamo offrire canali differenti usando una divisione in frequenza diversa da FDM. L'obiettivo è quello di garantire lo stesso data rate che avremmo in una trasmissione in TDM ma usando una divisione in frequenza, senza usare troppa banda. Schema:
+
+L'idea è quella di offrire canali differenti usando una divisione in frequenza diversa da FDM. L'obiettivo è quello di garantire lo stesso data rate che avremmo in una trasmissione TDM, usando una divisione in frequenza, senza usare troppa banda.
+
+Di base, si vuole fare multiplexing usando una divisione in frequenza con frequenze ortogonali tra loro (separate dal reciproco della durata del simbolo), in modo da essere vicine e allo stesso tempo non causare interferenze.
+
+Schema:
 \begin{center}
-	\includegraphics[width=0.45\linewidth]{img/wireless/OFDM1}
+	\includegraphics[width=0.6\linewidth]{img/wireless/OFDM1}
 \end{center}
-Lo si implementa tramite uno split da seriale a parallelo ed ogni componente viene inviata ad un modulatore, ognuno dei quali modula rispetto a multipli di una certa frequenza base $f_b$ e alla portante $f_0$; quindi abbiamo una portante $f_0$ e tante sotto-portanti multiple di $f_b$. Stessa codifica e modulazione. Alla fine si trasmette la combinazione di tutte le onde create. 
 
-Nel caso di FDM classico viene lasciata una guardia per evitare interferenze, si allontanano un po' le frequenze in modo tale che le varie armoniche di una frequenza non possa interagire con le adiacenti.
+Lo si può implementare tramite uno split da seriale a parallelo, in seguito ogni componente viene inviata a un modulatore, ognuno dei quali modula rispetto a multipli di una certa frequenza base $f_b$ e alla portante $f_0$. 
 
-\paragraph{Ortogonalità:} Nell'OFDM le \textbf{subcarrier sono ortogonali tra loro} e non interferiscono, i.e., la distanza tra subcarrier è studiata in modo da evitare interferenze. Nel momento di picco di ogni sotto-portante, il contributo delle altre frequenze è nullo.
+Alla fine si ha una portante $f_0$ e tante sotto-portanti multiple di $f_b$. Stessa codifica e modulazione per tutte le trasmissioni. Viene trasmessa la combinazione di tutte le onde create. 
+
+Nel caso di FDM classico viene lasciata una guardia tra i range di frequenze per evitare interferenze, in questo modo le varie armoniche di una frequenza non possono interagire con quelle adiacenti.
+
+\paragraph{Ortogonalità:} In OFDM le \textbf{subcarrier sono ortogonali tra loro} e non interferiscono, i.e., la distanza tra subcarrier è studiata in modo da evitare interferenze. 
+
+Questo accade perché nel momento di picco di ogni sotto-portante, il contributo delle altre frequenze è nullo.
 \begin{center}
 	\includegraphics[width=0.6\linewidth]{img/wireless/OFDM2}
 \end{center}
 
-La scelta di $f_b$ dipende dalla durata dei simboli $T$:
-$$ f_b = \frac{1}{T}$$
+La scelta della sotto-portante $f_b$ dipende dalla durata dei simboli $T$:
+$$ f_b = \frac{1}{T} $$
+
 Tutti i segnali multipli di $f_b$ sono ortogonali tra loro. Si tratta dell'inverso della durata del simbolo.
 
 Considerazioni:
 \begin{itemize}
-	\item più robusto riguardo ad interferenze che riguardano solo alcuni subcarrier
-	\item più robusto rispetto ai problemi di multipath perché la distanza tra un simbolo e l'altro è maggiore (ISI ridotta)
+	\item più robusto rispetto a interferenze che riguardano solo alcuni subcarrier
+    
+	\item più robusto rispetto ai problemi di multipath perché la distanza tra un simbolo e l'altro è maggiore (ridotta ISI)
 \end{itemize}
 
 N.B.: in generale multiple access $\neq$ multiplexing, far passare più segnali contemporaneamente è diverso da fare comunicare più utenti contemporaneamente.
 
-\paragraph{TL;DR: } Si tratta di un FDM in cui le frequenze sono ortogonali tra loro in modo da non avere interferenze. Le interferenze in FDM erano prevenute tramite l'uso di una guardia, ovvero spazio di banda libero, OFDM permette di usare meno banda.
+\paragraph{TL;DR:} Si tratta di una divisione in frequenza in cui le frequenze sono ortogonali tra loro, in modo da non avere interferenze. 
+
+Le interferenze in FDM erano prevenute tramite l'uso di una guardia, ovvero spazio di banda libero, di conseguenza OFDM permette di usare meno banda.
 
 \subsection{Spread Spectrum}
-Letteralmente "spettro espanso", consiste nel trasmettere il segnale di informazione su uno \textbf{spettro di frequenze più ampio} di quella del segnale. Una banda maggiore del necessario. 
+
+Letteralmente "\textit{spettro espanso}", consiste nel trasmettere il segnale occupando deliberatamente uno \textbf{spettro di frequenze più ampio}.
 
 La struttura, concettualmente, è
 \begin{center}
-	\includegraphics[width=0.95\linewidth]{img/wireless/ss1}
+	\includegraphics[width=0.98\linewidth]{img/wireless/ss1}
 \end{center}
-Dopo l'encoding, c'è una fase di \textbf{spreading dei dati}, generalmente basato su valori pseudo-casuali (da invertire dopo la ricezione).
+
+In seguito all'encoding, c'è una fase di \textbf{spreading dei dati}, generalmente basato su valori pseudo-casuali (noti, da invertire dopo la ricezione).
 
 Motivazioni:
 \begin{itemize}
-	\item rendere il segnale più robusto, "spalmandolo" su una banda più ampia lo rende più resiliente a diversi tipi di rumore e interferenze
-	\item nascondere e cifrare il segnale (nato in ambito militare); solo TX e RX sono a conoscenza del codice di spreading (non una tecnica sufficiente, ma a livello radio questo si può fare)
-	\item molti utenti possono usare indipendentemente la stessa banda contemporaneamente senza interferenza. Usata da CDMA
+	\item rendere il \textbf{segnale più robusto}: "spalmandolo" su una banda più ampia lo si rende più resiliente a diversi tipi di rumore e interferenze
+	
+    \item \textbf{nascondere e cifrare il segnale} (nato in ambito militare); solo TX e RX sono a conoscenza del codice di spreading (non una tecnica sufficiente, ma a livello radio non si può fare molto di più)
+    
+	\item \textbf{accesso multiplo}: molti utenti possono usare indipendentemente la stessa banda contemporaneamente senza interferenza. Usata da CDMA
 \end{itemize}
 
 \subsubsection{Frequency Hopping Spread Spectrum FHSS}
 
-In FHSS il codice di spreading determina quale frequenza usare per trasmettere il segnale. Ad ogni intervallo di tempo prestabilito, la frequenza viene cambiata pseudo-casualmente (frequency hopping). usato da Bluetooth (802.15.1), "saltando" ogni $625 \mu s$.
-In altre parole: ho una certa ampiezza di banda e cambio in modo pseudo-casuale la frequenza usata ad ogni intervallo di tempo. Ho $n$ frequenze e ne uso una per volta, cambiata ogni tanto.
+In FHSS il \textbf{codice di spreading} determina quale frequenza viene usata per trasmettere il segnale. A ogni intervallo di tempo prestabilito, la frequenza viene cambiata pseudo-casualmente (frequency hopping). 
+
+Usato da Bluetooth (802.15.1), "saltando" ogni $625 \mu s$.
+
+In altre parole: si ha una certa ampiezza di banda e la frequenza usata viene cambiata in modo pseudo-casuale a ogni intervallo di tempo. Tra $n$ frequenze ne viene usata una per volta, cambiata ogni tanto.
 
 Schema di trasmissione e ricezione:
 \begin{center}
 	\includegraphics[width=\linewidth]{img/wireless/fhss1}
 \end{center}
-La channel table permette di scegliere la frequenza da utilizzare, in base al valore casuale, ed il sintetizzatore utilizzerà quella frequenza. Il tempo di hopping generalmente è predefinito, serve un seed per la sequenza di valori pseudo-casuali usati per determinare la frequenza usata.
 
-Il frequency hopping è più resistente a rumore e jamming, in quanto compromettere una frequenza non compromette l'intera trasmissione.
-Un altro ricevitore che si sincronizza con il trasmettitore può solo leggere alcuni pezzi dei messaggi perché non conosce la sequenza di hopping. 
+La channel table permette di scegliere la frequenza da utilizzare, in base al valore casuale, e il sintetizzatore utilizzerà quella frequenza. 
+
+Il tempo di hopping generalmente è predefinito, ma serve un seed per la sequenza di valori pseudo-casuali usati per determinare la frequenza di hopping a ogni istante.
+
+Il frequency hopping è più \textbf{resistente a rumore e jamming}: compromettere una frequenza non compromette l'intera trasmissione. Un altro ricevitore che si vuole sincronizzare con il trasmettitore può leggere solo alcuni pezzi dei messaggi in quanto non conosce la sequenza di hopping. 
 
 \subsubsection{Direct Sequence Spread Spectrum DSSS}
 
-Per una sequenza di $D$ bit, ogni bit della sequenza viene rappresentato da un insieme di bit usando un codice di spread (pseudo-casuale). Ogni bit diventa $n$ bit ottenuti da una sequenza casuale. 
-I bit della sequenza di spread "durano meno" (durano $1/n$ del tempo dei bit di informazione) e vengono chiamati "chip". Per ogni bit originale abbiamo $n$ chip.
-Per mantenere lo stesso data rate abbiamo bisogno di $n$ volte la banda ($n$ fattore di spreading).
+Per una sequenza di $D$ bit: ogni bit della sequenza viene rappresentato da un insieme di bit usando un codice di spread (pseudo-casuale). Ogni bit diventa $n$ bit, ottenuti da una sequenza casuale.
 
-Generalmente, si usa uno \texttt{xor} (in quanto invertibile) degli $n$ bit casuali con il bit da inviare e si invia il risultato. Esempio: 
+I bit della sequenza di spread "durano meno" (durano $1/n$ del tempo dei bit di informazione) e vengono chiamati "chip". Per ogni bit originale si hanno $n$ chip.
+
+Per mantenere lo stesso data rate c'è bisogno di $n$ volte la banda (dove $n$ è il fattore di spreading).
+
+Generalmente, si effettua uno \texttt{xor} (in quanto invertibile) degli $n$ bit casuali con il bit da inviare e si invia il risultato. 
+
+Esempio:
 \begin{center}
 	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
 		\hline
@@ -409,11 +432,15 @@ Generalmente, si usa uno \texttt{xor} (in quanto invertibile) degli $n$ bit casu
 		\hline
 	\end{tabular}
 \end{center}
+
 Usando BPSK diventa: 
 \begin{center}
 	\includegraphics[width=0.95\linewidth]{img/wireless/DSSS1}
 \end{center}
+
 In verde il {\color{green} segnale originale}, in blu la {\color{blue} sequenza pseudo-casuale}, in rosso ciò che viene {\color{red} effettivamente inviato}.
+
+In breve, il ricettore conosce la sequenza di spreading, se la riceve invertita in quel lasso di tempo il bit originale era 1, 0 altrimenti.
 
 %Schema di trasmissione e ricezione: 
 %img s110
@@ -421,31 +448,37 @@ In verde il {\color{green} segnale originale}, in blu la {\color{blue} sequenza 
 %End L4
 
 \subsubsection{Code Division Multiple Access CDMA}
+
 Differenza tra multiplexing e multiple access:
 \begin{itemize}
-	\item multiplexing significa avere più canali di comunicazione
-	\item multiple access: come faccio a far comunicare più utenti 
+	\item multiplexing: avere più canali di comunicazione
+	
+    \item multiple access: come far comunicare più utenti 
 \end{itemize}
 
 L'idea è utilizzare un canale con una certa banda a disposizione, e tutti i dispositivi possono usare la stessa banda, evitando interferenze.
 
-Ogni bit della sequenza da trasmettere viene codificato con un codice largo $k \geq 1$ chip usando un pattern prefissato detto \textbf{codice}. Un chip è una sequenza di 1 e $-1$ (al posto dello $0$). Ogni utente ha un codice diverso e di conseguenza produrrà chip diversi. Tutti "parlano assieme" e posso comunque distinguere le informazioni provenienti da un utente specifico.
+Ogni bit della sequenza da trasmettere viene codificato con un codice largo $k \geq 1$ chip, usando un pattern prefissato detto \textbf{codice}. Un chip è una sequenza di 1 e $-1$ (al posto dello $0$). Ogni utente ha un codice diverso e di conseguenza produrrà chip diversi. Tutti gli utenti "parlano assieme" e si possono comunque distinguere le informazioni provenienti da un utente specifico.
 
-\paragraph{Sequenze Walsh:} Creano un insieme di codici ortogonali (sono in numero limitato).
+Esempi di \textbf{sequenze:}
+\begin{itemize}
+    \item \textbf{Walsh}: creano un insieme di codici ortogonali (sono in numero limitato)
+    
+    \item \textbf{PN, Gold, Kasami}: non ortogonali ma in numero molto maggiore
+\end{itemize}
 
-\paragraph{Sequenze PN, Gold, Kasami:} Non ortogonali ma in numero molto maggiore.
+Non si ha nessuna divisione della banda, ma uno spettro maggiore rispetto a quello per un bit singolo. Ogni utente comincia a trasmettere usando il proprio codice, senza preoccuparsi di interferenze: starà al ricevitore distinguere i vari segnali. 
 
-Non si ha nessuna divisione della banda, ma uno spettro maggiore che quello per un singolo bit. Ognuno comincia a trasmettere con il proprio codice assegnato senza preoccuparsi di interferenze, starà al ricevitore distinguere i vari segnali. Tutte le forme d'onda vengono trasmesse assieme, senza il problema dell'interferenza.
-Esempio di trasmissione da parte di 3 utenti:
+Tutte le forme d'onda vengono trasmesse assieme, senza il problemi di interferenze. Esempio di trasmissione da parte di 3 utenti:
 \begin{center}
-	\includegraphics[width=0.6\linewidth]{img/wireless/CDMA1}
+	\includegraphics[width=0.7\linewidth]{img/wireless/CDMA1}
 \end{center}
 
 Il RX è a conoscenza del codice, numero di chip per bit e la regola (1 viene codificato tramite il codice stesso, 0 tramite l'inverso). Il RX calcola la funzione
 $$ s_u (d) = \sum_{i=1}^{k} d_i \cdot c_i $$ 
 Si tratta di una moltiplicazione tra il valore ricevuto ed il relativo bit all'interno del codice: se il risultato della sommatoria è positivo è stato trasmesso un 1, 0 altrimenti.
 
-Esempio: con 3 utenti
+Esempio: sequenze per 3 utenti
 \begin{center}
 	{
 	\renewcommand{\arraystretch}{1.2}
@@ -459,6 +492,7 @@ Esempio: con 3 utenti
 		\hline
 	\end{tabular}}
 \end{center}
+
 Con un solo segnale, se l'utente A invia un 1:
 \begin{center}
 	{
@@ -474,7 +508,10 @@ Con un solo segnale, se l'utente A invia un 1:
 	\end{tabular}
 	}
 \end{center}
-Per uno 0, il codice trasmesso sarebbe invertito ed il risultato della sommatoria diventa $-6$. In questo caso l'utente A ha trasmesso ed è stato usato il codice di A per decodificare. Se provassi ad usare il codice di A per decodificare un messaggio di B:
+
+Per uno 0, il codice trasmesso sarebbe invertito e il risultato della sommatoria sarebbe stato $-6$ di conseguenza. 
+
+In questo caso l'utente A ha trasmesso ed è stato usato il codice di A per decodificare. Se provassi a usare il codice di A per decodificare un messaggio di B:
 \begin{center}
 	{
 	\renewcommand{\arraystretch}{1.2}
@@ -490,7 +527,9 @@ Per uno 0, il codice trasmesso sarebbe invertito ed il risultato della sommatori
 	}
 \end{center}
 
-Il risultato è 0, quindi non è stato trasmesso da A ma da un segnale ortogonale rispetto ad A. Non è detto che i segnali debbano essere perfettamente ortogonali, possono anche esserci interferenze: 
+Il risultato è 0, quindi non è stato trasmesso da A ma da un segnale ortogonale rispetto ad A. 
+
+Non è detto che i segnali debbano essere perfettamente ortogonali, possono anche esserci interferenze: 
 \begin{center}
 	{
 		\renewcommand{\arraystretch}{1.2}
@@ -505,9 +544,10 @@ Il risultato è 0, quindi non è stato trasmesso da A ma da un segnale ortogonal
 		\end{tabular}
 	}
 \end{center}
-Non sono perfettamente ortogonali quindi risulta in una interferenza, il risultato è però troppo basso per essere interpretato come un valore corretto.
 
-Ma l'idea è che tutti trasmettano assieme, quindi i segnali possono combinarsi:
+Non sono perfettamente ortogonali, risulta in una interferenza, ma il risultato della sommatoria è troppo basso per essere interpretato come un valore corretto.
+
+L'idea è che tutti trasmettano assieme, quindi i segnali possono combinarsi:
 \begin{center}
 	{
 	\renewcommand{\arraystretch}{1.2}
@@ -526,9 +566,13 @@ Ma l'idea è che tutti trasmettano assieme, quindi i segnali possono combinarsi:
 	\end{tabular}
 	}
 \end{center}
+
 Cercando di estrarre cosa ha mandato B (ovvero usando il codice B) risulta un segnale abbastanza alto da poter essere interpretato come 1.
 
-Più è alto il numero di utenti più lo spreading factor deve essere alto (lunghezza del codice), riducendo il data rate del dispositivo. Può essere modulato in funzione del numero di utenti, quando ci sono tanti utenti connessi viene usato uno spreading factor maggiore.
+Più è alto il numero di utenti, più lo spreading factor deve essere alto (lunghezza del codice), riducendo il data rate del dispositivo. 
 
-\paragraph{Near-Far Problem:} Questo sistema funziona bene se i vari segnali ricevuti hanno più o meno la stessa potenza, ma utenti più lontani avranno una potenza minore (se tutti trasmettono con la stessa potenza).
-La soluzione è utilizzare potenze diverse in base alla distanza (sì, consuma più batteria).
+Lo spreading factor può essere modulato in funzione del numero di utenti: più utenti connessi ci sono, maggiore lo spreading factor usato.
+
+\paragraph{Near-Far Problem:} Questo sistema funziona bene se i vari segnali ricevuti hanno \textit{più o meno} la stessa potenza. Al contrario, se ci sono utenti più lontani, la potenza ricevuta da quest'ultimi sarà minore (se tutti trasmettono con la stessa potenza).
+
+La soluzione è utilizzare potenze diverse in base alla distanza (consuma più batteria).
