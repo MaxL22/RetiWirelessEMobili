@@ -1,36 +1,47 @@
 % !TeX spellcheck = it_IT
 \section{5G}
 
-Vengono aggiunti \textit{sempre più casi d'uso diversi tra loro}, e quindi il relativo supporto. Ci sono diversi casi d'uso completamente differenti, come ad esempio:
+Con il 5G, vengono aggiunti \textit{sempre più casi d'uso diversi tra loro}, e quindi il relativo supporto. Ci sono diversi casi d'uso completamente differenti, come ad esempio:
 \begin{itemize}
 	\item Multi-hop communication: comunicazione a più salti tra dispositivi per estendere la copertura e migliorare la connettività, utile in ambienti urbani o in aree remote
+
 	\item Device-to-device communication and cooperative devices: comunicazione diretta tra dispositivi senza passare dalla rete centrale, per aumentare efficienza e ridurre la latenza	
+
 	\item Ultra-reliable communication: comunicazioni ad altissima affidabilità, ad esempio per infrastrutture critiche come reti elettriche o trasporti
+
 	\item Massive machine communication: connessione simultanea di un gran numero di dispositivi IoT, tipico di fabbriche smart, logistica e sensori ambientali	
+
 	\item Inter-vehicular/vehicular-to-road communication: comunicazioni tra veicoli e tra veicoli e infrastrutture stradali per supportare la guida autonoma e la sicurezza stradale
+
 	\item Ultra-dense deployments: aree con altissima densità di dispositivi connessi, come uffici o stadi, dove il 5G garantisce prestazioni elevate nonostante l'affollamento.
 \end{itemize}
-Si ampia il range di frequenze: va da $300MHz$ a $300GHz$. Comprende diverse fasce di frequenza.\\
 
-\newpage
+Si ampia il range di frequenze: va da $300MHz$ a $300GHz$. Comprende diverse fasce di frequenza.
 
 \paragraph{Classificazione International Telecommunication Unit ITU:} Secondo l'ITU le applicazioni possono essere classificate in tre principali categorie di utilizzo:
 \begin{itemize}
 	\item \textbf{Enhanced Mobile Broadband (eMBB)}
 	\begin{itemize}
 		\item Servizi orientati alle persone
+
 		\item Elevata banda
+
 		\item HD Streaming, AR/VR
 	\end{itemize}
+
 	\item \textbf{Ultra-reliable and Low-latency communication (uRLLC)}
 	\begin{itemize}
 		\item Servizi orientate alle industrie
+
 		\item Bassissima latenza e affidabilità
+
 		\item Controllo remoto, guida autonoma
 	\end{itemize}
+
 	\item \textbf{Massive Machine Type Communications (mMTC)}
 	\begin{itemize}
 		\item alta densità di connessioni (anche con bassa quantità di dati trasmessi)
+
 		\item smart cities/smart agriculture
 	\end{itemize}
 \end{itemize}
@@ -112,60 +123,74 @@ Le "direzioni" dell'evoluzione per 5G sono:
 
 %End L19
 
-\newpage
-
 \subsection{Software Defined Networking SDN}
 
-La struttura di un'applicazione di rete "normale" (senza SDN), consiste di un layer per control e data assieme, il quale si occupa sia del flusso di controllo che del flusso di dati. I dispositivi nella rete hanno al loro interno gli algoritmi di controllo e le regole di forward. \\
+La struttura di un'applicazione di rete "normale" (senza SDN), consiste di un layer per control e data assieme, il quale si occupa sia del flusso di controllo che del flusso di dati. I dispositivi nella rete hanno al loro interno gli algoritmi di controllo e le regole di forward. 
 
-SDN "toglie" dai dispositivi di rete la \textbf{parte di controllo}, la quale viene \textbf{centralizzata} in un SDN controller, collegato con tutti i dispositivi e implementa le regole di controllo. Tutte le regole di controllo sono implementati ad un \textbf{livello software} al di sopra del data layer. Offre un'interfaccia unificata all'esterno della rete e permette una conoscenza topologica globale della rete stessa.\\
+SDN "toglie" dai dispositivi di rete la \textbf{parte di controllo}, la quale viene \textbf{centralizzata} in un SDN controller: questo è collegato con tutti i dispositivi e implementa le regole di controllo. 
+
+Tutte le regole di controllo sono implementati ad un \textbf{livello software} al di sopra del data layer. Offre un'interfaccia unificata all'esterno della rete e permette una conoscenza topologica globale della rete stessa.
 
 \begin{center}
 	\includegraphics[width=0.8\linewidth]{img/5g/sdn1}
 \end{center}
 
-I dispositivi di rete usano un linguaggio in grado di comunicare con l'SDN controller; si ha un linguaggio apposito per la comunicazione tra controller e switch.\\
-Si può lavorare anche in maniera reattiva: una volta ricevuto un pacchetto, il dispositivo richiede al controller la regola relativa. In questo modo il controller può inviare/gestire la regola anche per gli altri dispositivi presenti all'interno della rete.\\
+I dispositivi di rete usano un linguaggio in grado di comunicare con l'SDN controller; si ha un linguaggio apposito per la comunicazione tra controller e switch.
 
-Nel networking tradizionale, una volta definiti control e data plane non si possono più modificare i layer, con SDN e fixed-function data plane si possono modificare le funzionalità di controllo a livello software. \\
+Si può lavorare anche in maniera reattiva: una volta ricevuto un pacchetto, il dispositivo richiede al controller la regola relativa. In questo modo il controller può inviare/gestire la regola anche per gli altri dispositivi presenti all'interno della rete.
+
+Nel networking tradizionale, una volta definiti control e data plane non si possono più modificare i layer, con SDN e fixed-function data plane si possono modificare le funzionalità di controllo a livello software. 
 
 L'evoluzione vuole andare verso SDN con data plane programmabile, si ha SDN in cui tutto è programmabile, ovvero anche il livello dati ha funzionalità programmabili.
+
 \begin{center}
-	\includegraphics[width=0.85\linewidth]{img/5g/sdn2}
+	\includegraphics[width=0.95\linewidth]{img/5g/sdn2}
 \end{center}
-L'architettura prevede una parte di parsing programmabile: si può programmare come il pacchetto ricevuto viene processato. Se data plane è fisso, si possono programmare che regole utilizzare, ma queste devono essere implementate dal data plane, altrimenti nulla. Questo permette molta più flessibilità; le reti cambiano molto velocemente e questo permette di adattare i meccanismi alle condizioni della rete on-the-fly. Si vuole far arrivare il software fino al data link, al bordo del livello fisico.\\
+
+L'architettura prevede una parte di parsing programmabile: si può programmare come il pacchetto ricevuto viene processato. 
+
+Se data plane è fisso, si possono programmare che regole utilizzare, ma queste devono essere implementate dal data plane, altrimenti nulla. Questo permette molta più flessibilità; le reti cambiano molto velocemente e questo permette di adattare i meccanismi alle condizioni della rete on-the-fly. Si vuole far arrivare il software fino al data link, al bordo del livello fisico.
 
 I vantaggi sono diversi:
 \begin{itemize}
 	\item flessibilità nella gestione della rete
+
 	\item visione centralizzata, quindi ottimizzazione del routing
+
 	\item semplificazione della gestione a livello applicativo (OSS/BSS)
+
 	\item testing e configurazione di nuovi protocolli di rete più semplice e veloce
 \end{itemize}
 
 Ma ci sono anche delle sfide: 
 \begin{itemize}
 	\item i controller diventano un single point of failure
+
 	\item permette di reagire real-time: ma questo deve essere fatto in modo efficiente
+
 	\item ottimizzazione del numero di regole: gestione ottimizzata delle tabelle di forwarding, gestione e garanzia dell'isolamento di reti di overlay (reti logiche), gestione della complessità
+
 	\item sicurezza: controllare il controller vuol dire controllare la rete
 \end{itemize}
 
-\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TODO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Network Function Virtualization NFV}
-Prima dell'avvento di questa tecnologia, tutto necessitava hardware dedicato; ogni componente aveva la sua soluzione hardware specifica e la soluzione software corrispondente è strettamente legata.\\
 
-Con NFV si separano le funzionalità hardware e software. Si ha un hardware "standard" sui cui installare l'implementazione software delle funzionalità di rete richieste. Si virtualizza la parte software della funzionalità di rete per poi istanziarla a bordo di hardware standard. Si possono avere istanze in base a dove e quanto necessario.\\ 
+Prima dell'avvento di questa tecnologia, tutto necessitava hardware dedicato; ogni componente aveva la sua soluzione hardware specifica e la soluzione software corrispondente è strettamente legata.
 
-Ma come si implementano le funzionalità di rete che implementano il servizio? \textbf{Service Function Chain (SFC)}: grafo delle funzionalità necessarie. \\
-Il \textbf{NFV Orchestrator} contiene dei template per delle funzionalità e le istanzia secondo la configurazione necessaria (ovvero in base alla SFC). Si occupa anche di dove metterle (resource allocation); decide dove mettere le istanze necessarie sulle risorse hardware dedicate, in modo che rispettino tutti i vincoli: capacità dei nodi, passaggio, performance, ecc.\\
+Con NFV si separano le funzionalità hardware e software. Si ha un hardware "standard" sui cui installare l'implementazione software delle funzionalità di rete richieste. Si virtualizza la parte software della funzionalità di rete per poi istanziarla a bordo di hardware standard. Si possono avere istanze in base a dove e quanto necessario. 
+
+Ma come si implementano le funzionalità di rete che implementano il servizio? \textbf{Service Function Chain (SFC)}: grafo delle funzionalità necessarie. 
+Il \textbf{NFV Orchestrator} contiene dei template per delle funzionalità e le istanzia secondo la configurazione necessaria (ovvero in base alla SFC). Si occupa anche di dove metterle (resource allocation); decide dove mettere le istanze necessarie sulle risorse hardware dedicate, in modo che rispettino tutti i vincoli: capacità dei nodi, passaggio, performance, ecc.
 
 \subsubsection{Architettura NFV}
 
-Standardizzato da ETSI. La base sono risorse hardware e tramite virtualizzazione vengono offerte risorse virtualizzate. Tutto questo diventa una NFV Infrastructure, ovvero l'infrastruttura su cui instanziare le risorse di rete virtualizzate.\\
+Standardizzato da ETSI. La base sono risorse hardware e tramite virtualizzazione vengono offerte risorse virtualizzate. Tutto questo diventa una NFV Infrastructure, ovvero l'infrastruttura su cui instanziare le risorse di rete virtualizzate.
 
-Sulla base di questo vengono montate le \textbf{Virtual Network Functions}. Per ogni istanza viene tenuta traccia del suo stato di funzionamento: \textbf{Element Management System (EMS)}.\\
+Sulla base di questo vengono montate le \textbf{Virtual Network Functions}. Per ogni istanza viene tenuta traccia del suo stato di funzionamento: \textbf{Element Management System (EMS)}.
 
 Il tutto si interfaccia alla rete operatore (BSS/OSS) tramite \textbf{NFV MANO} (Management and Orchestration). All'interno della NFV MANO si trovano
 \begin{itemize}
@@ -188,8 +213,6 @@ Vantaggi di NFV:
 	\item uso delle risorse ottimizzato e condiviso
 \end{itemize}
 
-\newpage
-
 Sfide: 
 \begin{itemize}
 	\item le prestazioni devono essere comparabili con l'hardware dedicato, bisogna garantire certe prestazioni, nonostante l'overhead di virtualizzazione; esistono degli acceleratori, si vuole migliorare il più possibile le VFN, si vogliono usare migliori tecniche di virtualizzazione come Linux Container
@@ -201,11 +224,9 @@ Sfide:
 
 \subsection*{Cloud + NFV + SDN}
 
-5G usa tecnologie Cloud, SDN e NFV.\\
+5G usa tecnologie Cloud, SDN e NFV.
 
-Partendo da un data center (molto) distribuito, si aggiungono le NFV sui vari componenti della rete ed i collegamenti tra questi vengono gestiti tramite SDN controller.\\
-
-\newpage
+Partendo da un data center (molto) distribuito, si aggiungono le NFV sui vari componenti della rete ed i collegamenti tra questi vengono gestiti tramite SDN controller.
 
 \subsection{Centralized-RAN C-RAN e Virtual-RAN V-RAN}
 
@@ -219,7 +240,7 @@ La attuale architettura eNodeB è composta da Remote Radio Head RRH e Baseband U
 	\item un singolo standard: solo 4G
 \end{itemize}
 
-Si può densificare questa struttura? Per ogni antenna bisogna inserire tutte le componenti specificate. Per risolvere questo problema si separano quindi la RRH dai livelli superiori (MAC in su), ponendoli in remoto (ma non troppo remoto, comunque c'è un vincolo geografico, 1km max circa). Si usano delle Virtual Baseband Unit, con sopra tutte le tecnologie necessarie, permettendo anche una migliore gestione in base al carico (virtualizzato).\\
+Si può densificare questa struttura? Per ogni antenna bisogna inserire tutte le componenti specificate. Per risolvere questo problema si separano quindi la RRH dai livelli superiori (MAC in su), ponendoli in remoto (ma non troppo remoto, comunque c'è un vincolo geografico, 1km max circa). Si usano delle Virtual Baseband Unit, con sopra tutte le tecnologie necessarie, permettendo anche una migliore gestione in base al carico (virtualizzato).
 
 Questo permette:
 \begin{itemize}
@@ -232,7 +253,7 @@ Questo permette:
 	\includegraphics[width=0.98\linewidth]{img/5g/vbbu}
 \end{center}
 
-Per scalare la rete: si possono installare nuove RRH, senza dover aggiungere BBU, al posto della quale è necessario solo scalare orizzontalmente la vBBU già esistente (permetterne più istanze in parallelo, i.e., aumentare le performance). Tramite un singolo data center si possono gestire molte BS, risultando in una migliore gestione.\\
+Per scalare la rete: si possono installare nuove RRH, senza dover aggiungere BBU, al posto della quale è necessario solo scalare orizzontalmente la vBBU già esistente (permetterne più istanze in parallelo, i.e., aumentare le performance). Tramite un singolo data center si possono gestire molte BS, risultando in una migliore gestione.
 
 \subsection*{Cloud Computing}
 Dai, sai come funziona, \href{https://it.wikipedia.org/wiki/Cloud_computing}{\texttt{ma nel caso}}. Una struttura tipica:
@@ -241,22 +262,20 @@ Dai, sai come funziona, \href{https://it.wikipedia.org/wiki/Cloud_computing}{\te
 \end{center}
 Questo potrebbe avere (relativamente) elevata latenza per i servizi, elevato jitter (deviazione standard sul delay alta), applicazioni near real-time sono difficili da realizzare.
 
-\newpage
-
 \subsection{Mobile Edge Computing MEC (ETSI)}
 
 Mobile Edge Computing (chiamato anche Multi-access Edge Computing). Si vuole avere delle risorse computazionali il più vicino possibile all'utente. 
 \begin{center}
 	\includegraphics[width=0.9\linewidth]{img/5g/mec}
 \end{center}
-Si hanno risorse ad ogni livello (Cloud Edge Continuum), ovviamente con limitazioni su applicazioni contenute e capacità disponibile.\\
+Si hanno risorse ad ogni livello (Cloud Edge Continuum), ovviamente con limitazioni su applicazioni contenute e capacità disponibile.
 
 Le domande sono: 
 \begin{itemize}
 	\item Dove installare i vari moduli? Cloud? MEC server? Dispositivo stesso? 
 	\item Come viene gestita la mobilità dei dispositivi che utilizzano il servizio?
 \end{itemize}
-La risposta dipende dai requisiti del modulo e dei link di comunicazione tra moduli.\\
+La risposta dipende dai requisiti del modulo e dei link di comunicazione tra moduli.
 
 Vantaggi: 
 \begin{itemize}
@@ -265,8 +284,6 @@ Vantaggi:
 	\item Riduzione traffico verso il core della network
 	\item Miglior support a Servizi Location/Context-Aware
 \end{itemize}
-
-\newpage
 
 Sfide: 
 \begin{itemize}
@@ -280,17 +297,15 @@ Sfide:
 
 \subsection{Network Slicing}
 
-Network slicing è un concetto che trasforma la rete/sistema  da \textbf{paradigma} statico ad uno \textbf{dinamico} (nei primi standard si avevano qualità di servizio predefinite, qualunque fosse il servizio), nel quale \textbf{reti logiche} vengono create \textbf{on demand} con risorse e topologie ottimizzate per servire uno scopo specifico, una categoria di servizi o singoli utenti.\\
+Network slicing è un concetto che trasforma la rete/sistema  da \textbf{paradigma} statico ad uno \textbf{dinamico} (nei primi standard si avevano qualità di servizio predefinite, qualunque fosse il servizio), nel quale \textbf{reti logiche} vengono create \textbf{on demand} con risorse e topologie ottimizzate per servire uno scopo specifico, una categoria di servizi o singoli utenti.
 
-\textbf{Network Slice Instance} è un insieme di network function e risorse di rete organizzate e configurate per fornire una rete logica che soddisfa certe caratteristiche.\\
+\textbf{Network Slice Instance} è un insieme di network function e risorse di rete organizzate e configurate per fornire una rete logica che soddisfa certe caratteristiche.
 
-Per ogni classe di servizio/esigenza viene costruito un overlay di rete ad hoc al di sopra della rete fisica. Diventa molto più flessibile la gestione della rete \textit{al servizio di un servizio}, viene creata una slice della rete ad hoc per il servizio.\\
+Per ogni classe di servizio/esigenza viene costruito un overlay di rete ad hoc al di sopra della rete fisica. Diventa molto più flessibile la gestione della rete \textit{al servizio di un servizio}, viene creata una slice della rete ad hoc per il servizio.
 
-5G abbandona l'idea degli standard precedenti in cui \textit{one size fits all}, si hanno diversi casi d'uso e le risorse vengono allocate di conseguenza. \\
+5G abbandona l'idea degli standard precedenti in cui \textit{one size fits all}, si hanno diversi casi d'uso e le risorse vengono allocate di conseguenza.
 
 %End L20
-
-\newpage
 
 \subsection{Architettura}
 
@@ -300,7 +315,7 @@ Un po' di "storia": due release prima di 5G effettivo (Rel-14, 5G è la 16, quin
 \begin{center}
 	\includegraphics[width=0.7\linewidth]{img/5g/ltecups}
 \end{center}
-Si ha una \textbf{separazione} tra \textbf{user plane e control plane} in modo che siano indipendenti l'una dall'altra, permettendo una migliore scalabilità, indipendente tra piano dati e piano di controllo (ognuno dei due piani può essere scalato senza che l'altro vada necessariamente modificato). \\
+Si ha una \textbf{separazione} tra \textbf{user plane e control plane} in modo che siano indipendenti l'una dall'altra, permettendo una migliore scalabilità, indipendente tra piano dati e piano di controllo (ognuno dei due piani può essere scalato senza che l'altro vada necessariamente modificato). 
 
 \subsubsection{Divisione dei Plane}
 In 5G, rispetto le versioni precedenti, si ha un data plane semplificato quasi all'estremo (un solo componente che si occupa del controllo), mentre il control plane prevede una sempre maggior divisione dei compiti su componenti diverse.
@@ -308,9 +323,9 @@ In 5G, rispetto le versioni precedenti, si ha un data plane semplificato quasi a
 	\includegraphics[width=0.9\linewidth]{img/5g/arch}
 \end{center}
 
-Per la parte di comunicazione all'interno del data plane e tra i due piani rimane una comunicazione punto-punto tra i vari componenti. Invece, all'interno del control plane viene usata una \textbf{service-based architecture} con un \textbf{modello publish-subscribe}: ogni componente è una VNF ed ognuna di queste implementa un servizio con API REST. Ogni VNF può consumare una o più API delle altre VNF. Si ha un bus comune di comunicazione tra tutte le VNF.\\
+Per la parte di comunicazione all'interno del data plane e tra i due piani rimane una comunicazione punto-punto tra i vari componenti. Invece, all'interno del control plane viene usata una \textbf{service-based architecture} con un \textbf{modello publish-subscribe}: ogni componente è una VNF ed ognuna di queste implementa un servizio con API REST. Ogni VNF può consumare una o più API delle altre VNF. Si ha un bus comune di comunicazione tra tutte le VNF.
 
-Ogni componente del control plane è una VFN, quindi ognuno può evolvere indipendentemente, ogni VNF può essere (dis)attivata o scalata in base alla necessità. Ci sono tanti "micro-servizi" che svolgono le funzioni precedentemente svolte dal control plane.\\
+Ogni componente del control plane è una VFN, quindi ognuno può evolvere indipendentemente, ogni VNF può essere (dis)attivata o scalata in base alla necessità. Ci sono tanti "micro-servizi" che svolgono le funzioni precedentemente svolte dal control plane.
 
 \paragraph{Control Plane: } All'interno del control plane si trovano
 \begin{itemize}
@@ -340,15 +355,13 @@ Ogni componente del control plane è una VFN, quindi ognuno può evolvere indipe
 	\item \textbf{DN Data Network}: rete esterna
 \end{itemize}
 
-\paragraph{Protocol Data Unit PDU:} I pacchetti utente viaggiano all'interno di una connessione end-to-end sullo user plane chiamata PDU session. La sessione va da uno UE a uno specifico DN. Connessione dal device alla rete esterna (DN). Al di sopra di ha il livello applicativo, al di sotto uno stack (idealmente) IP-MAC-PHY.\\
+\paragraph{Protocol Data Unit PDU:} I pacchetti utente viaggiano all'interno di una connessione end-to-end sullo user plane chiamata PDU session. La sessione va da uno UE a uno specifico DN. Connessione dal device alla rete esterna (DN). Al di sopra di ha il livello applicativo, al di sotto uno stack (idealmente) IP-MAC-PHY.
 
 Lo stack di protocolli lato user plane rimane simile a quello 4G (con le necessarie modifiche per la PDU).
 
 \paragraph{Multiple PDU Sessions:} Un singolo UE può avere più connessioni attive, verso diverse data network, attraverso diverse UPF. Viene utilizzata una UPF per ogni collegamento.
 
-\paragraph{Interfaccia N9:} Permette di connettere tra loro più UPF e fare routing verso altre data network. Per fare ciò si usa un ulteriore UPF che classifica il traffico in downlink: chiamata \textbf{ULCL (UpLink CLassifier)}, questa viene configurata apposta per classificare il traffico in uplink di ciascun dispositivo, permettendo di fare routing verso la corretta Data Network in modo trasparente all'utente.\\
-
-\newpage
+\paragraph{Interfaccia N9:} Permette di connettere tra loro più UPF e fare routing verso altre data network. Per fare ciò si usa un ulteriore UPF che classifica il traffico in downlink: chiamata \textbf{ULCL (UpLink CLassifier)}, questa viene configurata apposta per classificare il traffico in uplink di ciascun dispositivo, permettendo di fare routing verso la corretta Data Network in modo trasparente all'utente.
 
 \subsubsection{Network Slices}
 
@@ -357,11 +370,9 @@ Si espandono le funzionalità dei TTF in 4G, i quali permettevano \textit{solo} 
 	\includegraphics[width=0.97\linewidth]{img/5g/slicing}
 \end{center}
 
-Permette non solo di stabilire le \textbf{caratteristiche del servizio}, ma specifica anche la \textbf{composizione delle NF che permettono il servizio}. Rende possibile avere anche più livelli di Control Plane CP, per diversi servizi all'interno dello stesso caso d'uso (un servizio magari necessita di tempi di risposta molto brevi, ma non tutti); l'uscita dalla rete può essere prevista in diversi punti in base al servizio (vedi Critical IoT URLLC). I servizi sono "confezionati" anche a livello di collegamenti logici tra NF.\\
+Permette non solo di stabilire le \textbf{caratteristiche del servizio}, ma specifica anche la \textbf{composizione delle NF che permettono il servizio}. Rende possibile avere anche più livelli di Control Plane CP, per diversi servizi all'interno dello stesso caso d'uso (un servizio magari necessita di tempi di risposta molto brevi, ma non tutti); l'uscita dalla rete può essere prevista in diversi punti in base al servizio (vedi Critical IoT URLLC). I servizi sono "confezionati" anche a livello di collegamenti logici tra NF.
 
-Fornisce grande flessibilità alla rete oltre che alla qualità di servizio, tutto questo grazie alle tecnologie di virtualizzazione.\\
-
-\newpage
+Fornisce grande flessibilità alla rete oltre che alla qualità di servizio, tutto questo grazie alle tecnologie di virtualizzazione.
 
 \paragraph{Identificazione:} Per l'identificazione della slice si usa uno slice identifier a 32 bit
 \begin{center}
@@ -394,17 +405,17 @@ I primi 8 bit indicano l'utilizzo per cui è pensata la network slice:
 		\hline
 	\end{tabular}
 \end{center}
-Mentre gli ultimi 24 definiscono la specifica istanza di un determinato tipo. \\
+Mentre gli ultimi 24 definiscono la specifica istanza di un determinato tipo. 
 
-La slice consentita all'utente viene determinata con il dialogo tra UE + AMF + NSSF + UDM. In questo modo il dispositivo è a conoscenza della slice a cui è assegnato e metterà l'identificativo della slice all'interno dei pacchetti.\\
+La slice consentita all'utente viene determinata con il dialogo tra UE + AMF + NSSF + UDM. In questo modo il dispositivo è a conoscenza della slice a cui è assegnato e metterà l'identificativo della slice all'interno dei pacchetti.
 
 \subsubsection{5G e MEC}
 
-L'integrazione tra 5G e MEC avviene tramite UPF come data plane nell'architettura MEC. UE che usa un servizio MEC ha UPF (PSA) collegato alla MEC platform dove è attivo il servizio che utilizza.\\
+L'integrazione tra 5G e MEC avviene tramite UPF come data plane nell'architettura MEC. UE che usa un servizio MEC ha UPF (PSA) collegato alla MEC platform dove è attivo il servizio che utilizza.
 
 \subsubsection{5G RAN - 5G NR (New Radio)}
 
-Vogliamo mantenere i 14 simboli OFDMA ma lo slot da 10ms non va bene, si vuole ridurre la latenza. La soluzione è \textbf{ridurre la durata dei simboli} (stesso numero, mento tempo), risparmiando banda.\\
+Vogliamo mantenere i 14 simboli OFDMA ma lo slot da 10ms non va bene, si vuole ridurre la latenza. La soluzione è \textbf{ridurre la durata dei simboli} (stesso numero, mento tempo), risparmiando banda.
 
 Lo standard 5G NR definisce 5 diverse durate, indicate come \textbf{numerology}. Definisce anche due possibili intervalli di frequenze:
 \begin{itemize}
@@ -441,22 +452,6 @@ Quando aumenta la distanza tra le portanti si usa solo il secondo range di frequ
 	\end{tabular}
 \end{center}
 
-Raddoppiare la banda permette di dimezzare il tempo necessario per ogni simbolo. All'interno dello scheduling si possono allocare resource block con numerology diverse, magari anche in base alla slice utilizzata. Oltre alla rete, anche la configurazione della radio si può adattare all'utilizzo (se richiede latenza bassa si aumenterà la banda e diminuirà la durata del simbolo).\\
+Raddoppiare la banda permette di dimezzare il tempo necessario per ogni simbolo. All'interno dello scheduling si possono allocare resource block con numerology diverse, magari anche in base alla slice utilizzata. Oltre alla rete, anche la configurazione della radio si può adattare all'utilizzo (se richiede latenza bassa si aumenterà la banda e diminuirà la durata del simbolo).
 
-\newpage
-
-%TODO: Da rivedere, non nell'esame
-%\subsection{Open-RAN O-RAN}
-%
-%Rientra nello standard. Prevede separazione tra 
-%* Central Unit CU
-%* Distributed Unit DU
-%* Radio Unit RU
-%%compl, idk s109
-%
-%La parte interessante sono i controller al di sopra, che sono programmabili e gestibili dall'utente. Dialogano con le varie componenti. \\
-%
-%I blocchi blu sono standard 5G (3GPP), O-RAN aggiunge sulla BS una parte programmabile e ottimizzabile, anche con tecniche ti AI/ML, il tutto svolgibile direttamente sulla BS.\\
-
-%Un saaacco di cose da rivedere, non vedo l'ora
 %End L22
