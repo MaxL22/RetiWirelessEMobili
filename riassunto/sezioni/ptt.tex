@@ -1,0 +1,153 @@
+% !TeX spellcheck = it_IT
+\section{Teoria della Trasmissione}
+
+Si vogliono trasmettere informazioni su un mezzo analogico: non perfetto, questo può introdurre \textbf{rumore}, \textbf{interferenze} o \textbf{attenuare} il segnale.
+
+Un segnale può essere rappresentato: 
+\begin{itemize}
+    \item Nel dominio del \textbf{tempo}, vedendolo come un segnale periodico sinusoidale; rappresentazione "classica"
+    
+    \item Nel dominio delle \textbf{frequenze}, ogni segnale ragionevolmente periodico può essere scomposto in una serie di segnali periodici ($\sin$ e $\cos$), detti armoniche, ognuna con il relativo contributo rispetto al segnale originale
+\end{itemize}
+
+Quando tutte le armoniche sono multiple di una frequenza base, questa si chiama \textbf{frequenza fondamentale}.
+
+\paragraph{Teorema del campionamento di Shannon:} Il segnale analogico va campionato, la frequenza di campionamento deve essere almeno il doppio della frequenza massima del segnale in ingresso. 
+
+\paragraph{Relazione tra banda e data rate:} Per trasmettere perfettamente onde come composizioni di sinusoidali serverebbe banda infinita, quindi si usa un'approssimazione.
+
+La quantità di informazioni inviata dipende dalla banda, per trasmetterne di più o si aumenta la banda o si peggiora l'approssimazione (usare meno armoniche).
+
+\paragraph{Teorema di Nyquist sulla banda:} Dato un canale noise-free, il limite della quantità di informazioni è dato dalla formula
+$$ C = 2 B \log_2 M $$
+Dove
+\begin{itemize}
+    \item $B$ è la banda
+    \item $M$ il numero di livelli del segnale (binario ne ha 2)
+\end{itemize}
+
+La capacità del canale aumenta con banda e numero di livelli del segnale, ma questo è solo un limite teorico in assenza di rumore.
+
+\paragraph{Decibel:} Unità di misura del rapporto di potenze, in scala logaritmica:
+$$ \left(\frac{P_1}{P_2}\right)_{dB} = 10 \cdot \log_{10} \left(\frac{P_1}{P_2}\right)$$
+
+\paragraph{Rapporto segnale rumore SNR:} Per quantificare il rumore su un canale, e quindi il suo impatto sulla trasmissione
+$$ SNR_{dB} = 10 \log_{10} \frac{P_\text{signal}}{P_\text{noise}}$$
+Tanto più il rapporto è alto, tanto più il segnale si distingue dal rumore.
+
+\paragraph{Formula della capacità di Shannon:} La capacità di un canale dipende anche dal rumore
+$$ C = B \log_2 (1 + SNR) $$
+Questa formula fornisce una massima teorica per la trasmissione senza errori sul canale.
+
+Partendo dalla capacità data da Shannon si può trovare il numero di livelli da usare con un dato canale tramite l'inverso della formula data dal teorema di Nyquist:
+$$ M = 2^{\frac{C}{2B}}$$
+Trasmettere un numero maggiore di livelli è inutile, il rumore sarebbe troppo alto.
+
+\subsection{Multiplexing}
+
+Con "multiplexing" si intende la capacità di far passare più comunicazione all'interno dello stesso canale.
+
+\paragraph{Frequency Division Multiplexing FDM:} Con una banda larga, la si può dividere in sotto-bande, ognuna con una comunicazione diversa.
+
+\paragraph{Time division Multiplexing TDM:} Se il data rate è molto superiore a quello richiesto da una singola trasmissione, si possono creare $n$ slot di tempo ciclici.
+
+\subsection{Comunicazione Wireless}
+
+Le comunicazione wireless non possono avvenire in banda base (spettro $[0,B]$): ci sarebbero interferenze, le antenne richieste sarebbero troppo grandi, ogni range di frequenza ha delle proprietà specifiche.
+
+Si usa quindi la banda traslata, si sposta il range a $[f_c - B/2, f_c + B/2]$, ovvero la stessa banda attorno a una frequenza portante $f_c$.
+
+Il trasmettitore deve quindi codificare e modulare (attorno a $f_c$) il segnale prima di inviarlo.
+
+\paragraph{Simbolo:} Uno stato significativo del canale di comunicazione che persiste per un tempo prefissato. In generale un simbolo può contenere più bit.
+
+\paragraph{Tipi di antenne:} Una antenna può essere: 
+\begin{itemize}
+    \item Omnidirezionale: potenza emessa ugualmente in tutte le direzioni
+    
+    \item Direzionale: il segnale si propaga principalmente in una sola direzione
+\end{itemize}
+
+Il gain è il rapporto tra l'intensità della radiazione in una direzione rispetto all'intensità che si avrebbe con un'antenna isotropica/omnidirezionale, misurato in $dBi$.
+
+\paragraph{Propagazione onde radio:} Esistono diversi tipi di propagazione delle onde radio, sopra i $30MHz$ la più comune è la Line of Sight LoS, che richiede una linea diretta tra RX e TX.
+
+Problemi con la trasmissione LoS: 
+\begin{itemize}
+    \item Path loss: attenuazione dovuta alla distanza e ambiente in cui il segnale si propaga; misurato in $dB$
+    $$ \frac{P_t}{P_r} = \left(\frac{4 \pi f}{c}\right)^2 d^n$$
+    dove $n$ dipende dall'ambiente in cui si propaga il segnale (free space con $n=2$)
+    
+    \item Rumore: disturbo che può distorcere il segnale
+    
+    \item Multipath: riflessi di un segnale giunti al RX dopo aver già ricevuto l'originale, dovuti a riflessioni, rifrazioni o scattering; i percorsi "alternativi" sono più lunghi, le riflessioni vengono ricevute dopo. Inter-Symbol-Interference ISI: simboli successivi devono tener conto del multipath dei segnali precedenti
+    
+    \item Effetto doppler: il segnale cambia a causa del movimento di RX o TX
+\end{itemize}
+
+\subsubsection{Modulazione e Codifica}
+
+L'obiettivo di codifica e modulazione è quello di ottenere una forma d'onda con un determinato significato.
+
+Per la codifica si può agire su ognuno dei 3 parametri di una sinusoidale: Amplitude Shift Keying ASK, Amplitude Shift Keying ASK, Amplitude Shift Keying ASK.
+
+\paragraph{Differential Phase-Shift Keying (DPSK):} Accorgersi di una differenza è più facile che misurare un livello, si codifica l'1 con un cambio di fase.
+
+\paragraph{Quadrature Phase-Shift Keying QPSK:} Si usa la fase per determinare i bit. Ci sono 4 fasi differenti ($90^\circ$ tra ognuna), di conseguenza 2 bit per simbolo.
+
+\paragraph{Quadrature Amplitude Modulation QAM:} Oltre alla fase si modifica l'ampiezza. Più parametri permettono più valori e una costellazione più densa. Si mappa prima in fase, poi in frequenza.
+
+\subsubsection{Bit Error Rate BER Curve}
+
+La curva BER rappresenta la probabilità che un bit venga alterato, in funzione del rapporto tra la densità di energia del segnale e il livello di rumore.
+
+La probabilità di sbagliare a leggere una codifica, diminuisce all'incrementare del SNR. Tanto più una codifica ha una costellazione di valori densa più è facile sbagliare un simbolo (i valori sono vicini).
+
+\paragraph{Adaptive Modulation and Coding AMC:} Si può adattare la codifica in base alla qualità del canale; si definisce un lasso di tempo ogni quanto misurare la qualità del canale e adattare la codifica di conseguenza.
+
+\subsubsection{Forward Error Correction}
+
+Servono tecniche di correzione dell'errore, molto probabile in ambito wireless. Viene aggiunta ridondanza ai dati inviati: ogni sequenza di bit lunga $n$ diventa una codeword lunga $k$ ($k > n$) secondo una tabella prefissata, rendendo la trasmissione più resiliente agli errori.
+
+In AMC va scelta anche la coding rate, ovvero la proporzione tra bit di dati e bit di ridondanza.
+
+\subsubsection{Orthogonal Frequency Division Multiplexing OFDM}
+
+Multiplexing usando una divisione in frequenza con bande ortogonali tra loro (separate dal reciproco della durata del simbolo), in quanto bande ortogonali non possono causare interferenze a vicenda.
+
+Si ha una portante $f_0$ e tante sotto-portanti multiple di $f_b$, scelta come
+$$ f_b = \frac{1}{T}$$
+dove $T$ è la durata di un simbolo.
+
+Questo metodo 
+\begin{itemize}
+    \item permette di usare più banda rispetto a FDM in quanto non più necessaria una guardia (banda libera) tra le frequenze
+    
+    \item è più robusto a interferenze che riguardano solo alcune subcarrier
+    
+    \item è più robusto ai problemi di multipath perché la distanza tra un simbolo e l'altro è maggiore (ridotta ISI)
+\end{itemize}
+
+\subsubsection{Spread Spectrum}
+
+Trasmettere il segnale occupando deliberatamente uno spettro più ampio del necessario, in modo da rendere il segnale più robusto, nascondere il segnale e permettere accesso multiplo.
+
+\paragraph{Frequency Hopping Spread Spectrum FHSS:} Si genera pseudo-casualmente un codice di spreading, usato per determinare quale frequenza usare all'interno di una certa ampiezza di banda. La frequenza viene cambiata ogni intervallo di tempo prestabilito.
+
+Generalmente resistente a rumore e jamming (compromettere tutte le frequenze è più difficile), nasconde parzialmente il segnale (è difficile leggere il messaggio senza sapere il codice di spreading).
+
+\paragraph{Direct Sequence Spread Spectrum DSSS:} Ogni bit di una sequenza viene rappresentato da un insieme di bit, ottenuti da una sequenza casuale. Ogni bit trasmesso, chiamati "chip", dura $1/n$ del tempo dei bit di informazione, dove $n$ è il numero di chip che compongono un bit. 
+
+Per mantenere lo stesso data rate è necessaria $n$ volte la banda.
+
+Generalmente, si invia uno \texttt{xor} tra bit di informazioni e sequenza di spread (si manda la sequenza originale per uno 0, invertita per 1).
+
+\paragraph{Code Division Multiple Access CDMA:} Ogni bit della sequenza da inviare viene codificato con un codice lungo $k \geq 1$ chip, unico per ogni utente. L'idea è che tutti gli utenti possono parlare assieme e le informazioni rimangono distinguibili. I chip usano 1 e -1 (al posto dello 0).
+
+Un 1 viene codificato tramite il codice stesso, 0 con l'inverso. Il ricevitore moltiplica i bit ricevuti con il relativo bit all'interno del codice: se la somma di tutti questi è positiva è stato trasmesso un 1, 0 altrimenti.
+
+Usando un codice non corretto per decifrare il risultato della sommatoria sarebbe inconcludente (vicino allo 0); il valore risultante deve essere abbastanza alto.
+
+Più è alto il numero di utenti, più lo spreading factor deve essere alto; può essere modulato in funzione del numero di utenti.
+
+Questo sistema funziona bene se i vari segnali ricevuti hanno circa la stessa potenza. \textbf{Near-far problem:} utenti più lontani avranno potenza minore. La soluzione è modulare la potenza in base alla distanza.
