@@ -1,0 +1,31 @@
+% !TeX spellcheck = it_IT
+\section{4G LTE}
+
+Introduce una separazione più netta tra data e control plane. Le stazioni si chiamano ora eNodeB. Il dispositivo utente si chiama User Equipment UE.
+
+La rete si divide in: 
+\begin{itemize}
+    \item \textbf{E-UTRAN}, parte wireless, che comprende:
+    \begin{itemize}
+        \item \textbf{UE}
+        
+        \item \textbf{eNodeB:} Fornisce connettività radio all'UE e lo collega alla CN; ha i compiti di una BS
+    \end{itemize}
+    
+    \item \textbf{EPC}, che contiene i moduli: 
+    \begin{itemize}
+        \item \textbf{MME Mobility Management Entity:} si occupa di tutto il traffico di controllo e segnalazione all'intero della rete, tra CN e UE usando protocolli NAS; si occupa di gestione del contesto UE tramite operazioni NAS, dei bearer, della mobilità, del paging, degli aspetti di sicurezza e cifratura; tra UE e MME transitano solo dati di controllo
+        
+        \item \textbf{HSS Home Subscriber Server:} contiene le informazioni dell'utente riguardanti il profilo e la connessione
+        
+        \item \textbf{P-GW Packet Data Network Gateway:} bordo tra rete LTE e reti esterne; gestisce l'assegnamento IP dell'UE, garantisce QoS, filtra pacchetti IP downlink in bearer differenti per QoS, gestisce la mobilità tra reti non-3GPP
+        
+        \item \textbf{S-GW Serving Gateway:} Unico modulo data plane, responsabile della gestione del traffico user plane. Si occupa di gestire tutti i pacchetti IP degli utenti, gestione dei bearer in fase di handover (dentro la TA), funzionalità di buffering quando UE è IDLE-CONNECTED; si tratta del punto di gestione, con un sottogruppo di eNodeB assegnate.
+        
+        \item \textbf{PCRF Policy Control and Charging Rules Function:} svolge funzioni di controllo e autorizzazioni per i singoli flussi a livello di P-GW, autorizza QoS secondo il profilo utente (da HSS); contiene le regole da applicare all'utente, tramite il P-GW
+    \end{itemize}
+\end{itemize}
+
+\subsection{Modulazione e Codifica}
+
+%p 126

@@ -1,0 +1,81 @@
+% !TeX spellcheck = it_IT
+\section{Mobile Network}
+
+L'idea è molteplici trasmettitori, area divisa in celle, ogni cella servita da una Base Station BS, la quale contiene trasmettitore, ricevitore e unità di controllo.
+
+Le celle devono coprire "bene" l'area e avere una disposizione uniforme (comunque considerando vincoli dovuti alla situazione reale).
+
+\paragraph{Riuso delle frequenze:} Celle vicine non possono usare la stessa banda di frequenza. Tre soluzioni possibili: 
+\begin{itemize}
+    \item \textbf{Frequenze diverse tra celle vicine}: ogni cella ha la sua banda, servono più bande differenti (costano); usato da 2G
+    
+    \item Usare la \textbf{stessa frequenza ma tecniche di codifica} per evitare interferenze, come CDMA
+    
+    \item Usare \textbf{frequenze diverse ai bordi} delle celle, l'\textbf{intero spettro al centro}; permette banda maggiore ma richiede coordinamento tra le BS (da 4g e 5G)
+\end{itemize}
+
+\paragraph{Architettura:} Si divide in due macro aree: 
+\begin{itemize}
+    \item \textbf{Radio Access Network RAN:} stazioni e collegamento radio che forniscono connettività ai dispositivi mobili (parte wireless)
+    
+    \item \textbf{Core Network:} parte responsabile di gestione e controllo della comunicazione
+\end{itemize}
+
+In generale, esistono 2 tipologie di canali e traffico:
+\begin{itemize}
+    \item Canali di controllo: informazioni per la gestione delle operazioni; Control Plane
+    
+    \item Canali di traffico: voce e dati; Data Plane
+\end{itemize}
+La divisione tra i due piani è netta ed esplicita.
+
+\subsection{Operazioni}
+
+\paragraph{Inizializzazione:} Quando un dispositivo vuole iniziare una comunicazione con la rete cellulare: 
+\begin{itemize}
+    \item Disponibilità dei canali radio con BS: ascolta le trasmissioni broadcast delle BS per individuare la migliore e quali parametri usare
+    
+    \item Traffico di controllo per iniziare la comunicazione: viene inoltrata la richiesta di comunicazione fino al MTSO, parte della CN che si occupa di autenticare l'utente, verificare permesse e risorse
+    
+    \item Creazione dei collegamenti su data plane: se la fase di controllo va a buon fne, vengono allocati canali fisici e logici necessari per il traffico dati
+\end{itemize}
+
+\paragraph{Paging:} Quando \textit{qualcosa} deve raggiungere il dispositivo, è compito della rete trovarne la posizione quando necessario. MTSO contatta le BS per trovare il dispositivo.
+
+\paragraph{Chiamata accettata:} I dati passano sempre per il CN, il dispositivo accetta la chiamata, MTSO crea un circuito e le BS impostano i canali radio data plane. 
+
+\paragraph{Handoff:} Quando un dispositivo esce da una cella, deve collegarsi a un'altra. Le fasi per il cambio cella sono: decidere la nuova associazione, gestirla, riconfigurare i percorsi di comunicazione. 
+
+Il tutto deve avvenire in maniera automatica e trasparente al dispositivo.
+
+La procedure può essere decisa in due modi:
+\begin{enumerate}
+    \item solo dalla rete: in base al segnale in uplik
+    
+    \item coinvolgendo il dispositivo: anche in base a feedback sul downlink
+\end{enumerate}
+
+Vengono usate diverse metriche, ma il parametro principale è la potenza del segnale ricevuto. Possibili metodi per stabilire quando cambiare BS a cui il dispositivo è collegato: 
+\begin{itemize}
+    \item \textbf{Solo potenza relativa:} l'associazione viene fatta alla BS con il migliore segnale. Potrebbe portare a cambio continuo tra BS quando sui bordi delle celle e l'handover è costoso
+    
+    \item \textbf{Soglia di segnale:} L'handover viene fatto nel caso incui il segnale è peggiore di un'altra BS e allo stesso tempo sotto una certa soglia. Come si definiscono le soglie? (difficile)
+    
+    \item \textbf{Isteresi:} Per far partire l'handover deve esserci una differenza significativa di potenza, risolvendo il ping pong
+\end{itemize}
+
+La soluzione reale è combinare i metodi.
+
+L'handover può essere:
+\begin{itemize}
+    \item \textbf{Hard}: dispositivo associato a una sola BS alla volta, cambio immediato di frequenza
+    
+    \item \textbf{Soft}: il dispositivo mantiene connettività con entrambe le BS e ne rilascia una quando il segnale è chiaramente dominante; occupa più risorse
+\end{itemize}
+
+\paragraph{Duplex:} Può essere gestito come: 
+\begin{itemize}
+    \item FDD: divisione in frequenza, minore delay, maggiori risorse richieste
+    
+    \item TDD: una sola frequenza e slot di tempo; maggiore ritardo dovuto all'attesa
+\end{itemize}

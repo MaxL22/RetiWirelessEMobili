@@ -5,4 +5,223 @@ Si ha una rete con uno o più Access Point AP, coordinata da Point Coordinator F
 
 Alternativamente, si può avere una rete ad hoc, senza PCF ma con una Distributed Coordination Function DCF, con un Indipendent Basic Service Set IBSS.
 
-%pag 71
+Al di sopra di PHY, MAC e PCF si ha un livello di \textbf{Logical Link Control LLC:} il quale offre principalmente 3 servizi: 
+\begin{itemize}
+    \item Unacknowledged connectionless service: consegna non garantita, senza connessione, niente controllo degli errori 
+    
+    \item Connection-mode service: canale punto-punto affidabile
+    
+    \item Acknowledged connectionless: senza connessione, ma con ack
+\end{itemize}
+
+\subsection{Senza infrastruttura}
+
+Canale molto inaffidabile, con frame da $2304B$. Il sottolivello MAC offre: 
+\begin{itemize}
+    \item Servizio dati asincrono: niente garanzie su delay o QoS, best effor
+    
+    \item Servizio time-bounded: garanzie sul delay, disponibile solo in presenza di AP
+\end{itemize}
+
+\subsubsection{Distributed Coordination Function DCF}
+
+Opera in \textbf{CSMA/CA}: l'accesso al canale viene regolato aspettando del tempo prima di trasmettere. Diversi periodi di attesa possibili: 
+\begin{itemize}
+    \item \textbf{slot time:} unità base di tempo
+    
+    \item \textbf{Short Inter Frame Spacing SIFS:} intervallo breve
+    
+    \item \textbf{DCF Inter Frame Spacing DIFS:} SIFS + 2 slot time
+    
+    \item \textbf{PCF Inter Frame Spacing PIFS:} SIFS + slot time
+\end{itemize}
+
+Per trasmettere: 
+\begin{itemize}
+    \item il sender ascolta il canale
+    
+    \item fa un CCA
+    
+    \item ascolta per tempo DIFS
+    
+    \item fa un altro CCA
+\end{itemize}
+Se il canale è risultato sempre libero, allora il dispositivo può cominciare a trasmettere.
+
+Se necessario l'ack, l'attesa di questo ha durata SIFS, per non andare in conflitto con i CCA. Al contrario, si presume frame corrotto se dopo SIFS non viene ricevuto ack.
+
+Se il canale è occupato, il sender aspetta il termine della trasmissione, per poi aspettare uno dei periodi di tempo (in base alla priorità del messaggio), per poi avere un periodo di contesa, in cui il dispositivo aspetta un numero random di slot time da attendere. Se interrotto, il conteggio riprende alla contesa successiva
+
+\subsubsection{Problema del terminale nascosto}
+
+Il carrier sense funziona solo se il dispositivo che comincia a trasmettere è rilevabile. Se due dispositivi che non si vedono vogliono trasmettere allo stesso RX vedrebbero entrambi il canale libero nello stesso momento.
+
+Per risolvere, il sender invia una Request to Send RTS, contenente sorgente e destinazione della richiesta, oltre che durata stimata.
+
+Quando un terminale riceve un RTS:
+\begin{itemize}
+    \item se non è il target del messaggio, alloca un Network Allocation Vector NAV, tempo in cui sa di non poter trasmettere a quel RX
+    
+    \item il destinatario risponde con un Clear to Send CTS, contenente sorgente, destinazione e tempo rimanente
+\end{itemize}
+
+Il CTS viene ricevuto da tutti i terminali nel raggio del destinatario, che allocheranno un NAV per il tempo indicato nel CTS.
+
+Dopo il CTS, il sender aspetta SIFS prima di cominciare a inviare.
+
+\paragraph{Frammentazione:} Il frame a livello MAC è più piccolo di un frame Ethernet (troppi errori altrimenti), quindi un frame LLC viene suddiviso in frammenti, ognuno dei quali contiene informazioni riguardo il NAV per i dispositivi non direttamente coinvolti. 
+
+Frammentazione e correzione dei dati viene fatta a livello MAC, tra AP e terminale, per ridurre il ritardo di correzione.
+
+\subsection{Con Infrastruttura}
+
+Nel caso più semplice si ha un AP con relativo BSS; si possono anche avere più BSS connesse tramite un distributed system DS, formando un Extended Service Set ESS (comunque visto come un'unica rete).
+
+\subsubsection{Point Coordination Function PCF}
+
+In presenza di AP, tutti i frame passano per questo, permettendo di avere servizi time-bounded. AP usa tempo PIFS, per prevalere sulle stazioni che usano tempistiche DIFS e SIFS.
+
+AP manda beacon frame periodici, contenenti:
+\begin{itemize}
+    \item Parametri PHY (modulation and coding scheme)
+    
+    \item Sincronizzazione
+    
+    \item Supporto a PCF con le relative informazioni 
+    
+    \item Invito per le nuove stazioni, non ancora associate
+\end{itemize}
+
+Una rete manda beacon per farsi scoprire e comunicare le proprie caratteristiche per nuove associazioni.
+
+Il tempo è diviso in blocchi (superframe), con due periodi: 
+\begin{itemize}
+    \item Senza contesa, opzionale, per i servizi time bounded
+    
+    \item A contesa, sempre presente
+\end{itemize}
+
+Per il periodo senza contesa: l'AP aspetta PIFS al termine della comunicazione precedente, tutti gli altri aspettano DIFS, quindi prende possesso del canale e fornisce il permesso di trasmettere dove necessario, aspettando SIFS tra una trasmissione e l'altra. Al termine manda un Contention Free End.
+
+\subsubsection{Formato Frame MAC}
+
+Nell'header del frame si hanno obbligatoriamente 
+\begin{itemize}
+    \item Frame Control FC: 2 byte contenenti informazioni sul tipo di frame, inclusi tipo del messaggio e 2 bit che indicano se il messaggio è verso o dal DS
+    
+    \item Duration/Connection ID D/I: contengono la durata della trasmissione rimanente, usate per i NAV
+    
+    \item Indirizzo di destinazione e fino ad altri 3 indirizzi, il cui significato varia in base ai bit To DS e From DS; in generale sono sorgente e destinazione del messaggio, e l'eventuale "hop" in mezzo
+\end{itemize}
+
+\subsection{Orthogonal Frequency Division Multiple Access OFDMA}
+
+WiFi 6, usa subcarrier per fornire connettività a più dispositivi contemporaneamente. 
+
+Vengono serviti più dispositivi contemporaneamente, assegnando gruppi di sotto-portanti a dispositivi diversi.
+
+Le frequenze sono raggruppate in blocchi base asssegnabili a ogni utente, chiamati Resource Units RU. Ogni RU ha una sequenza unica di 7 bit che identifica univocamente il gruppo di sotto-portanti.
+
+Alcune sotto-portanti sono usate come pilot, trasmettono onde standard usate per stimare la qualità del segnale.
+
+\subsubsection{Downlink}
+
+Per comunicare l'assegnamento delle risorse, l'AP
+\begin{itemize}
+    \item invia una \textbf{Multi-User Request to Send MU-RTS}, ha la funzione di RTS
+    
+    \item le stazioni rispondono con un CTS in contemporanea
+    
+    \item l'AP invia gli assegnamenti delle RU
+    
+    \item l'AP invia un Block Acknowledgment Request BAR
+    
+    \item i dispositivi rispondono in parallelo con un Block ACK 
+\end{itemize}
+Ogni operazione è intervallata da tempo SIFS.
+
+\subsubsection{Uplink}
+
+Meno prevedibile, richiede di sincronizzare i dispositivi che devono trasmettere. Tutto gestito dall'AP: 
+\begin{itemize}
+    \item l'AP invia \textbf{Buffer Status Report Poll BSRP}, chiede chi ha da dire qualcosa
+    
+    \item i dispositivi rispondono con un \textbf{Buffer Status Report BSR}, contenente le quantità di dati da trasmettere
+    
+    \item l'AP assegna risorse in base alle risposte delle stazioni, invia il \textbf{MU-RTS} indicando la suddivisione delle RU
+    
+    \item le stazioni rispondono con CTS
+    
+    \item l'AP invia un trigger aggiuntivo per sincronizzare tutti i dispositivi
+    
+    \item ogni stazione trasmette in parallelo sulle risorse allocate; se la trasmissione dura meno: padding
+    
+    \item se necessario: l'AP invia \textbf{multi-station block acknowledgment Multi-STA Block ack}
+\end{itemize}
+
+\subsection{WLAN Security}
+
+802.11 definisce feature di sicurezza. Si vuole cifratura a livello di data link.
+
+\paragraph{Wired Equivalent Privacy WEP:} Cifratura RC4, non obbligatorio, stessa chiave per tutto il traffico.
+
+\paragraph{Robust Security Network RSN:} Per sopperire alle lacune di WEP; al suo interno ha diversi servizi: 
+\begin{itemize}
+    \item \textbf{Accesso control:} impone l’utilizzo di protocolli di sicurezza e assiste lo scambio delle chiavi
+    
+    \item \textbf{Authentication:} definisce lo scambio tra utente e AS, genera chiavi temporanee 
+    
+    \item \textbf{Privacy with message integrity:} il payload MAC viene cifrato e viene aggiunto un controllo per l'integrità
+\end{itemize}
+
+Più fasi per le operazioni:
+\begin{itemize}
+    \item \textbf{Discovery:} AP manda il beacon con i servizi disponibili, vengono negoziate le capabilities prima di decidere le funzioni di sicurezza da usare
+    
+    \item \textbf{Autenticazione e gestione chiavi:} STA richiede all'AP autenticazione tramite AS (remoto EAP o meno), vengono generate e consegnate le chiavi
+    
+    \item \textbf{Protected data transfer}
+    
+    \item Chiusura della connessione
+\end{itemize}
+
+Per generare le chiavi: 
+\begin{itemize}
+    \item AP $\rightarrow$ Client: Nonce
+    
+    \item Chiave di sessione $K_S$ calcolata dal client, a partire da MAC address, nonce e master key
+    
+    \item Client $\rightarrow$ AP: nonce, assieme a un Message Integrity Check $MIC_S$, dipendente dalla sessione
+    
+    \item AP calcola la stessa $K_S$
+    
+    \item AP $\rightarrow$ Client: chiave di gruppo $K_G$, cifrata tramite $K_S$
+    
+    \item Client verifica che $K_S$ dell'AP sia corretta
+    
+    \item Client $\rightarrow$ AP: ack cifrato con $K_S$
+    
+    \item AP verifica che $K_S$ del client sia corretta
+\end{itemize}
+
+Lo standard 802.11i considera due alternative per la protezione dati: 
+\begin{itemize}
+    \item \textbf{TKIP (WPA):} RC4 con codice integrità di 64 bit, usando MAC sorgente e destinazione
+    
+    \item \textbf{CCMP (WPA-2):} integrità tramite CBC AES-128
+\end{itemize}
+
+\subsection{802.11e EDCA Enhanced Distributed Channel Access}
+
+Quando i livelli superiori richiedono un certo QoS, si possono modificare dei parametri in base a profili prefissati. I parametri sono:
+\begin{itemize}
+    \item CWMin: minima dimensione della contention window
+    
+    \item CWMax: massima dimensione della contention window
+    
+    \item AIFSN: numero di SIFS+N slot time, tempo di attesa
+    
+    \item Max TXPO: massimo tempo in cui una stazione può trasmettere senza lasciare il canale
+\end{itemize}
+
+Permette una definizione più granulare delle politiche di accesso al canale in contesa, riducendo i tempo per le applicazioni che lo necessitano.

@@ -1,0 +1,252 @@
+% !TeX spellcheck = it_IT
+\section{Ad Hoc Distance Vector Routing Protocol AODV}
+
+Protocollo di routing per creare e riempire tabelle di instradamento, pensato per reti senza infrastrutture in cui ogni nodo è anche router. I percorsi vengono creati solo a necessità. 
+
+Gli obiettivi principali sono: 
+\begin{itemize}
+    \item Gestione dinamica della rete ad hoc
+    
+    \item Auto inizializzante
+    
+    \item Loop free
+    
+    \item Risposta rapida alla richiesta di rotta e alla rottura di link/cambio di topologia
+\end{itemize}
+
+Le funzionalità offerte sono: 
+\begin{itemize}
+    \item Scoprire e costruire percorsi
+    
+    \item Mantenere percorsi in modalità soft-state (scadono se non aggiornati)
+    
+    \item Riconoscimento errori e cancellazione percorsi
+\end{itemize}
+
+Protocollo a livello di applicazione (UDP 654), al di sopra ci sono i messaggi AODV, sotto stack IP con PHY e LL qualsiasi.
+
+\subsection{Tabelle di Routing}
+
+Ogni nodo mantiene una tabella con destinazioni conosciute e next hop per arrivarci. Ogni entry della tabella contiene: 
+\begin{itemize}
+    \item IP Destinazione
+    
+    \item Sequence Number SN della destinazione: in una dinamica, ogni entry possiede un SN che codifica la "freschezza" dell'informazione. Si tratta di un valore per ogni nodo, modificabile solo dal nodo stesso: incrementato di 1 quando un nodo inizia o risponde a una ricerca di percorso; gli altri nodi possono aggiornare il SN quando vengono ricevute informazioni più aggiornate
+    
+    \item Flag di validità del SN (disabilita temporaneamente il percorso)
+    
+    \item Stato del percorso 
+    
+    \item Interfaccia di rete
+    
+    \item Hop count per arrivare alla destinazione
+    
+    \item Lista dei precursori: quali vicini utilizzano il router per arrivare alla destinazione
+    
+    \item Lifetime della entry: scadenza
+\end{itemize}
+
+\subsection{Route Request RREQ}
+
+All'interno del pacchetto: Tipo 1. Ci sono delle flag: 
+\begin{itemize}
+    \item \texttt{D} Destination only: solo la destinazione può rispondere
+    
+    \item \texttt{U} Unknown SN: l'origine non conosce il SN della destinazione
+    
+    \item \texttt{G} Gratuitous: se risponde un nodo intermedio, questo deve creare il percorso bidirezionale
+\end{itemize}
+
+Oltre a questo contiene: 
+\begin{itemize}
+    \item Hop count: incrementato di 1 ogni inoltro, tiene traccia della distanza della richiesta
+    
+    \item RREQ ID: identificativo della richiesta, permette di riconoscere copie della stessa richiesta
+    
+    \item Destination IP Address e ultimo SN conosciuto
+    
+    \item Originator IP Address e SN
+\end{itemize}
+
+Una RREQ viene creata quando serve conoscere un percorso verso una destinazione. Per inviare:
+\begin{itemize}
+    \item L'originator incrementa RREQ ID e il proprio SN
+    
+    \item Setta i flag come necessario 
+    
+    \item Mantiene una copia per un tempo standard \texttt{PATH\_DISCOVERY\_TIME}, per evitare il riprocessamento e reinvio del pacchetto, se ricevuto nuovamente
+\end{itemize}
+
+\paragraph{Expanding Ring Search:} Per evitare di propagare "inutilmente" una RREQ in tutta la rete, il TTL dell'header IP della RREQ viene aumentato iterativamente, espandendo la ricerca man mano (valori di inizio, incremento e fine sono parametri). 
+
+Senza conoscenze a priori si parte da un TTL standard, se ci sono informazioni riguardo la destinazione (percorso scaduto o interrotto), si usa l'hop count della vecchia entry come TTL.
+
+\paragraph{Processamento e Inoltro:} Quando un nodo riceve una RREQ: 
+\begin{itemize}
+    \item Controlla se ha già visto la richiesta: \texttt{RREQ\_ID} e originator IP già noti
+    
+    \item Aggiorna il percorso verso l'originator: se il SN della richiesta è maggiore di quello posseduto, aggiorna la entry verso l'originator impostando come next hop il nodo da cui è arrivata la richiesta e hop count pari a quello dello RREQ
+    
+    \item Se non può rispondere con RREP, inoltra la richiesta in broadcast (livello IP) ai vicini incrementando di 1 l'hop count e ponendo il SN della DST al massimo tra quello della RREQ e quello presente all'interno della propria routing table
+\end{itemize}
+
+Il propagarsi di una richiesta permette ai nodi che la ricevono di costruire un percorso verso l'originator.
+
+\subsection{Route Reply RREP}
+
+Tipo 2, le flag sono:
+\begin{itemize}
+    \item \texttt{A}: richiede ack, per prevenire link non affidabili
+\end{itemize}
+
+Inoltre contiene:
+\begin{itemize}
+    \item prefix size: usato per subnet, indica la lunghezza del prefisso di rete dell'IP dst
+    
+    \item Destination IP Address, chi ha generato la risposta
+    
+    \item Destination SN
+    
+    \item Lifetime, in ms, tempo di validità della risposta
+\end{itemize}
+
+\paragraph{Creazione:} Chi può generare la risposta: 
+\begin{enumerate}
+    \item La destinazione: quando riceve la RREQ
+    \begin{itemize}
+        \item Incrementa il proprio SN di 1
+        
+        \item Hop count = 0
+        
+        \item Aggiorna lista dei precursori 
+        
+        \item Imposta il campo lifetime, secondo parametro
+        
+        \item Invia RREP lungo il percorso reverse in unicast 
+        
+        \item Drop della RREQ
+    \end{itemize}
+    
+    \item Un nodo intermedio: con delle condizioni:
+    \begin{enumerate}
+        \item Avere una entry con percorso valido per la destinazione
+        
+        \item Flag \texttt{D == 0}
+        
+        \item DST SN della entry $\geq$ DST SN della RREQ
+    \end{enumerate}
+    Se tutte soddisfatte:
+    \begin{itemize}
+        \item Hop count = hop count della entry
+        
+        \item Aggiorna la lista dei precursori
+        
+        \item Imposta campo lifetime, pari a quello della entry
+        
+        \item Invia RREP lungo il percorso reverse in unicast
+        
+        \item Drop della RREQ
+        
+        \item Se flag \texttt{G == 1}, allora invia una RREP anche alla destinazione
+    \end{itemize}
+\end{enumerate}
+
+\paragraph{Processamento e Inoltro:} Quando un nodo riceve un messaggio RREP
+\begin{itemize}
+    \item Aggiorna la entry nella tabella se: la corrente non è valida, DST SN della RREP maggiore di quello della entry o il numero di hop è minore
+    
+    \item Aggiorna
+    \begin{itemize}
+        \item Entry marcata come valida
+        
+        \item Next hop della entry = nodo da cui proviene RREP (DST della RREQ)
+        
+        \item RREP hop count += 1
+        
+        \item Lifetime della entry 
+        
+        \item Lista dei precursori
+    \end{itemize}
+\end{itemize}
+
+\paragraph{RREP con flag Gratuitous:} Durante il ritorno della RREP, ogni nodo intermedio crea il path da se stesso alla destinazione originale della RREQ. Per creare il percorso bidirezionale anche tra nodo che ha risposto e destinazione serve la flag \texttt{G}. 
+
+Se un nodo intermedio riceve RREQ con flag \texttt{G} alzata, deve "costruire" anche il percorso verso la destinazione della RREQ. Il nodo invia quindi 2 RREP indipendenti: 
+\begin{enumerate}
+    \item Verso il nodo originator della RREQ
+    
+    \item Verso la destinazione della RREQ, con parametri atti a "simulare" che la destinazione abbia fatto una RREQ verso l'originator, per completare il path bidirezionale
+\end{enumerate}
+
+\subsection{Hello Message}
+
+Messaggi broadcast con TTL=1, senza incremento di SN, per fornire informazioni riguardo la connettività ai propri vicini. 
+
+RREP speciale con:
+\begin{itemize}
+    \item DST IP = IP del nodo stesso 
+    
+    \item DST SN = SN del nodo 
+    
+    \item Hop count = 0 
+    
+    \item Lifetime = dato da parametri \texttt{ALLOWED\_HELLO\_LOSS * HELLO\_INTERVAL}
+\end{itemize}
+
+Meccanismo facoltativo, usato se non si ricevono altri informazioni da un vicino.
+
+\subsection{Route Error RERR}
+
+Ogni nodo ha il compito di tenere traccia della connettività con i nodi indicati come "next hop" nella tabella di routing. Questa può essere controllata tramite qualsiasi pacchetto a livello di data link o rete (se ricevo informazioni il link funziona).
+
+Quando un nodo \textbf{identifica un link interrotto/scaduto} parte di un percorso attivo: 
+\begin{itemize}
+    \item Vengono invalidati i percorsi esistenti 
+    
+    \item Identifica le destinazioni per le quali viene usato come next hop il link interrotto
+    
+    \item Determina quali vicini nella lista dei predecessori possono essere affetti dal problema e invia un Route Error RERR
+\end{itemize}
+
+Tipo 3, le flag: 
+\begin{itemize}
+    \item \texttt{N} No Delete: indica alla destinazione di non eliminare la entry, il percorso è stato riparato localmente
+\end{itemize}
+
+Altri campi:
+\begin{itemize}
+    \item Destination Count: indica il numero di destinazioni non più raggiungibili contenute nel messaggio
+    
+    \item Unreachable Destination IP Address
+    
+    \item Unreachable Destination SN
+\end{itemize}
+
+Quando viene inviato un messaggio RERR:
+\begin{itemize}
+    \item Link interrotto trovato mentre si prova a inoltrare un pacchetto DATA (era il next hop verso una destinazione)
+    
+    \item Ricezione di pacchetto DATA per una destinazione sconosciuta (l'originator del pacchetto usa informazioni troppo vecchie)
+    
+    \item Ricezione di un pacchetto RERR da un vicino per uno o più percorsi attivi
+\end{itemize}
+
+\paragraph{Processamento e Inoltro:} Quando un nodo riceve una RERR:
+\begin{itemize}
+    \item Marca come invalide le entry della destinazione indicate nel RERR 
+    
+    \item Ogni entry invalidata viene preservata per un tempo (parametro)
+    
+    \item Inoltra RERR ai predecessori 
+\end{itemize}
+
+\paragraph{Local Repair:} Se un nodo riceve un pacchetto per una destinazione "non troppo lontana" (distanza definita) il cui percorso è interrotto, allora il nodo prova a riparare il percorso tramite una RREQ con TTL tale da non raggiungere la sorgente del pacchetto DATA (hop count del percorso verso originator). 
+
+Due possibili esiti del tentativo di riparazione: 
+\begin{itemize}
+    \item procedura fallisce: manda RERR
+    
+    \item trova un percorso alternativo: aggiorna la propria entry
+\end{itemize}
+
+Se il percorso trovato è più lungo del precedente, invia una RERR con flag \texttt{N} alzata, sta alla sorgente decidere come procedere (la nuova lunghezza è accettabile o serve una RREQ?).
