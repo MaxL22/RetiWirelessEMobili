@@ -1,0 +1,121 @@
+% !TeX spellcheck = it_IT
+\section{Satellitare}
+
+Parametri importanti per la comunicazione satellitare: 
+\begin{itemize}
+    \item \textbf{Piano orbitale:} "cerchio" secondo cui il satellite si muove
+    
+    \item \textbf{Angolo di Azimuth:} orientamento rispetto al nord geografico
+    
+    \item \textbf{Angolo di elevazione:} angolo rispetto all'orizzonte
+    
+    \item \textbf{Angolo di copertura:} angolo tridimensionale della superficie terrestre visibile dal satellite
+    
+    \item \textbf{Lunghezza fisica del link:} la distanza dal satellite, importante per i tempi di trasmissione e varia in base al punto dell'orbita
+    
+    \item \textbf{Attenuazione in funzione dell'angolo di elevazione:} l'angolo di elevazione determina lunghezza del link e di conseguenza l'attenuazione
+\end{itemize}
+
+\subsection{Orbite}
+
+\paragraph{Geostationary Earth Orbit GEO:} Orbita geostazionaria
+\begin{itemize}
+    \item periodo 24h 
+    
+    \item visibilità permanente
+    
+    \item angolo di elevazione fisso
+\end{itemize}
+
+Circa 35786km di altezza, ruota alla stessa velocità della Terra, quindi sembra fisso, permettendo di usare antenne fisse, allo stesso tempo avendo una copertura molto elevata. 
+
+Di contro, alto delay, bassa qualità del segnale (molto lontano).
+
+\paragraph{Low Earth Orbit LEO:} Orbita più vicina alla terra
+\begin{itemize}
+    \item periodo 1.5-2h
+    
+    \item visibilità 15/20 minuti per passaggio
+    
+    \item copertura 6000km
+\end{itemize}
+
+Rilevanti in particolare per applicazioni di comunicazione, hanno ridotto delay e RTT, necessitano di minore potenza di trasmissione. Posizionati a quota tra 160 e 2000km, sorvolano aree diverse a ogni passaggio, con una copertura relativamente limitata.
+
+Il basso delay viene al costo di una limitata copertura e relativa necessità di grandi costellazioni, assieme a una gestione più complessa per quanto riguarda tracciamento, handover e comunicazione tra satelliti.
+
+\paragraph{Medium Earth Orbit MEO:} Via di mezzo:
+\begin{itemize}
+    \item periodo 5-10h
+    
+    \item visibilità 2-8 ore per passaggio
+    
+    \item copertura 12000-15000km
+\end{itemize}
+
+Richiedono maggiore potenza e hanno RTT più lungo (decine di $ms$) dei LEO, ma comunque significativamente minore dei GEO. Usati da GNSS.
+
+\subsection{Architettura}
+
+Composta da 3 segmenti: 
+\begin{itemize}
+    \item \textbf{Space segment:} i satelliti e le relative costellazioni, possibili anche link inter-satellitari
+    
+    \item \textbf{Ground segment:} la "parte di controllo" del sistema, include gateway e tutto ciò che concerne le stazioni di terra per il controllo
+    
+    \item \textbf{User segment:} utilizzatori dei servizi, mobili o fixed
+\end{itemize}
+
+\subsection{Topologie di Rete}
+
+\paragraph{Punto-punto:} Il satellite è solo ponte radio; due stazioni non si vedono e usano il satellite per comunicare. Permette una copertura maggiore rispetto alla rete terrestre, con un'elevata banda, ma delay e potenza elevati.
+
+\paragraph{Broadcast:} Si sfrutta l'area coperta dal satellite, un solo satellite può trasmettere a molti ricevitori.
+
+\paragraph{Mesh:} Link tra stazioni usando il satellite come ripetitore, non necessario un gateway.
+
+\paragraph{Star:} Ogni stazione comunica passando dal satellite verso un gateway, il quale provvederà a smistare le comunicazioni.
+
+\paragraph{Hybrid:} Combina star e mesdh, alcune comunicazioni passano dal gateway, ma si possono avere anche link diretti tra le stazioni 
+
+\subsection{MAC}
+
+I protocolli possono essere: 
+\begin{itemize}
+    \item Contention free: FDMA, CDMA, TDMA
+    
+    \item Contention-based random access: slotted RA, unslotted RA
+\end{itemize}
+
+\paragraph{TDMA:} Slot di tempo dedicato a ogni trasmittente. Per il downlink viene mandato un pacchetto unico, sta al ricevitore filtrare ciò che gli serve.
+
+\paragraph{FDMA:} Minore efficienza spettrale, richiede di tenere conto dell'effetto doppler, soprattutto per orbite basse. Può essere combinata con TDMA.
+
+\paragraph{CDMA:} Usato da GNSS. Soffre del near-far problem, molto rilevante per distanze \textit{satellitari}, poco rilevante per sistemi di posizionamento.
+
+\paragraph{OFDMA:} Elevata sensibilità all'effetto doppler, richiede molta precisione.
+
+\subsection{Integrated Satellite - Terrestrial Networks and 5G/6G NTN Technology}
+
+Si vuole migliorare il servizio 5G/6G, anche in aree remote, con migliore continuità, affidabilità e scalabilità della rete.
+
+\subsubsection{Architetture possibili}
+
+Come si può integrare la rete satellitare alla rete operatore?
+
+\paragraph{Relay:} Satellite per la comunicazione, relay a terra usato come ripetitore del segnale.
+
+\paragraph{Backhaul:} Il satellite viene usato come rete di backhaul per reti difficili da raggiungere (gNodeB lontane dalla CN).
+
+\paragraph{Direct Access:} La rete satellitare offre connettività direttamente ai dispositivi (device vede direttamente il satellite).
+
+\subsubsection{Opzioni di integrazione}
+
+Per integrare il satellite: 
+\begin{itemize}
+    \item \textbf{NTN Transparent Payload:} il satellite fa solo da relay, dialoga con le gNodeB, il gateway con le BS; si tratta di solo processore fisico
+    
+    \item \textbf{NTN Regenerative Payload:} Il satellite implementa lo stack di una gNodeB e ne svolge le funzionalità; implementa tutta la BS
+    
+    \item \textbf{NTN Regenerative Payload with Functional Split:} il satellite svolge solo le funzionalità del modulo distributed unit della gNodeB; i livelli di protocollo implementati dipendono dall'opzione di splitting scelta dall'operatore
+\end{itemize}

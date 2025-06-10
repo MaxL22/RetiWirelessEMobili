@@ -26,6 +26,263 @@ La rete si divide in:
     \end{itemize}
 \end{itemize}
 
-\subsection{Modulazione e Codifica}
+\subsection{E-UTRAN}
 
-%p 126
+\subsubsection{Modulazione e Codifica}
+
+Il processo di trasmissione è: 
+\begin{itemize}
+    \item Codifica da bit a simboli, ad esempio QPSK 
+    
+    \item Modulazione usando una frequenza intermedia (per variare leggermente la portante, ad esempio per OFDMA)
+    
+    \item Conversione DAC
+    
+    \item Modulazione sulla portante
+    
+    \item Selezione della componente in fase 
+    
+    \item Trasmissione
+\end{itemize}
+
+In ricezione: 
+\begin{itemize}
+    \item Si misura segnale, rumore e sfasamento $\psi$
+    
+    \item Si rimuove la portante
+    
+    \item Filtro passa-basso per il rumore termico
+    
+    \item Conversione ADC
+    
+    \item Channel estimation per capire la sfasatura $\psi$, tramite un pilot standard
+    
+    \item Conversione simboli bit
+\end{itemize}
+
+Le \textbf{possibili codifiche} sono:
+\begin{itemize}
+    \item BPSK: usato per segnali di controllo a basso livello
+    
+    \item QPSK: per messaggi di controllo e dati in caso di scarsa qualità del segnale
+    
+    \item 16/64-QAM: per trasmissione dati
+\end{itemize}
+
+Si una modulazione e codifica in base alla qualità del canale AMC, ognuno con la relativa coding rate. Il control plane ha una codifica diversa dal data plane, meno variabile.
+
+\paragraph{Riuso Frequenze:} Si usa tutta la banda disponibile, per evitare interferenze i bordi delle celle hanno frequenze diverse, coordinate tramite l'interfaccia X2, il centro usa una banda maggiore. 
+
+\paragraph{Durata Simboli:} Decisa in base a distanza tra le sotto-portanti ($15kHz$) e i punti da campionare per la FFT (2048), di conseguenza
+$$ T_S = \frac{1}{2048 \cdot 15000 Hz} \approx 32.6 ns$$
+
+Un simbolo dura $2048 T_S = 66.7 \mu s$
+
+I simboli sono organizzati in slot da $0.5ms = 15360 T_S$, con un prefisso ciclico per evitare ISI causa multipath. Ogni slot contiene 7 simboli, ognuno con un preambolo.
+
+\paragraph{Duplex:} Ogni eNodeB può essere configurato in una di 2 modalità: 
+\begin{itemize}
+    \item FDD: frequenze diverse per uplink e downlink
+    
+    \item TDD: una sola frequenza per uplink e downlink, 7 possibili configurazioni che permettono flessibilità sul tempo dedicato a uplink e downlink; decisa in base all'utilizzo
+\end{itemize}
+
+\paragraph{Uplink Timing Advance:} Tra downlink e inizio dell'uplink si ha un periodo di guardia per tenere conto dell'anticipo di trasmissione in uplink; UE comincia a trasmettere in anticipo rispetto al frame della BS, per allineare il tempo di ricezione con il frame effettivo (segnale ci mette tempo ad arrivare).
+
+\subsubsection{OFDMA}
+
+La banda viene divisa in sotto-bande ortogonali di ampiezza $15kHz$, organizzate in Resource Block, i quali rappresentano le minime quantità di risorse allocabili a un singolo dispositivo.
+
+Per trasmettere: 
+\begin{itemize}
+    \item Flussi di bit vengono trasformati a simboli
+    
+    \item Simboli vengono mappati sui resource block
+    
+    \item IFFT per ottenere il segnale OFDM complesso 
+    
+    \item I campioni temporali paralleli vengono ricombionati in un unico flusso seriale
+    
+    \item Si aggiunge il prefisso ciclico 
+    
+    \item DAC e trasmissione
+\end{itemize}
+
+Il ricevitore fa il processo inverso, estraendo solo il flusso di bit per l'UE che sta ricevendo e correggendo il segnale tramite channel estimation. 
+
+\paragraph{Scheduler:} Tutte le comunicazioni da e per i dispositivi sono gestite dall'eNodeB, che determina come allocare le risorse.
+
+\subsubsection{Collegamento alla CN}
+
+Oltre al collegamento S1 diretto alla CN, si ha un collegamento tra BS X2, con protocolli dedicati, che permette di svolgere compiti locali alle BS.
+
+L'interfaccia X2 permette: 
+\begin{itemize}
+    \item Gestione handover in alternativa a S1 (se all'interno della stessa TA)
+    
+    \item Funzionalità di Self Organizing Network SON: load balancing, gestione interferenze 
+    
+    \item Mantenimento dello storico delle ultime celle visitate per gestire l'effetto ping-pong
+\end{itemize}
+
+In generale, permette handover alternativo e meccanismi SON e di coordinazione tra celle per migliorare l'efficienza della rete.
+
+\paragraph{Tracking Area TA:} Le BS sono raggruppate il TA per questioni di ridondanza, fault tolerance e load balancing. Ogni TA ha uno o più gruppi di moduli di controllo.
+
+\subsection{Architettura}
+
+\subsubsection{Control Plane}
+
+I moduli direttamente coinvolti nel control plane sono UE, eNodeB e MME. La BS è dual stack in quanto collega "entrambi i lati". 
+
+\paragraph{UE - eNodeB:} Per la comunicazione con l'UE (dall'alto verso il basso):
+\begin{itemize}
+    \item Radio Resource Control RRC: gestisce paging, mobilità (handover), QoS e raccolta di misurazioni UE
+    
+    \item Packet Data Convergence Protocol PDCP: convergenza tra IP e mobile, comprime gli header mandando solo le differenze
+    
+    \item Radio Link Control RLC: correzione errori, ritrasmissione e segmentazione pacchetti di livelli superiori
+    
+    \item MAC: gestione dell'accesso al canale radio e scheduler
+\end{itemize}
+
+\paragraph{eNodeB - MME:} Tra BS e CN:
+\begin{itemize}
+    \item Livello applicazione interfaccia S1 S1-AP: trasporto del traffico di controllo tra E-UTRAN e CN
+    
+    \item Stream Control Transmission Protocol SCTP: protocollo livello di trasporto usato per ottimizzare il trasporto del traffico di segnalazione
+    
+    \item IP (interno alla rete operatore): identifica specifici eNodeB e MME all'interno della rete operatore, si occupa di routing control plane
+\end{itemize}
+
+\paragraph{Perché usare SCTP:} Le motivazioni dietro l'uso di SCTP (al posto che TCP) sono: 
+\begin{itemize}
+    \item Head of Line Blocking Problem: TCP buffera ma non invia pacchetti al livello superiore se i segmenti non sono in ordine rispetto a tutti gli altri, per gestire molteplici stream all'interno di una connessione basta un ordinamento parziale: SCTP aggiunge uno stream ID a ogni pacchetto, definendo multipli stream all'interno di una connessione, se viene perso un pacchetto questo blocca solo i pacchetti con lo stesso stream ID; garantisce ordine parziale dello stream, non importa il totale
+    
+    \item SCTP è message oriented: i messaggi sono frammentati, mentre TCP lascia aggiungere alle applicazioni dei delimitatori per marcare diversi messaggi
+    
+    \item SCTP supporta Multi Homing (TCP no): una connessione permette gruppi di indirizzi sorgente e destinazione, non uno singolo
+\end{itemize}
+
+\subsubsection{User Plane}
+
+I moduli coinvolti nello user plane sono: UE, eNodeB, S-GW, P-Ge, servizi operatore. 
+
+Lo stack tra UE e eNodeB è uguale al control plane per PHY, MAC, RLC e PDCP, sopra possiede uno stack IP classico. 
+
+Sono presenti protocolli IP a diversi livelli: 
+\begin{itemize}
+    \item Tra UE e P-GW: IP interno, valido per tutta la connessione UE e P-GW, assegnato con DHCP e nascosto tramite NAT
+    
+    \item Tra P-GW e mondo esterno: indirizzo IP pubblico del P-GW
+    
+    \item Diversi indirizzi IP interni alla rete operatore
+\end{itemize}
+
+\subsubsection{GPRS Tunneling Protocol GTP}
+
+La connessione logica tra UE e P-GW è identificata da una sessione Packet Data Network PDN e l'UE è libero di muoversi all'interno della rete, quindi eNodeB e S-GW potrebbero cambiare durante la durata della connessione.
+
+Per non aggiornare le tabelle di routing a ogni movimento (impossibile), il pacchetto gestito dall'eNodeB è incapsulato GTP. Viene aggiunto un Tunnel ID TEID per identificare la connessione, in modo che lo UE non perda la sessione anche muovendosi.
+
+\subsection{Bearers}
+
+Si possono astrarre a più livelli i bearer usati nella rete. L'astrazione maggiore è tra UE e servizio finale, al contrario si possono considerare tutti i beare tra ogni componente della rete (radio verso la eNodeB, S1 verso S-GW, S5/S8 verso P-FW, external verso il servizio).
+
+\subsubsection{Bearer multipli}
+
+Si possono usare multipli bearer per gestire la QoS. Durante la registrazione viene creato un default bearer, ma si può avere un dedicated bearer con lo stesso indirizzo del default bearer da cui deriva. 
+
+Alternativamente si può avere un altro default bearer, verso un nuovo P-GW, creato dopo la registrazione. 
+
+Massimo di 8 bearer.
+
+In base al servizio di può avere uno specifico QoS Class Identifier QCI, con le rispettive caratteristiche richieste. I Traffic Flow Template TFT sono "mappe" istanziate al momento della connessione sul dispositivo e contengono regole generate dall'operatore per mappare un servizio a una classe QCI.
+
+\subsection{Collegamento alla rete operatore}
+
+Quando un dispositivo deve collegarsi può essere in uno degli stati: 
+\begin{itemize}
+    \item \texttt{EMM-DEREGISTERED}: EPS Mobility Management non registrato; all'interno della CN nessuno gestisce il dispositivo 
+    
+    \item \texttt{ECM-IDLE}: EPS Connection Management, connessione tra UE e MME non attiva
+    
+    \item \texttt{RRC\_IDLE}: Radio Resource Control, UE non connesso a nessuna eNodeB (risparmio energetico)
+\end{itemize}
+
+Prima di potersi collegare alla BS l'UE deve \textbf{scegliere la cella}, basandosi su potenza di trasmissione e segnale ricevuto. 
+
+Poi comincia la \textbf{procedura di contesa} per l'\textbf{accesso allo scheduling} della cella selezionata.
+
+Poi avviene la fase di \textbf{configurazione livelli MAC e L1}, ovvero i canali radio per la trasmissione.
+
+A questo punto il dispositivo è \texttt{RRC\_CONNECTED}, ma bisogna \textbf{collegarlo alla CN}, tramite messaggi di controllo con l'MME; prima fase che coinvolge la CN.
+
+A questo punto il dispositivo è connesso (se tutto è andato a buon fine). Nel caso UE rimanga inattivo lo stato non diventa "deregistrato", ma \texttt{RRC\_IDLE} (non bisogna ripetere tutta la procedura).
+
+\subsection{Procedura di Handover}
+
+In LTE solo hard handover. Due classi di hard handover: 
+\begin{itemize}
+    \item \textbf{Seamless handover:} minore latenza, ammette ritrasmissioni, non si vuole far percepire l'handover, il più veloce possibile 
+    
+    \item \textbf{Lossless handover:} maggiore latenza ma si dà priorità a non perdere dati. Per evitare di perdere pacchetti quando il device non è collegato a nulla durante l'handover, il downlink andrà alla vecchia BS che inoltrerà i dati tramite X2 alla nuova
+\end{itemize}
+
+\subsubsection{Handover S1}
+
+L'UE vuole cambiare BS e MME (fuori TA). 5 parti: source eNodeB, source MME, target eNodeB, target MME, UE. L'handover viene deciso solo lato eNodeB. 
+
+Passaggi: 
+\begin{itemize}
+    \item eNodeB source: richiesta di handover al source MME 
+    
+    \item source MME: Forward Relocation Request al target MME 
+    
+    \item target MME: richiesta di handover al target eNodeB
+    
+    \item target eNodeB prepara le risorse, poi risponde al target MME con handover request ack
+    
+    \item target MME: risponde alla relocation request del source MME
+    
+    \item source MME: invia a source eNodeB comando di handover
+    
+    \item source eNodeB: inoltra il comando di handover allo UE
+    
+    \item source eNodeB: invia il trasferimento dello stato di gestione al source MME
+    
+    \item Se lossless handover si ha un collegamento X2 tra le eNodeB
+    
+    \item target MME: una volta avvenuto il trasferimento, invia al target eNodeB il trasferimento dello stato
+    
+    \item UE: invia conferma dell'handover al target eNodeB
+    
+    \item target eNodeB: invia handover notify, conferma dell'handover al target MME
+    
+    \item due MME si scambiamo Forward Relocation Complete e relativo ack
+    
+    \item UE: invia al suo MME l'update della TA
+    
+    \item source MME: dice a source eNodeB di rilasciare le risorse
+\end{itemize}
+
+In generale: predisposizione delle risorse, comando di handover, una volta confermato si rilasciano le risorse originali.
+
+\subsubsection{Handover X1}
+
+Quando non bisogna cambiare TA e MME. Passaggi: 
+\begin{itemize}
+    \item source eNodeB: invia richiesta di handover a target eNodeB tramite X2
+    
+    \item target eNodeB fa setup delle risorse, poi invia ack alla source eNodeB
+    
+    \item source eNodeB: invia comando di handover allo UE
+    
+    \item trasferimento di stato tra le eNodeB
+    
+    \item UE: invia messaggio di handover completato alla target eNodeB
+    
+    \item path switch request e relativo ack per il cambio di bearer tra rete core e RAN (cambio TEID)
+    
+    \item target eNodeB: una volta terminata path switch dice alla source eNodeB di rilasciare le risorse
+\end{itemize}

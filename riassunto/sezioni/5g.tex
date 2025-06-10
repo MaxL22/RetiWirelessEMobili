@@ -1,0 +1,166 @@
+% !TeX spellcheck = it_IT
+\section{5G}
+
+Si vogliono ampliare i casi d'uso e allontanarsi dalla formula one-size-fits-all. Secondo l'ITU si possono classificare le applicazioni in tre principali categorie di utilizzo: 
+\begin{itemize}
+    \item \textbf{Enhanced Mobile Broadband eMBB:} servizi orientati alle persone, elevata banda
+    
+    \item \textbf{Ultra-reliable and Low-latency communication (uRLLC):} servizi orientati alle industrie, bassa latenza e affidabilità
+    
+    \item \textbf{Massive Machine Type Communications (mMTC):} altà densità di connessioni
+\end{itemize}
+
+\subsection{Tecnologie abilitanti}
+
+\subsubsection{Software Defined Networking SDN}
+
+Un'applicazione di rete normale ha dati e controllo nello stesso layer. SDN rimuove dai dispositivi di rete la parte di controllo, centralizzata in un SDN controller collegato con tutti i dispositivi e che implementa tutte le regole di controllo.
+
+Tutte le regole di controllo sono implementate a livello software al di sopra del data layer. Offre un'interfaccia unificata all'esterno della rete e permette una conoscenza topologica globale della rete stessa.
+
+Con data e control plane definiti a livello software, le funzionalità possono essere modificati anche dopo la definizione dei layer stessi, cosa non fattibile nei sistemi tradizionali.
+
+Si vuole andare verso SDN con anche data plane programmabile: si può programmare come il pacchetto ricevuto viene processato, anche il livello dati ha funzionalità programmabili.
+
+Vantaggi:
+\begin{itemize}
+    \item flessibilità nella gestione della rete
+    
+    \item visione centralizzato
+    
+    \item semplificazione della gestione a livello applicativo 
+    
+    \item testine e configurazione di nuovi protocolli più rapida
+\end{itemize}
+
+Sfide: 
+\begin{itemize}
+    \item controller sono single point of failure
+    
+    \item permette di reagire real time, ma questo deve essere implementato in modo efficiente
+    
+    \item ottimizzazione del numero di regole, va gestita la complessità a cui la configurazione può portare
+\end{itemize}
+
+\subsubsection{Network Function Virtualization NFV}
+
+Nel modello tradizionale, ogni componente necessita di hardware dedicato. Con NFV si separano le funzionalità hardware e software, a partire da hardware standard si installano le funzionalità software richieste, virtualizzando questa parte. 
+
+Si parte da una \textbf{Service Function Chain (SFC)}: grafo delle funzionalità necessarie (requisiti del servizio).
+
+Il \textbf{NFV Orchestrator} contiene template per determinate funzionalità e le istanzia secondo la configurazione necessaria (in base alla SFC). Si occupa anche di dove allocare le risorse in modo da rispettare tutti i vincoli.
+
+I componenti principali dell'architettura sono: 
+\begin{itemize}
+    \item \textbf{NFV Infrastructure:} all'interno della quale vengono montate le Virtual Netowork Functions VNF; contiene tutte le risorse hardware e virtualizzate. Per ogni istanza di VNF c'è un Element Management System EMS che tiene traccia del suo stato di funzionamento
+    
+    \item \textbf{NFV MANO:} contiene
+    \begin{itemize}
+        \item Virtual Infrstructure Manager (VIM): definisce quali risorse sono disponibili e dove (collegato all'architettura)
+        
+        \item VNF Manager (VNFM): gestisce tutte le VNF istanziate, collegato al VIM per dire \textit{cosa fare}
+        
+        \item Orchestrator: coordina VNFM e VIM, collegato anche alla rete operatore per gestire tutte le richieste
+    \end{itemize}
+\end{itemize}
+
+Vantaggi: 
+\begin{itemize}
+    \item Flessibilità, scalabilità e agilità della rete e dei servizi, dati in particolare dalla virtualizzazione
+    
+    \item Indipendenza hardware e software
+    
+    \item Rapida prototipizzazione e introduzione di nuovi servizi
+    
+    \item Uso delle risorse ottimizzato e condiviso 
+\end{itemize}
+
+Sfide: 
+\begin{itemize}
+    \item l'hardware deve garantire certe prestazioni, nonostante l'overhead di virtualizzazione
+    
+    \item Le risorse vanno gestite in maniera efficiente
+    
+    \item Più software significa potenzialmente più problematiche di sicurezza
+    
+    \item Bisogna gestire la fase di transizione, devono coesistere software e hardware network function
+\end{itemize}
+
+\subsection{Centralized-RAN C-RAN e Virtual-RAN V-RAN}
+
+Per permettere una maggiore densificazione delle antenne, si separa la Remote Radio Head RRH e la Baseband Unit BBU; il fisico viene separato dai livelli MAC e superiori, mettendoli in remoto (ma non troppo), usando delle virtual Baseband Unit vBBU, con al loro interno tutte le tecnologie necessarie, permettendo una migliore gestione del carico tramite virtualizzazione.
+
+Per scalare la rete è sufficiente installare nuove RRH, senza dover aggiungere nuove BBU, ma solamente scalando orizzontalmente la vBBU già esistente.
+
+\subsection{Mobile Edge Computing MEC (ETSI)}
+
+Si vogliono avere risorse computazionali a più livelli, il più possibile vicino all'utente; ovviamente con limitazioni di capacità e applicazioni disponibili.
+
+Questo permette di decentralizzare e localizzare l'architettura, riducendo latenza, jitter e traffico verso la core network.
+
+Allo stesso tempo bisogna pensare come e dove posizionare i moduli, come gli standard MEC possono coesistere con gli altri standard 3GPP, se ci possono essere problemi di sicurezza, performance o resilienza.
+
+\subsection{Architettura}
+
+Rispetto agli standard precedenti, in 5G viene semplificato il data plane, mentre si aumenta la divisione dei compiti nel control plane.
+
+La comunicazione all'interno del data plane e tra i due piani è punto-punto tra le componenti, mentre all'interno del control plane viene usata una service-based architecture con modello publish subscribe: ogni componente è una VNF che implementa un servizio con la relativa API; ogni VNF può consumare uno o più API delle altre. 
+
+\paragraph{Control Plane:} All'interno si trovano:
+\begin{itemize}
+    \item \textbf{NRF Network Repository Function:} permette a ogni servizio di registrarsi e rendersi individuabile dalle altre VNF
+    
+    \item \textbf{AMF Access \& Mobility Management Function:} gestisce la maggior parte del traffico di segnalazione per autenticazione, registrazione e mobilità
+    
+    \item \textbf{SMF Session Management Function:} gestisce il controllo relativo alla creazione di sessioni dati, permette la creazione di sessioni user plane; unico componente che comunica con il data plane
+    
+    \item \textbf{UDM Unified Data Management Function:} front-end unico per tutti i dati che ogni VNF potrebbe dover richiedere, di qualsiasi tipo
+    
+    \item \textbf{PCF Policy Control Function:} gestione e controllo delle politiche di accesso, mobilità in rete e utilizzo dello user plane
+    
+    \item \textbf{AUSF Authentication Server Function:} gestisce autenticazione e generazione delle chiavi di cifratura
+    
+    \item \textbf{NSSF Network Slice Selection Function:} determina la migliore slice da utilizzare per un determinato servizio
+    
+    \item \textbf{NEF Network Exposure Function e AF Application Function:} la NEF espone all'esterno della rete funzionalità, la AF permette all'applicazione di rendersi visibile all'interno della CN; permette il dialogo tra rete e servizi esterni
+\end{itemize}
+
+\paragraph{User Plane:} Semplificato, rimangono: 
+\begin{itemize}
+    \item UE
+    
+    \item \textbf{RAN}: composta da gNodeB
+    
+    \item \textbf{UPF User Plane Function:} si occupa dell'inoltro di pacchetti utente da e verso la rete esterna Data Network DN; l'interfaccia N9 di loop permette routing tra DN
+\end{itemize}
+
+\paragraph{Protocol Data Unit PDU:} I pacchetti utente viaggiano all'interno di una connessione end-to-end sullo user plane chiamata PSU session; la sessione va da uno UE a uno specifico DN, sotto il livello applicativo, sopra IP-MAC-PHY.
+
+Un singolo UE può avere più connessioni attive verso diverse DN, attraverso diverse UPF (una per collegamento). L'interfaccia N9 permette di collegare tra loro più UPF, usando una ulteriore UPF chiamata ULCL \textbf{(UpLink CLassifier)} che permette di classificare il traffico in downlink, facendo routing verso la DN corretta.
+
+\subsection{Network Slices}
+
+Il network slicing trasforma la rete in un paradigma dinamico nella quale reti logiche vengono create on demand, con risorse e topologie ottimizzate per uno scopo specifico. 
+
+Una Network Slice Instance è un insieme di network function e risorse configurate in modo da fornire una rete logica che soddisfa determinate caratteristiche. Viene costruito un overlay di rete sopra il fisico per ogni esigenza. Si possono avere anche diversi siti di installazione delle diverse NF.
+
+Permette non solo di stabilire le caratteristiche del servizio, ma anche la composizione delle NF che lo compongono. Permette grande flessibilità della rete, oltre che alla QoS, sempre grazie alla virtualizzazione.
+
+Per identificare la slice si usa uno \textbf{slice identifier} di 32 bit: i primi 8 indicano l'utilizzo, gli altri 24 l'istanza specifica.
+
+\subsection{5G NR (New Radio)}
+
+Ricercando latenze minime, si deve ridurre la durata di $10ms$ degli slot OFDMA: la soluzione è ridurre la durata dei simboli.
+
+Lo standard 5G NR definisce 5 durate possibili, chiamate \textbf{numerology}, e due livelli di frequenze: 
+\begin{itemize}
+    \item FR1: $410MHz$ - $7125MHz$
+    \item FR2: $24250MHz$ - $52600MHz$
+\end{itemize}
+
+Per ogni numerology $\mu$ si ha una distanza tra le frequenze $\Delta f$ tale che
+$$ \Delta f = 2^\mu \cdot 15 kHz$$
+
+Raddoppiare la banda permette di dimezzare il tempo per il simbolo. 
+
+All'interno dello scheduling si possono allocare resource block con numerology diverse, anche in base alla slice utilizzata.
