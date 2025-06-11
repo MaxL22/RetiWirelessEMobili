@@ -11,4 +11,42 @@
         
         In ambito IoT, in generale, i dati da trasmettere sono in quantità limitata e si dà la priorità a un basso consumo energetico. In questo caso tenere la radio spenta per la maggior parte del tempo può essere vantaggioso (i.e., non bisogna cambiare spesso la batteria ai sensori).
     \end{solution}
+    
+    \question Cosa si intende per Scatternet in una rete Bluetooth? Come viene gestita rispetto a una Piconet?
+    
+    \begin{solution}
+        Una rete composta da un singolo master e diversi slave è definita Piconet. Se uno o più dispositivi appartengono a più piconet contemporaneamente si crea una Scatternet. 
+        
+        Le due (o più) piconet rimangono completamente indipendenti, clock, sequenza di hopping e slot di tempo completamente differenti, sta al dispositivo collegato a entrambe gestire la complessità aggiuntiva che questo porta.
+        
+        Sui 79 canali che Bluetooth usa per fare frequency hopping potrebbe capitare una sovrapposizione all'interno della scatternet, per evitare interferenze si usa CDMA (il master fornisce un codice ortogonale a ogni dispositivo).
+    \end{solution}
+    
+    \question Descrivere il funzionamento della modalità di accesso al canale Slotted CSMA/CA utilizzata dal livello MAC dello standard 802.15.4 (usato da ZigBee e Thread).
+    
+    \begin{solution}
+        La modalità CSMA/CA si fonda sull'invio di beacon da parte del coordinatore, usati per sincronizzare i dispositivi e organizzare i periodi di trasmissione.
+        
+        All'interno del superframe (divisione, logica, del tempo di trasmissione data dal coordinatore) sono presenti slot con diverso tipo di accesso: 
+        \begin{itemize}
+            \item Contention Access Period CAP: accesso al canale a contesa, usando CSMA/CA
+            
+            \item Contention Free Period CFP: intervallo di tempo per le comunicazioni con banda riservata
+        \end{itemize}
+        
+        Nella modalità a contesa, un dispositivo, prima di trasmettere, verifica che il canale sia libero. 
+        
+        Per verificare la condizione del canale: 
+        \begin{itemize}
+            \item Viene deciso un valore casuale di backoff $[0, 2^{BE} - 1]$, dove il Backoff Exponent $BE$ è un parametro, e aspetta tale numero di slot (ognuno dura 20 simboli)
+            
+            \item Dopo l'attesa del numero casuale di slot vengono fatti un numero $CW$ (Contention Window, parametro) di CCA ravvicinati tra loro
+            
+            \item Se il canale è risultato libero in tutti i CCA il dispositivo comincia a trasmettere
+            
+            \item Se il canale è occupato, vengono incrementati di 1 $BE$ e $NB$ (Numero di Backoff, inizialmente 0), prima di ritentare; dopo 4 tentativi il livello MAC dichiara transmission failure
+        \end{itemize}
+        
+        In qualsiasi caso, la trasmissione deve terminare nel numero di slot dedicati al CAP. Se il numero di slot non è sufficiente per la trasmissione viene rimandata al superframe dopo; similmente, se il conteggio durante il random backoff eccede il numero di slot, riprende al superframe successivo.
+    \end{solution}
 \end{questions}
