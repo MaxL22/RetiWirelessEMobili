@@ -2,9 +2,27 @@
 \section{4G LTE}
 
 \begin{questions}
-    \question Domanda
+    %Non mi piace la risposta, ma non ho davvero molto da dire su questo
+    \question Descrivere il funzionamento del protocollo GTP (GPRS Tunneling Protocol) utilizzato nella rete mobile. Inoltre, discutere le motivazioni che hanno portato all'introduzione di questo protocollo e quali problemi risolve.
     
     \begin{solution}
-        Risposta
+        Il protocollo GTP è stato introdotto per gestire in modo efficiente la mobilità dei dispositivi. Lo User Equipment UE è libero di muoversi all'interno della rete, potenzialmente cambiando il punto di accesso alla rete (eNodeB e S-GW), cambiare le tabelle di routing di conseguenza sarebbe troppo dispendioso. 
+        
+        L'indirizzo IP del dispositivo dovrebbe rimanere unico per tutta la sessione, quindi GTP aggiunge ai pacchetti un header contenente un identificativo della sessione: Tunnel ID TEID. 
+        
+        In questo modo la sessione dello UE è identificata all'interno della rete operatore tramite il TEID, l'handover, anche a livello di S-GW, può essere gestito in maniera trasparente all'utente e alla rete esterna, il nodo di destinazione deve solo aggiornare le associazioni del TEID.
+    \end{solution}
+    
+    \question Descrivere i 3 principali approcci di riutilizzo delle bande di frequenza nelle reti cellulari per ridurre l'interferenza tra celle adiacenti.
+    
+    \begin{solution}
+        I 3 approcci principali per il riutilizzo delle frequenze sono: 
+        \begin{itemize}
+            \item La più intuitiva è usare frequenze diverse per celle adiacenti, la gestione è semplice ma viene sprecata molta banda in quanto effettivamente ne viene usata solo una porzione per volta
+            
+            \item Per non consumare più banda, una soluzione è usare tecniche di codifica per evitare interferenze tra celle vicine, come ad esempio CDMA (ogni utente ha il suo codice univoco, le trasmissioni sono distinguibili grazie a quello)
+            
+            \item L'ultima soluzione è utilizzare l'intera banda disponibile al centro della cella e ai bordi usare frequenze diverse per celle adiacenti; porta a un migliore uso della banda ma richiede un coordinamento più sofisticato tra le BS, oltre che riuscire a posizionare in maniera abbastanza precisa i dispositivi all'interno della cella
+        \end{itemize}
     \end{solution}
 \end{questions}

@@ -2,9 +2,37 @@
 \section{Trasmissione Wireless}
 
 \begin{questions}
-    \question Domanda
+    \question Descrivere le tecniche di multiplexing TDM, FDM e OFDM. Data la stessa ampiezza di banda, quali sono i vantaggi di OFDM rispetto a FDM?
     
     \begin{solution}
-        Risposta
+        Tutte e tre le tecniche servono per far passare più comunicazioni sullo stesso canale, ma lo fanno in maniera diversa: 
+        \begin{itemize}
+            \item \textbf{Time Division Multiplexing TDM:} tutte le comunicazioni usano la stessa portante in frequenza, ma ognuna ha uno slot di tempo ciclico in cui può trasmettere. Ogni comunicazione ha accesso esclusivo al canale per breve tempo. Può essere usata quando il data rate del canale è molto maggiore del data rate richiesto da una singola comunicazione; richiede una precisa sincronizzazione
+            
+            \item \textbf{Frequency Division Multiplexing FDM:} ogni comunicazione ha una sotto-banda assegnata a uso esclusivo, permettendo la trasmissione in simultanea di tutti i canali. Si può usare quando la banda a disposizione è molto maggiore di quella richiesta da un singolo canale; ha una bassa efficienza spettrale dovuta all'uso di guardie tra le fasce di frequenze, necessarie per evitare interferenze
+            
+            \item \textbf{Orthogonal Frequency Division Multiplexing OFDM:} la banda viene divisa in sotto-portanti ortogonali, frequenze vicine che non causano interferenze tra loro in quanto durante il picco di una frequenza il contributo delle altre è a zero; più robusto a interferenze che riguardano solo alcune sotto-portanti e a problemi di multipath in quanto la distanza tra simboli è maggiore
+        \end{itemize}
+        
+        Considerando la stessa ampiezza di banda, OFDM permette una maggiore efficienza spettrale, non richiedono guardie di frequenza inutilizzata tra un canale e l'altro; allo stesso tempo presenta una maggiore resistenza ai fenomeni di fading e multipath.
+    \end{solution}
+    
+    \question Molte tecnologie wireless codificano e trasmettono le informazioni utilizzando una tecnica denominata Adaptive Modulation and Coding AMC. Descrivere il funzionamento di questa tecnica e vantaggi rispetto a una tecnica di modulazione e codifica statica.
+    
+    \begin{solution}
+        La tecnica AMC permette di adattare dinamicamente lo schema di modulazione e tasso di codifica in base alle condizioni del mezzo di trasmissione, altamente variabili in ambito wireless.
+        
+        In generale, viene misurata la qualità del canale (spesso tramite l'invio di segnali standard) e in base a questa vengono scelti: 
+        \begin{itemize}
+            \item Schema di modulazione: il modo in cui i bit vengono mappati sul segnale analogico, ad esempio QPSK, QAM, \dots; in generale, migliore è il canale maggiore la quantità di bit per simbolo della modulazione, permettendo data rate migliore, ma potenzialmente più suscettibile a errori
+            
+            \item Tasso di codifica: il rapporto tra il numero di bit utili e i bit totali trasmessi dopo la fase di Forward Error Correction; si aggiunge una ridondanza per far rimanere il segnale distinguibile anche in caso di distorsioni, in base alla qualità del canale va deciso quanta ridondanza inserire
+        \end{itemize}
+        
+        La misurazione del canale viene ripetuta a intervalli regolari. Per sapere ogni quanto campionare le condizioni del canale si definisce un Coherence time, lasso di tempo in cui il canale sicuramente non potrà subire cambiamenti significativi
+        $$ T_C = \frac{1}{f_D}$$
+        dove $f_D$ è la frequenza di Doppler, dipende dalla velocità di movimento tra trasmettitore e ricevitore.
+        
+        AMC permette quindi di massimizzare l'utilizzo della capacità del canale, adattandosi a condizioni anche mutevoli, ad esempio passando a uno schema più robusto quando il canale si degrada. In generale permette un throughput migliore rispetto a tecniche statiche, al costo di una maggiore complessità di gestione del sistema.
     \end{solution}
 \end{questions}

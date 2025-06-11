@@ -2,9 +2,13 @@
 \section{WPAN}
 
 \begin{questions}
-    \question Domanda
+    \question Nel protocollo 802.15.4 (Livello PHY e MAC di ZigBee) viene introdotto il concetto di "Duty-Cycle". Descrivere in cosa consiste e che vantaggi porta rispetto a 802.11 (Wi-Fi) per l'utilizzo in ambito IoT.
     
     \begin{solution}
-        Risposta
+        Il coordinatore di una rete ZigBee invia a intervalli regolari dei beacon, utilizzati per sincronizzare i dispositivi e organizzare i periodi di trasmissione. Il tempo tra un beacon e l'altro si divide in una prima parte di attività e una di inattività, per tutti i dispositivi. 
+        
+        Con duty cycle si intende l'alternarsi di periodi di attività e inattività, a radio spenta. Questo permette di ridurre significativamente i consumi rispetto ad altri standard, come 802.11, che richiedono di mantenere la radio sempre accesa. 
+        
+        In ambito IoT, in generale, i dati da trasmettere sono in quantità limitata e si dà la priorità a un basso consumo energetico. In questo caso tenere la radio spenta per la maggior parte del tempo può essere vantaggioso (i.e., non bisogna cambiare spesso la batteria ai sensori).
     \end{solution}
 \end{questions}

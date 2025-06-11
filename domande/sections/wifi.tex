@@ -2,9 +2,34 @@
 \section{WiFi}
 
 \begin{questions}
-    \question Domanda
+    \question Descrivere lo schema di accesso del protocollo 802.11 (Wi-Fi) CSMA/CA. Discutere, inoltre, che "accorgimento" viene aggiunto al meccanismo di backoff per evitare che una stazione attenda un tempo indefinito per accedere al canale.
     
     \begin{solution}
-        Risposta
+        Il sistema Carrier Sense Multiple Access/Collision Avoidance CSMA/CA richiede di aspettare "del tempo" prima di poter trasmettere. Definizioni delle unità di tempo: 
+        \begin{itemize}
+            \item Slot time: unità base di tempo, dipende dal trasmettitore fisico usato 
+            
+            \item SIFS: intervallo più breve, usato per messaggi ad alta priorità
+            
+            \item DIFS: intervallo più lungo, usato per messaggi a bassa priorità, pari a SIFS+2 slot time
+            
+            \item PIFS: intervallo di tempo intermedio, usato per servizi time-bounded, SIFS+slot time
+        \end{itemize}
+        
+        Per trasmettere, un dispositivo: 
+        \begin{itemize}
+            \item Verifica che il canale sia libero tramite un Clear Channel Assessment CCA
+            
+            \item Ascolta per tempo DIFS il canale 
+            
+            \item fa un altro CCA 
+        \end{itemize}
+        Se il canale è risultato libero entrambe le volte, può cominciare a comunicare.
+        
+        Se il canale è occupato: il dispositivo aspetta il termine dell'altra trasmissione, per poi attendere tempo DIFS più un numero random di slot time (random backoff). Viene fatto carrier sense durante tutto il periodo di backoff, se il canale risulta libero può cominciare a trasmettere.
+        
+        Se durante il periodo di contesa il canale torna occupato, al turno successivo il dispositivo riprende il conteggio degli slot dal valore a cui era arrivato.
+        
+        Se necessario ack, il dispositivo attende tempo SIFS per riceverlo al termine della sua trasmissione, prima di presupporre che il frame sia stato corrotto e ritrasmettere. 
     \end{solution}
 \end{questions}
