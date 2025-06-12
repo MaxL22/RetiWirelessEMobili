@@ -36,6 +36,10 @@
     \question Descrivere, con un esempio, il problema del terminale nascosto in una rete Wi-Fi che adotta il protocollo CSMA/CA per l'accesso al canale radio condiviso. Quali modifiche vengono introdotte al protocollo CSMA/CA per risolvere questo problema? 
     
     \begin{solution}
+        Se due terminali A e B, fuori dal rispettivo raggio di copertura, volessero trasmettere a B, vedrebbero il canale libero contemporaneamente, in quanto il meccanismo di carrier sense funziona solo se l'altro dispositivo che comincia a trasmettere può essere rilevato.
         
+        Per risolvere il problema, il sender, dopo aver fatto carrier sense, invia una Request to Send RTS, contenete origine, destinazione e durata stimata della comunicazione da inviare, in questo modo tutti i terminali che ricevono la RTS senza esserne destinatari possono allocare un Network Allocation Vector NAV per la durata della comunicazione, in cui sanno che il canale verso la destinazione indicata sarà occupato.
+        
+        Il destinatario del messaggio risponde con un messaggio di Clear to Send CTS, anch'esso contenente origine, destinazione e durata stimata (rimanente) del messaggio. In questo modo anche i terminali all'interno del raggio di copertura del destinatario possono allocare un NAV per la durata della comunicazione.
     \end{solution}
 \end{questions}

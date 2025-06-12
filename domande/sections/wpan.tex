@@ -49,4 +49,17 @@
         
         In qualsiasi caso, la trasmissione deve terminare nel numero di slot dedicati al CAP. Se il numero di slot non è sufficiente per la trasmissione viene rimandata al superframe dopo; similmente, se il conteggio durante il random backoff eccede il numero di slot, riprende al superframe successivo.
     \end{solution}
+    
+    \question In Bluetooth, la comunicazione all'interno della piconet utilizza FHSS, TDD e TDMA. Descrivere, usando uno schema temporale, come vengono utilizzate queste tre tecniche per la comunicazione tra master e slave all'interno di una Piconet Bluetooth.
+    
+    \begin{solution}
+        In Bluetooth la comunicazione è divisa in slot da $625 \mu s$ e le tecniche utilizzate portano a: 
+        \begin{itemize}
+            \item Time Division Duplex TDD: la comunicazione alterna master e slave, negli slot pari comunica il master, in quelli dispari gli slave
+            
+            \item Time Division Multiple Access TDMA: ogni slot dedicato agli slave viene indirizzato a uno slave specifico
+            
+            \item Frequency Hopping Spread Spectrum FHSS: la banda viene divisa in 79 canali (40 per BLE) e la frequenza da utilizzare per ogni messaggio è determinata dal numero dello slot di tempo e da una sequenza pseudo-casuale condivisa dal master. Viene generata una sequenza casuale di frequenze e allo slot di tempo $n$ viene usata la $n$-esima frequenza. I messaggi possono durare 1, 3 o 5 slot, ma la frequenza utilizzata per un singolo messaggio non cambia durante la trasmissione
+        \end{itemize}
+    \end{solution}
 \end{questions}

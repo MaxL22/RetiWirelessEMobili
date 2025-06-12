@@ -26,9 +26,16 @@
         \end{itemize}
     \end{solution}
     
-    \question Che vantaggi porta il protocollo SCTP rispetto a TCP all'interno del control-plane di 4G LTE?s
+    \question Che vantaggi porta il protocollo SCTP rispetto a TCP all'interno del control-plane di 4G LTE?
     
     \begin{solution}
-        
+        SCTP ha diversi vantaggi all'interno per l'utilizzo all'interno del control-plane 4G, tra cui
+        \begin{itemize}
+            \item Ammette ordinamento parziale: in TCP, se un segmento viene perso, tutti quelli successivi non vengono inviati ai livelli superiori, ma in 4G si ha la necessità di inviare dati relativi a tante connessioni indipendenti, quindi si aggiunge a ogni pacchetto uno Stream ID e la perdita di un pacchetto è bloccante solo rispetto ad altri pacchetti con lo stesso Stream ID
+            
+            \item SCTP è message oriented, al contrario di TCP che è stream oriented e richiede di inserire marcatori per delimitare i singoli messaggi
+            
+            \item SCTP permette il multi-homing: sorgente e destinazione della connessione non devono obbligatoriamente essere indirizzi singoli, possono essere multipli
+        \end{itemize}
     \end{solution}
 \end{questions}

@@ -5,6 +5,15 @@
     \question In quali casi un nodo intermedio (non destinazione) che utilizza il protocollo AODV può rispondere con RREP alla ricezione di una RREQ? Che cosa deve fare il nodo se nel messaggio RREQ il flag Gratuitous è impostato a 1 (Assumendo che possa rispondere)? 
     
     \begin{solution}
+        Un nodo intermedio può rispondere a una RREQ nel caso in cui
+        \begin{itemize}
+            \item Possiede un percorso valido verso la destinazione
+            
+            \item La flag \texttt{D} è a \texttt{0}
+            
+            \item Il SN della entry per il percorso non è minore del SN presente all'interno della RREQ
+        \end{itemize}
         
+        Per rispondere imposta hop count e lifetime pari a quelli presenti nella entry, invia la RREP sul percorso reverse in unicast, drop della RREQ. Se la flag \texttt{G} è alzata, invia una RREP anche verso la destinazione della RREQ originale, per indicare il percorso verso l'origine, quindi con hop count, lifetime, SN pari a quelli presenti nella RREQ, la destinazione è l'origine della RREQ e viceversa. In questo modo "simula" una richiesta di RREQ da parte della destinazione verso il nodo originale, in modo da completare il percorso tra i due.
     \end{solution}
 \end{questions}
