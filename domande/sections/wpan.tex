@@ -62,4 +62,19 @@
             \item Frequency Hopping Spread Spectrum FHSS: la banda viene divisa in 79 canali (40 per BLE) e la frequenza da utilizzare per ogni messaggio è determinata dal numero dello slot di tempo e da una sequenza pseudo-casuale condivisa dal master. Viene generata una sequenza casuale di frequenze e allo slot di tempo $n$ viene usata la $n$-esima frequenza. I messaggi possono durare 1, 3 o 5 slot, ma la frequenza utilizzata per un singolo messaggio non cambia durante la trasmissione
         \end{itemize}
     \end{solution}
+    
+    \question Descrivere, utilizzando un diagramma di sequenza, la procedura di Inquiry e Paging di Bluetooth. Si assuma che sia il dispositivo master e che il dispositivo slave siano nello stato iniziale di standby. Indicare inoltre in quale momento il dispositivo slave viene a conoscenza della specifica sequenza di frequency hopping del master.
+    
+    \begin{solution}
+        In inquiry mode, il master invia periodicamente uno IAC packet su 32 canali standard. Gli slave ascoltano periodicamente su una delle 32 frequenze di wake up. Una volta che lo slave riesce a sentire una trasmissione del master: 
+        \begin{itemize}
+            \item Conoscendo il clock del master, fa un random backoff per poi rispondere con il proprio device address e classe
+            
+            \item Il master risponde con il Device Address Code DAC, sequenza per il frequency hopping e l'Active Member Address AMA
+            
+            \item Lo slave risponde con DAC e ack
+        \end{itemize}
+        
+        La fase di inquiry permette di individuare i dispositivi, il paging serve a stabilire definitivamente la connessione, si ha uno scambio di pacchetti per la sincronizzazione per poi passare alla piconet, usando tutti i 79 canali e la sequenza di hopping completa.
+    \end{solution}
 \end{questions}

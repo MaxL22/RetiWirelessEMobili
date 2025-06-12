@@ -38,4 +38,15 @@
             \item SCTP permette il multi-homing: sorgente e destinazione della connessione non devono obbligatoriamente essere indirizzi singoli, possono essere multipli
         \end{itemize}
     \end{solution}
+    
+    \question In LTE 4G esistono due tipologie di handover: Seamless e Lossless. Come funzionano e in quali casi vengono usati.
+    
+    \begin{solution}
+        In 4G LTE esiste solo hard handover (il dispositivo non è mai collegato a più BS contemporaneamente), ma gli handover si possono distinguere in due classi: 
+        \begin{itemize}
+            \item Seamless handover: latenza minore, ha come obiettivo far percepire il meno possibile l'handover, anche a costo di un (breve) buco nella connessione; viene usato per applicazioni real time, ad esempio traffico VoIP
+            
+            \item Lossless handover: maggiore latenza, ma ha come obiettivo non perdere nessun pacchetto; viene usato quando la ritrasmissione sarebbe troppo lenta, come ad esempio per traffico HTTP/FTP. Per evitare di perdere pacchetti in downlink, il flusso in download continuerà a mandare pacchetti alla vecchia BS, che li inoltrerà tramite interfaccia X2 alla BS di destinazione, la quale farà il buffer dei dati fino al termine dell'handover
+        \end{itemize}
+    \end{solution}
 \end{questions}

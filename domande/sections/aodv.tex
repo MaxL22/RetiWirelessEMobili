@@ -16,4 +16,75 @@
         
         Per rispondere imposta hop count e lifetime pari a quelli presenti nella entry, invia la RREP sul percorso reverse in unicast, drop della RREQ. Se la flag \texttt{G} è alzata, invia una RREP anche verso la destinazione della RREQ originale, per indicare il percorso verso l'origine, quindi con hop count, lifetime, SN pari a quelli presenti nella RREQ, la destinazione è l'origine della RREQ e viceversa. In questo modo "simula" una richiesta di RREQ da parte della destinazione verso il nodo originale, in modo da completare il percorso tra i due.
     \end{solution}
+    
+    \question Si consideri il caso in cui un nodo "X", che utilizza AODV, riceva una RREQ dal nodo "Z", descrivibile come 
+    \begin{center}
+        \begin{tabular}{| c | c | c | c |}
+            \hline
+            \multicolumn{4}{| c |}{RREQ Ricevuta da Z} \\
+            \hline
+            Destination & C & Destination\_Only & 0 \\
+            Destination SN & 100 & Gratuitous & 1 \\
+            Originator & A & Hop count & 4 \\
+            Originator SN & 200 & & \\
+            \hline
+        \end{tabular}
+    \end{center}
+    e in quel momento la sua tabella di routing contenga
+    \begin{center}
+        \begin{tabular}{| c | c | c | c |}
+            \hline
+            \multicolumn{4}{| c |}{Routing table X} \\
+            \hline
+            DST & NEXT & HOP & DST SN \\
+            \hline
+            C & G & 2 & 120 \\
+            G & G & 1 & 99 \\
+            Z & Z & 1 & 200 \\
+            \hline
+        \end{tabular}
+    \end{center}
+    
+    Indicare
+    \begin{itemize}
+        \item il tipo e i campi del/dei messaggio/i che invia il nodo X (quello che riceve la RREQ)
+        
+        \item come cambia la tabella di routing del nodo X
+    \end{itemize}
+    
+    \begin{solution}
+        Dato che
+        \begin{itemize}
+            \item Il nodo X possiede un percorso per la destinazione della RREQ C
+            
+            \item Il SN del percorso è $\geq$ del SN indicato nella RREQ
+            
+            \item Il flag Destination\_only è a zero
+        \end{itemize}
+        il nodo X può rispondere alla RREQ, con una RREP contenente: 
+        \begin{itemize}
+            \item SN = 120, pari a quello della entry
+            
+            \item Hop count = 2, come nella entry
+            
+            \item Lifetime pari a quello della entry
+        \end{itemize}
+        
+        Dato che il flag Gratuitous è alzato, invierà un'altra RREP verso la destinazione della RREQ, ovvero C, con
+        \begin{itemize}
+            \item Hop count = 4, come nella RREQ
+            
+            \item Destinazione = A, l'originator della RREQ
+            
+            \item SN della destinazione = 200, come nella RREQ
+            
+            \item Origine = C
+            
+            \item Lifetime pari alla entry verso l'origine della RREQ
+        \end{itemize}
+        
+        "Simula" una RREQ da C verso A.
+        
+        Il nodo X aggiunge alla sua tabella di routing il percorso verso l'originator della richiesta A, con hop count 4 e next hop Z.
+    \end{solution}
 \end{questions}
