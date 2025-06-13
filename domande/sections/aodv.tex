@@ -87,4 +87,12 @@
         
         Il nodo X aggiunge alla sua tabella di routing il percorso verso l'originator della richiesta A, con hop count 4 e next hop Z.
     \end{solution}
+    
+    \question Qual è la principale funzione del Sequence Number SN nel protocollo AODV? Quali nodi possono modificare il valore del SN?
+    
+    \begin{solution}
+        La funzione principale del Squence Number SN nel protocollo Ad Hoc Distance Vector AODV è quello di contatore monotono crescente, usato per determinare la freschezza dell'informazione riguardante un nodo. Se più alto, l'informazione è più recente.
+        
+        Il SN di un nodo può essere modificato solo dal nodo stesso, in particolare viene incrementato di uno quando genera una RREQ o risponde a una RREQ destinata al nodo stesso.
+    \end{solution}
 \end{questions}
