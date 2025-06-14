@@ -77,4 +77,58 @@
         
         La fase di inquiry permette di individuare i dispositivi, il paging serve a stabilire definitivamente la connessione, si ha uno scambio di pacchetti per la sincronizzazione per poi passare alla piconet, usando tutti i 79 canali e la sequenza di hopping completa.
     \end{solution}
+    
+    \question Descrivere le funzioni svolte dal Link Layer di BLE negli stati Advertising e Scanning, spiegando anche perché non è prevista una transizione di stato da Scanning a Connection.
+    
+    \begin{solution}
+        Il Link Layer in BLE si occupa della trasmissione e ricezione dei pacchetti radio, anche sui canali di advertising.
+        
+        Nello stato di Advertising, uno slave si annuncia periodicamente, usando i canali di advertising. Se un master vuole raccogliere informazioni riguardanti i dispositivi vicini entra nello stato Scanning, in cui ascolta i pacchetti inviati sui canali di advertising.
+        
+        Non è prevista una transizione da Scanning a Connection in quanto lo stato di Scanning è solo per la raccolta dati, una volta che il master vuole collegarsi a un dispositivo entra nello stato Initiator.
+    \end{solution}
+    
+    \question Spiegare come vengono gestiti più dispositivi Slave all'interno di una piconet Bluetooth. In particolare, descrivere come vengono gestiti duplex e multiple access?
+    
+    \begin{solution}
+        All'interno di una piconet Bluetooth, più dispositivi slave vengono gestiti tramite i meccanismi di: 
+        \begin{itemize}
+            \item Time Division Duplex TDD: il master trasmette e i dispositivi ascoltano negli slot pari, viceversa negli slot dispari
+            
+            \item Time Division Multiple Access TDMA: il master decide, per ogni slot dedicato agli slave, quale di questi può comunicare
+        \end{itemize}
+    \end{solution}
+    
+    \question Che tipi di servizi supporta la baseband Bluetooth?
+    
+    \begin{solution}
+        La baseband Blouetooth supporta due tipi di servizio: 
+        \begin{itemize}
+            \item Synchronous Connection Oriented Link SCO: connessione punto-punto con garanzie su bitrate minimo e delay, un canale riservato per casistiche real time; al massimo 3 in contemporanea
+            
+            \item Asynchronous Connectionless Link ACL: traffico best effort, occupa tutti gli slot rimanenti; permette qualità maggiore, ma senza garanzie
+        \end{itemize}
+    \end{solution}
+    
+    \question Descrivere lo schema di error control adottato da Bluetooth.
+    
+    \begin{solution}
+        All'interno dei pacchetti Bluetooth sono presenti solo 2 bit usati per il controllo degli errori, ARQN e SEQN, rispettivamente un ack/nack e numero di sequenza per il pacchetto.
+        
+        In una trasmissione tipica: 
+        \begin{itemize}
+            \item Il master invia un pacchetto con SEQN $s$
+            
+            \item Lo slave risponde con ack e SEQN $s$
+            
+            \item Nello slot successivo si ripete, con SEQN $\neg s$
+        \end{itemize}
+        
+        I possibili errori sono:
+        \begin{itemize}
+            \item Lo slave non riceve il pacchetto: risponde con un nack e SEQN $s$, il master sa che deve ritrasmettere grazie al nack
+            
+            \item Il master non riceve l'ack: in caso di ack perso il master ritrasmette sempre, lo slave si accorge della ritrasmissione in quanto il SEQN è pari a quello precedente
+        \end{itemize}
+    \end{solution}
 \end{questions}

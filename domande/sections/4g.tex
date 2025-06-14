@@ -49,4 +49,53 @@
             \item Lossless handover: maggiore latenza, ma ha come obiettivo non perdere nessun pacchetto; viene usato quando la ritrasmissione sarebbe troppo lenta, come ad esempio per traffico HTTP/FTP. Per evitare di perdere pacchetti in downlink, il flusso in download continuerà a mandare pacchetti alla vecchia BS, che li inoltrerà tramite interfaccia X2 alla BS di destinazione, la quale farà il buffer dei dati fino al termine dell'handover
         \end{itemize}
     \end{solution}
+    
+    \question Dato il seguente sequence diagram della procedura di handover: 
+    \begin{enumerate}
+        \item Quale interfaccia di comunicazione viene utilizzata?
+        
+        \item In quali casi è possibile?
+        
+        \item Descrivere i vari passi della procedura a partire dal punto 4 (la decisione di effettuare l'handover è stata presa)
+    \end{enumerate}
+    
+    \begin{solution}
+        L'interfaccia di comunicazione utilizzata è l'interfaccia X2,un canale di comunicazione diretto tra eNodeB.
+        
+        Questo tipo di handover è possibile solo nel caso il trasferimento sia effettuato tra celle appartenenti allo stesso MMU, i.e., cambia il bearer radio ma non il bearer S1.
+        
+        Dopo che è stata presa la decisione di handover: 
+        \begin{itemize}
+            \item La source eNodeB manda una richiesta di handover all'eNodeB di destinazione
+            
+            \item La eNodeB di destinazione alloca le risorse prima di rispondere con un ack alla richiesta
+            
+            \item Una volta che le risorse sono state allocate viene mandato il comando di handover dalla source eNodeB allo UE
+            
+            \item Viene trasferito lo stato della sessione in esecuzione sullo UE alla eNodeB di destinazione (per garantire continuità di servizio)
+            
+            \item Nel caso di lossless handover si ha una comunicazione su interfaccia X2 per trasferire i dati ricevuti in downlink dalla eNodeB sorgente durante il trasferimento
+            
+            \item Una volta che il trasferimento è completato, lo UE invia un messaggio di handover completato alla target eNodeB
+            
+            \item La target eNodeB invia una path switch request all'MME, ovvero una richiesta per cambiare l'indirizzamento dei dati relativi allo UE che è stato spostato; unica comunicazione con il CN, chiede di spostare il path dei dati
+            
+            \item L'MME risponde con un path switch ack
+            
+            \item Una volta terminato tutto, la target eNodeB invia un messaggio alla source eNodeB per rilasciare le risorse
+        \end{itemize}
+    \end{solution}
+    
+    \question Descrivere le funzionalità dei moduli principali (MME, SGW, PGW) in una rete LTE.
+    
+    \begin{solution}
+        I moduli principali in una rete LTE sono: 
+        \begin{itemize}
+            \item Mobility Management Entity MME: si occupa di tutto il traffico di controllo e segnalazione all'interno della rete (tutto ciò che non è dati utente), come ad esempio gestione della mobilita, della tracking area, del paging, \dots
+            
+            \item Serving Gateway SGW: il nodo all'interno della CN che si occupa del traffico user; il punto di gestione per tutti i dati utente, con assegnato un gruppo di eNodeB
+            
+            \item Packet Data Network Gateway PDW: il punto di accesso tra rete LTE e le reti esterne, si occupa di cose come l'assegnamento dell'IP allo UE, garantisce le policy autorizzate per un certo utente, filtra i pacchetti per garantire QoS usando bearer diversi
+        \end{itemize}
+    \end{solution}
 \end{questions}

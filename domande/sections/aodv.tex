@@ -95,4 +95,34 @@
         
         Il SN di un nodo può essere modificato solo dal nodo stesso, in particolare viene incrementato di uno quando genera una RREQ o risponde a una RREQ destinata al nodo stesso.
     \end{solution}
+    
+    \question In AODV, un nodo Originator O riceve RREP in tempi diversi e da cammini diversi per la stessa RREQ. In base a quali parametri di RREP il nodo O sceglie il cammino migliore?
+    
+    \begin{solution}
+        Un nodo Originator che ha inviato una RREQ, riceve più RREP in tempi diversi, i parametri per determinare il cammino migliore sono: 
+        \begin{itemize}
+            \item Numero di hop: all'interno della richiesta viene segnato il numero di inoltri effettuati, un percorso più breve è (solitamente) migliore
+            
+            \item Sequence Number SN: il SN codifica la freschezza dell'informazione, un SN più alto significa avere informazioni più recenti
+        \end{itemize}
+        
+        Prima viene guardato il SN, poi l'hop count, il presupposto di AODV è che la rete sia dinamica, quindi un'informazione più recente è migliore. Nel caso entrambi i valori sono pari potrebbe essere guardato il lifetime rimanente.
+    \end{solution}
+    
+    \question Descrivere le attività svolte da un nodo AODV quando riceve una RREQ.
+    
+    \begin{solution}
+        Quando un nodo riceve una RREQ:
+        \begin{itemize}
+            \item Controlla se l'ID di richiesta e IP di origine sono già noti: se già visti, ignora la richiesta
+            
+            \item Aggiorna il percorso verso l'originator, se il SN dell'origine è maggiore della eventuale entry già presente
+            
+            \item Se non può rispondere, inoltra il messaggio ai vicini, incrementando l'hop count
+            
+            \item Se il flag destination only è a 0, e il nodo possiede una entry valida verso la destinazione con SN maggiore di quello all'interno della richiesta, allora può rispondere con una RREP
+            
+            \item Se ha risposto e il flag Gratuitous è alzato, invia una RREP anche al nodo destinazione della RREQ
+        \end{itemize}
+    \end{solution}
 \end{questions}

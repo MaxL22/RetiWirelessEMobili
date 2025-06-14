@@ -42,4 +42,14 @@
         
         Il destinatario del messaggio risponde con un messaggio di Clear to Send CTS, anch'esso contenente origine, destinazione e durata stimata (rimanente) del messaggio. In questo modo anche i terminali all'interno del raggio di copertura del destinatario possono allocare un NAV per la durata della comunicazione.
     \end{solution}
+    
+    \question Data una rete WiFi che opera in moodalità DCF, descrivere la politica di backoff usata da una stazione che perde la contesa per l'accesso al canale.
+    
+    \begin{solution}
+        Per ottenere l'accesso al canale in CSMA/CA una stazione deve effettuare due Clear Channel Assessment CCA a distanza DIFS. 
+        
+        Se durante uno di questi il canale è occupato, il dispositivo aspetta fino al termine della trasmissione in corso (facendo carrier sense), per poi aspettare tempo DIFS/PIFS/SIFS (in base alla priorità) e un numero di slot random (periodo di contesa). Se il canale è ancora libero dopo il periodo di contesa allora può cominciare a trasmettere.
+        
+        Se il canale torna occupato durante il periodo di contesa, il conteggio viene interrotto e ripreso al termine della trasmissione successiva (non riparte per evitare che una stazione aspetti indefinitivamente).
+    \end{solution}
 \end{questions}
