@@ -131,4 +131,38 @@
             \item Il master non riceve l'ack: in caso di ack perso il master ritrasmette sempre, lo slave si accorge della ritrasmissione in quanto il SEQN è pari a quello precedente
         \end{itemize}
     \end{solution}
+    
+    \question Cos'è un superframe in ZigBee? Come viene definito e come è composto.
+    
+    \begin{solution}
+        A livello MAC si possono avere due modalità di trasferimento dati, sempre con CSMA/CA, ma possono essere slotted o unslotted.
+        
+        La modalità slotted utilizza i beacon: pacchetti di controllo, inviati dal coordinatore, contenenti informazioni per sincronizzare gli altri dispositivi, organizzare i periodi di trasmissione e gestire le trasmissioni di frame ancora pendenti. 
+        
+        L'organizzazione logica del tempo di comunicazione è detta "superframe", questa viene definita dal coordinatore e condivisa agli altri dispositivi attraverso i beacon.
+        
+        Il superframe viene diviso in slot con diverso tipo di accesso: 
+        \begin{itemize}
+            \item Contention Free Period CFP: periodo senza contesa, in cui il coordinatore garantisce la possibilità di comunicare ad alcuni dispositivi che lo necessitano
+            
+            \item Contention Access Period CAP: periodo a contesa, l'accesso al canale viene fatto usando CSMA/CA
+        \end{itemize}
+    \end{solution}
+    
+    \question Spiegare la procedura di accesso al canale tramite CSMA/CA in ZigBee. 
+    
+    \begin{solution}
+        Nel periodo di trasmissione slotted CAP, l'accesso al canale viene regolato tramite CSMA/CA, quindi, per poter trasmettere, un dispositivo: 
+        
+        \begin{itemize}
+            \item Aspetta un numero di slot di tempo random, nell'intervallo $[0, 2^{BE}]$, dove il Backoff Exponent $BE$ è un parametro
+            
+            \item Effettua un numero $CW$ di Clear Channel Assessment CCA ravvicinati, dove il valore di Contention Window $CW$ è un parametro
+            
+            \item Se il canale è risultato libero durante tutti i CCA può cominciare a trasmettere
+            
+            \item Se il canale è risultato occupato, aumenta il valore di $BE$ e $NB$ (Numero di Backoff, inizialmente 0) prima di riprovare
+        \end{itemize}
+        Se il conteggio degli slot durante la contesa viene interrotto da una trasmissione o dalla fine del periodo CAP, riprende dal valore a cui era arrivato all'occasione successiva, per evitare possibili attese infinite.
+    \end{solution}
 \end{questions}

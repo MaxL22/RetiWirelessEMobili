@@ -52,4 +52,27 @@
         
         Se il canale torna occupato durante il periodo di contesa, il conteggio viene interrotto e ripreso al termine della trasmissione successiva (non riparte per evitare che una stazione aspetti indefinitivamente).
     \end{solution}
+    
+    \question Spiegare il processo di Downlink e Uplink tramite OFDMA in WiFi 6.
+    
+    \begin{solution}
+        In WiFi 6 viene introdotto Orthogonal Frequency Division Multiple Access OFDMA per la suddivisone della banda tra più utenti. 
+        
+        In downlink, l'Access Point conosce la lista di destinatari e deve comunicare l'assegnamento delle risorse ai vari dispositivi, invia dunque una Multi-User Request to Send MU-RTS, per notificare ai dispositivi interessati l'assegnamento delle risorse e l'intento di comunicare.
+        
+        Dopo la MU-RTS, i dispositivi rispondono con una Clear to Send CTS, di seguito l'AP è libero di inviare in parallelo i dati a tutti i dispositivi.
+        
+        Se necessario, l'AP invia anche un Block Acknowledgment Request BAR e i dispositivi rispondono con un Block ack.
+        
+        Per l'uplink è necessario sincronizzare tutti i dispositivi, quindi: 
+        \begin{itemize}
+            \item L'AP invia un Buffer Status Report Poll BSRP, a cui i dispositivi rispondono con un Buffer Status Report BSR, usato per comunicare chi ha da trasmettere qualcosa
+            
+            \item L'AP invia la MU-RTS contenente l'allocazione delle risorse, i dispositivi rispondono con CTS
+            
+            \item Dopo un ulteriore trigger di sincronizzazione da parte dell'AP i dispositivi possono cominciare a trasmettere (padding se la trasmissione è troppo corta)
+            
+            \item Se necessario, l'AP invia un Multi-Station Block ack
+        \end{itemize}
+    \end{solution}
 \end{questions}

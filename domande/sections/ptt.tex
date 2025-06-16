@@ -106,4 +106,21 @@
         
         Importante in quanto permette di stabilire il limite teorico superiore di informazioni inviabili su un certo canale in un determinato istante, massimizzando l'efficienza spettrale.
     \end{solution}
+    
+    \question Supponendo di avere uno spettro tra $2$ e $4MHz$ e un $SNR_{dB} = 20dB$, quanti livelli di segnale servono per raggiungere la capacità teorica, tenendo in considerazione il rumore? 
+    
+    \begin{solution}
+        La banda a disposizione è
+        $$ B = 4 - 2 MHz = 2MHz $$
+        
+        Il valore del $SNR$ in $dB$ vuol dire che
+        $$ SNR_{dB} = 10 \log_{10} (SNR) \implies SNR = 10^{20/10} = 100 $$
+        il segnale è circa 100 volte superiore al rumore.
+        
+        La capacità secondo Shannon dice che
+        $$ C = B \cdot \log_2 (1 + SNR) = 2 \cdot 10^6 \cdot \log_2 (101) \approx 13.32 Mbps $$
+        
+        Possiamo quindi ricavare il numero di canali sapendo che
+        $$ C = 2 B \log_2 M \implies M = 2^{C/2B} = 10 $$
+    \end{solution}
 \end{questions}

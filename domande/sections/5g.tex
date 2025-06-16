@@ -2,9 +2,79 @@
 \section{5G}
 
 \begin{questions}
-    \question Domanda
+    \question Spiegare il concetto di Software Defined Networking SDN.
     
     \begin{solution}
-        Risposta
+        Una normale applicazione di rete contiene un singolo layer per flussi di controllo e dati, entrambi gestiti da tutti i dispositivi della rete.
+        
+        Con SDN si astrae la parte di controllo, centralizzata in un SDN controller: il layer di controllo viene implementato a livello software in maniera centralizzata, al di sopra del data layer.
+        
+        Questo rende il control plane programmabile in maniera software, risultando in maggiore flessibilità della rete, semplificazione nella gestione e si presenta la possibilità di configurare i meccanismi di controllo in base alle condizioni della rete.
+        
+        Allo stesso tempo, gli SDN Controller diventano un single point of failure per la rete, con le relative problematiche di sicurezza (controllare il controller vuol dire controllare la rete), inoltre la possibilità di adattare le regole real-time porta una complessità aggiuntiva alla gestione.
+        
+        Si vuole andare verso un'architettura con anche data plane programmabile, implementato a livello software e adattabile secondo le condizioni della rete.
+    \end{solution}
+    
+    \question Spiegare il concetto di Network Function Virtualization NFV, funzionamento, architettura e implementazione per la rete mobile.
+    
+    \begin{solution}
+        Con la NFV, le componenti passano da necessitare hardware dedicato a essere implementazioni software, installabile su hardware standard; si separano le funzionalità hardware e software.
+        
+        Per capire cosa deve implementare un determinato servizio si ha una Service Function Chain SFC: catena delle funzionalità necessarie per una determinata applicazione.
+        
+        L'architettura si divide in: 
+        \begin{itemize}
+            \item NFV Infrastructure, contenente le risorse virtualizzate, sulla base della quale vengono montate le Virtual Network Function VNF, ognuna delle quali con il relativo Element Management System EMS per tenere traccia dello stato di funzionamento
+            
+            \item NFV Management and Orchestration MANO, parte "di controllo" interfacciata alla rete operatore, contiene
+            \begin{itemize}
+                \item VNF Manager VNFM: gestisce le VNF istanziate
+                
+                \item VNF Infrastructure Manager VIM: definisce le risorse disponibili
+                
+                \item NFV Orchestrator: coordina NFM e VIM, collegato alla rete operatore per ricevere e gestire le richieste all'interno della rete; contiene template per possibili funzionalità necessarie e vengono istanziate secondo la SFC
+            \end{itemize}
+        \end{itemize}
+        
+        La NFV permette di avere maggiore flessibilità e scalabilità della rete, proprietà intrinseche alla virtualizzazione, ottimizzando l'uso delle risorse e facilitando modifiche ai servizi (l'hardware rimane sempre uguale, basta modificare il software).
+        
+        Di contro, le prestazioni dell'hardware devono essere adeguate allo scopo, anche considerando l'overhead di virtualizzazione, la gestione delle risorse può essere complicata, l'introduzione di software porta possibili problemi di sicurezza e bisogna pensare alla fase di transizione tra funzionalità hardware e software, le due devono poter coesistere.
+        
+        L'architettura di una eNodeB è composta da Remote Radio Head RRH e Baseband Unit BBU che si occupano, rispettivamente, della parte radio e di gestire la comunicazione secondo il protocollo usato.
+        
+        Per facilitare la densificazione della rete, vengono separate le due parti, si aggiungono solo RRH dove serve segnale, la BBU diventa una Virtual BBU vBBU, posizionata in remoto, con tutte le tecnologie necessarie (anche multi-tenant).
+        
+        Questo permette di virtualizzare e ottimizzare la gestione della parte di controllo delle BS, migliorando le prestazioni e permettendo una densificazione delle celle in maniera più sostenibile (installare solo RRH è più facile). 
+    \end{solution}
+    
+    \question Cosa sono e a cosa servono le Network slices in 5G?
+    
+    \begin{solution}
+        Il concetto di "Network slicing" modifica il paradigma della rete da statico a dinamico, reti logiche vengono create on demand, secondo il caso d'uso e lo scopo richiesto. Viene costruito un overlay di rete ad hoc per ogni servizio, rendendo più flessibile la gestione della rete.
+        
+        Le Network Slices 5G permettono di classificare diversi casi d'uso e per ognuno di questi vengono stabilite le caratteristiche del servizio e la composizione delle network function per tali caratteristiche. Vengono "confezionate" diverse strutture di reti logiche per diversi possibili casi d'uso.
+        
+        Per identificare una slice si usa uno slice identifier a 32 bit: 
+        \begin{itemize}
+            \item I primi 8 identificano il tipo di slice ("caso d'uso", la categoria)
+            
+            \item I rimanenti identificano la specifica istanza
+        \end{itemize}
+        
+        Lo slice identifier viene poi inserito all'interno dei pacchetti.
+    \end{solution}
+    
+    \question In cosa consiste e a cosa serve lo standard 5G New Radio NR.
+    
+    \begin{solution}
+        Per ridurre la latenza, una possibile soluzione è ridurre la durata dei simboli. Lo standard 5G NR definisce quindi 5 diverse durate, chiamate numerology, e due possibili intervalli di frequenza. 
+        
+        Per una numerology $\mu$ si ha una distanza tra le frequenze in OFDMA $\Delta f$
+        $$ \Delta f = 2^\mu \cdot 15kHz $$
+        
+        Aumenta la distanza tra le portanti, raddoppiare la banda permette di dimezzare la durata dei simboli.
+        
+        All'interno dello scheduling si possono allocare resource block con numerology diverse, permettendo latenze diverse per utenti differenti, magari anche in base alla network slice utilizzata.        
     \end{solution}
 \end{questions}

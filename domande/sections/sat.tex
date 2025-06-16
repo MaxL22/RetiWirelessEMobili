@@ -2,9 +2,69 @@
 \section{Comunicazione satellitare}
 
 \begin{questions}
-    \question Domanda
+    \question Quali sono le possibili orbite satellitari? Quali sono vantaggi e svantaggi di ognuna?
     
     \begin{solution}
-        Risposta
+        Le tre principali orbite satellitari sono:
+        \begin{itemize}
+            \item Geostationary Earth Orbit: A circa 35k km dalla superficie terreste, il periodo dell'orbita è circa 24h, apparendo quindi fisso rispetto alla superficie terreste
+            \begin{itemize}
+                \item Vantaggi: ampia copertura, angolo di elevazione fisso, visibilità permanente, permette di usare antenne fisse sul terreno, semplificando la gestione
+                
+                \item Svantaggi: alto delay, bassa qualità del segnale, elevata potenza richiesta per raggiungere il satellite
+            \end{itemize}
+            
+            \item Low Earth Orbit LEO: Periodo dell'orbita di 1.5/2h, con una visibilità di 15/20 minuti prima di oltrepassare l'orizzonte, l'orbita più bassa utilizzabile
+            \begin{itemize}
+                \item Vantaggi: basso delay, bassa potenza di trasmissione richiesta, miglior utilizzo dello spettro e qualità del segnale
+                
+                \item Svantaggi: copertura limitata, gestione complessa per tracciamento e handover, richiedono costellazioni numerose per una copertura significativa
+            \end{itemize}
+            
+            \item Medium Earth Orbit MEO: A metà delle orbite precedenti, periodo dell'orbita di 5-10h, 2-8h di visibilità per passaggio
+            \begin{itemize}
+                \item Vantaggi: significativamente minore delay e potenza richiesta rispetto a GEO, RTT nelle decine di ms; le caratteristiche sono "nel mezzo" e dipendono dall'altezza del satellite
+                
+                \item Svantaggi: potenza e delay maggiori di LEO
+            \end{itemize}
+            Usati da GNSS, per scaricare solamente dati non ci sono problemi.
+        \end{itemize}
+    \end{solution}
+    
+    \question Quali sono i 3 segmenti che compongono l'architettura per la comunicazione satellitare?
+    
+    \begin{solution}
+        I 3 segmenti sono: 
+        \begin{itemize}
+            \item Space segment: i satelliti e le relative costellazioni, si possono avere anche link inter-satellitari (radio o anche ottici)
+            
+            \item Ground segment: la parte di stazioni a terra che permettono il controllo del sistema, include gateway e tutto ciò che connette i satelliti al terreno, inclusi telemetria e tracking
+            
+            \item User segment: utilizzatori del servizio, possono essere mobili o fixed
+        \end{itemize}
+    \end{solution}
+    
+    \question Quali sono le possibili architetture e opzioni di integrazione per includere i satelliti nelle reti 5G/6G?
+    
+    \begin{solution}
+        Le possibili architetture per includere i satelliti sono: 
+        \begin{itemize}
+            \item Relay: il satellite funge da ripetitore per le comunicazioni, aumentando la qualità del canale
+            
+            \item Backhaul: raggiungere una zona tramite la rete di backhaul potrebbe essere complicato, quindi viene rimpiazzata dai satelliti
+            
+            \item Direct Access: l'utente può collegarsi direttamente al satellite ed è a conoscenza della presenza di quest'ultimo 
+        \end{itemize}
+        
+        Le possibili opzioni di integrazione sono: 
+        \begin{itemize}
+            \item NTN Transparent Payload: il satellite rimpiazza il livello fisico, il gateway dialoga con le BS; soluzione più semplice da implementare
+            
+            \item NTN Regenerative Payload: il satellite implementa lo stack di una BS e ne svolge le funzionalità, il gateway è collegato alla core network
+            
+            \item NTN Regenerative Payload with functional split: il satellite svolge solo le funzioni del modulo distributed unit di una gNodeB, implementa solo una parte dello stack di una BS
+        \end{itemize}
+        
+        Il satellite può quindi implementare: solo il livello fisico, tutta la BS, una parte della BS.
     \end{solution}
 \end{questions}

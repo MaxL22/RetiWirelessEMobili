@@ -98,4 +98,64 @@
             \item Packet Data Network Gateway PDW: il punto di accesso tra rete LTE e le reti esterne, si occupa di cose come l'assegnamento dell'IP allo UE, garantisce le policy autorizzate per un certo utente, filtra i pacchetti per garantire QoS usando bearer diversi
         \end{itemize}
     \end{solution}
+    
+    \question Quali sono le tre caratteristiche in base a cui può essere deciso un handover? 
+    
+    \begin{solution}
+        Il parametro principale secondo cui viene deciso se fare handover o meno è la potenza di trasmissione:
+        \begin{itemize}
+            \item Si può guardare solo la potenza relativa: quando la potenza di una BS è minore di un'altra si cambia; questo può portare a un continuo cambio (inutile) sui bordi delle celle e a un "rimbalzo" tra diverse BS
+            
+            \item Si può guardare anche una soglia di segnale: se il segnale è sufficiente, ancora "abbastanza buono", non viene fatto l'handover; il problema è definire queste soglie
+            
+            \item Aggiungere isteresi: l'handover viene fatto se la potenza relativa è maggiore e il segnale sotto una certa soglia, ma per effettuare il cambio la differenza di potenza deve essere significativa
+        \end{itemize}
+        Per determinare l'handover si combinano queste tre idee.
+    \end{solution}
+    
+    \question Come può essere gestito il duplex in 4G LTE? Cosa si intende per Uplink Timing Advance?
+    
+    \begin{solution}
+        All'interno di LTE, il duplex può essere: 
+        \begin{itemize}
+            \item Frequency Division Duplex FDD: vengono assegnate frequenze diverse per uplink e downlink
+            
+            \item Time Division Duplex TDD: una sola frequenza, ma vengono assegnati slot di tempo ciclici diversi per uplink e downlink; la percentuale di tempo dedicato a ogni fase è configurabile in base alla necessità
+        \end{itemize}
+        
+        In TDD, dopo il downlink si ha un periodo di guardia per tenere conto dell'Uplink Timing Advance: un anticipo della trasmissione durante il periodo di uplink dei dispositivi, dovuto al tempo fisicamente necessario per far arrivare la trasmissione all'AP; la trasmissione si può anticipare solo se il canale è libero, quindi si ha una guardia.
+    \end{solution}
+    
+    \question Spiega le fasi dell'handover S1.
+    
+    \begin{solution}
+        Quando l'handover richiede di cambiare sia BS che MME bisogna cambiare il bearer S1. La procedura è: 
+        \begin{itemize}
+            \item La eNodeB sorgente notifica la richiesta di handover al suo MME
+            
+            \item L'MME sorgente manda una Forward Relocation Request all'MME destinazione
+            
+            \item L'MME destinazione comunica la richiesta di handover alla eNodeB destinazione, la quale prepara le risorse necessarie
+            
+            \item Dopo il setup delle risorse, l'eNodeB destinazione risponde al suo MME con un handover request ack
+            
+            \item L'MME destinazione risponde alla relocation request dell'MME sorgente
+            
+            \item L'MME sorgente invia alla sua eNodeB il comando di handover, inoltrato poi allo UE
+            
+            \item Viene fatto il trasferimento di stato per mantenere la sessione dello UE tra le eNodeB
+            
+            \item Se lossless handover si ha una comunicazione su canale X2 per l'inoltro dei pacchetti
+            
+            \item Lo UE invia la conferma di avvenuto handover
+            
+            \item La eNodeB di destinazione notifica l'avvenuto handover al suo MME
+            
+            \item I due MME si scambiano forward relocation complete e il relativo ack
+            
+            \item Lo UE invia all'MME l'update della tracking area
+            
+            \item Il vecchio MME indica alla eNodeB source di rilasciare le risorse
+        \end{itemize}
+    \end{solution}
 \end{questions}
